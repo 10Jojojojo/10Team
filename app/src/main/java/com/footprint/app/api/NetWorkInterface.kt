@@ -8,7 +8,7 @@ import retrofit2.http.Query
 
 interface NetWorkInterface {
     @GET("place/nearbysearch/json")
-    fun getplace(
+   fun getplace(
         @Query("keyword") keyword:String, // 키워드는 검색어 내가 입력하는값
 //        @Query("location") location: Location, // 로케이션은 현재 나의 위치
         @Query("location") location: String, // 로케이션은 현재 나의 위치

@@ -7,32 +7,27 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.footprint.app.R
 import com.footprint.app.databinding.FragmentCommunityBinding
 
-class CommunityFragment : Fragment() {
+class CommunityFragment : Fragment(R.layout.fragment_community) {
 
     private var _binding: FragmentCommunityBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val communityViewModel =
             ViewModelProvider(this).get(CommunityViewModel::class.java)
 
-        _binding = FragmentCommunityBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        _binding = FragmentCommunityBinding.bind(view)
 
         val textView: TextView = binding.textCommunity
         communityViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
-        return root
     }
 
     override fun onDestroyView() {

@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.footprint.app.R
+import com.footprint.app.databinding.FragmentCommunityBinding
 import com.footprint.app.databinding.FragmentMypageBinding
+import com.footprint.app.ui.community.CommunityViewModel
 
-class MyPageFragment : Fragment() {
+class MyPageFragment : Fragment(R.layout.fragment_mypage) {
 
     private var _binding: FragmentMypageBinding? = null
 
@@ -17,22 +20,17 @@ class MyPageFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val myPageViewModel =
-            ViewModelProvider(this).get(MyPageViewModel::class.java)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val communityViewModel =
+            ViewModelProvider(this).get(CommunityViewModel::class.java)
 
-        _binding = FragmentMypageBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        _binding = FragmentMypageBinding.bind(view)
 
         val textView: TextView = binding.textMypage
-        myPageViewModel.text.observe(viewLifecycleOwner) {
+        communityViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
-        return root
     }
 
     override fun onDestroyView() {

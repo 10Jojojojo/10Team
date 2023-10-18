@@ -4,9 +4,8 @@ import com.footprint.app.api.serverdata.Location
 
 data class PlaceModel(
     val location: Location,
-    val type: List<String>,
-    val keyword: String,
-    val nextpage: String
+    val type: String,
+    val keyword: String
 )
 /*
 일단은 마커 표시용으로 위도와 경도, 타입과 키워드만 가져오고

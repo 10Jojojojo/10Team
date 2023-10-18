@@ -7,15 +7,14 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.footprint.app.R
+import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.databinding.FragmentHomeBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -33,7 +32,9 @@ import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 
-class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnPolylineClickListener,
+// Fragment()에 R.layout.fragment_home를 입력으로 주면, 생성자 주입이라고 하는건데 (공식문서에는없음)
+// onCreateView에서 하는동작을 대체해줌.
+class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, GoogleMap.OnPolylineClickListener,
     GoogleMap.OnPolygonClickListener {
     private var _binding: FragmentHomeBinding? = null
     // GoogleMap 인스턴스를 참조하기 위한 변수
@@ -54,41 +55,46 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnPolylineClickLi
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private val homeViewModel by lazy {ViewModelProvider(this).get(HomeViewModel::class.java)}
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentHomeBinding.bind(view)
+//        val homeViewModel =
+//            ViewModelProvider(this).get(HomeViewModel::class.java)
+//        _binding = FragmentHomeBinding.inflate(inflater, container, false) // 64번째 줄에 있어서 없어도됨
+//        val root: View = binding.root // 얘도 없어도됨
+        // 온크리에이트 뷰에는 버튼이 들어가면 안됨. 온크리에이트뷰는 뷰를 생성하는과정(그ㅡ래서 return이 root인듯
+        // 그래서 초기화안되고 불러와서 널값 인셉션? 그런 에러 발생확률 높음)
+        // 온뷰크리에이트에서 바인딩관련된거 하기
 
 //        val textView: TextView = binding.textHome
+        initView()
+        getmap()
+        getPermission()
+        observeViewModel() // 뷰를 먼저 생성하고
+    }
+    private fun observeViewModel(){
         homeViewModel.text.observe(viewLifecycleOwner) {
 //            textView.text = it
         }
+    }
+    private fun initView(){ // private는 여기 이 프래그먼트에서만 쓸꺼라는거
         binding.testinputbutton.setOnClickListener {
             homeViewModel.inputdata(mGoogleMap,pathPoints,path)
         }
         binding.testoutputbutton.setOnClickListener {
 //            homeViewModel.outputdata(mGoogleMap)
+            placeMarkersOnMap(homeViewModel.placeitems)
         }
         binding.testapibutton.setOnClickListener {
-            homeViewModel.getplaces()
+            homeViewModel.getplaces(null,"병원","")
+            homeViewModel.getplaces(null,"애견샾","")
         }
         binding.testpathlogbutton.setOnClickListener {
             Log.d("GoogleMapPractice","저장된 경로 : ${pathPoints}")
         }
-        return root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        getmap()
-        getPermission()
-
     }
     override fun onDestroyView() {
         super.onDestroyView()
@@ -162,6 +168,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnPolylineClickLi
         val mapFragment = childFragmentManager
             .findFragmentById(R.id.map_fragment) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
+
     }
 
     // 위치 관련 UI 업데이트 메서드
@@ -204,6 +211,27 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnPolylineClickLi
         pathPoints.add(newLatLng) // 위치 데이터를 리스트에 저장
         path.points = pathPoints // Polyline 업데이트
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 15f)) // 카메라를 현재 위치로 이동
+    }
+    fun placeMarkersOnMap(places: List<PlaceModel>) {
+        for (place in places) {
+            val location = LatLng(place.location.lat, place.location.lng)
+            val markerOptions = MarkerOptions()
+                .position(location)
+//                .title(place.name)
+//                .snippet(place.address)
+                .icon(BitmapDescriptorFactory.fromResource(image(place.keyword)))
+            mGoogleMap.addMarker(markerOptions)
+        }
+    }
+    fun image(keyword:String):Int{
+        var resultkeyword = 0
+        if(keyword=="병원"){
+            resultkeyword = R.drawable.ic_marker_shop
+        }
+        else if(keyword =="애견샾"){
+            resultkeyword = R.drawable.ic_marker_hospital
+        }
+        return resultkeyword
     }
 }
 
@@ -253,4 +281,8 @@ path.points = pathPoints // Polyline 업데이트
 있어야 될꺼 :
 홈은 데이터 저장 & 테스트 프래그먼트 이동
 테스트는 데이터 불러오기 & 홈 프래그로 이동
+
+ 스크롤 리스너
+ 구글 지도에서
+ 스크롤 하는걸 감지를 하니까, 스크롤 할때는 버튼 hide 하면 좋을듯(플로팅버튼)
  */
