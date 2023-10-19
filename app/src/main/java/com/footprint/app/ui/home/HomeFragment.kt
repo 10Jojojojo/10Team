@@ -37,52 +37,48 @@ import com.google.android.gms.maps.model.PolylineOptions
 class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, GoogleMap.OnPolylineClickListener,
     GoogleMap.OnPolygonClickListener {
     private var _binding: FragmentHomeBinding? = null
+
     // GoogleMap 인스턴스를 참조하기 위한 변수
-    lateinit var mGoogleMap: GoogleMap
+    // 화면 표시 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
+    private lateinit var mGoogleMap: GoogleMap
 
     // FusedLocationProviderClient가 위치 업데이트를 수신할 때 호출되는 콜백을 정의하는 데 사용되는 변수
-    lateinit var locationCallback: LocationCallback
+    // 화면 업데이트 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
+    private lateinit var locationCallback: LocationCallback
 
     // 기기 위치 정보를 가져오는 여러 메서드를 제공하는 FusedLocationProviderClient 인스턴스를 참조하기 위한 변수
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    // 화면 업데이트 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    lateinit var locationPermission: ActivityResultLauncher<Array<String>>
+    // 위치 권한을 얻기 위한 ActivityResultLauncher<Array<String>> 인스턴스를 참조하기 위한 변수
+    // 화면 업데이트 요소의 권한을 요청하는 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
+    private lateinit var locationPermission: ActivityResultLauncher<Array<String>>
 
-    private var pathPoints = mutableListOf<LatLng>() // 사용자의 이동 경로 저장
-
+    // 구글맵에 표시되는 선 객체
+    // 화면 표시 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
     private lateinit var path: Polyline // Polyline 객체
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
-    private val homeViewModel by lazy {ViewModelProvider(this).get(HomeViewModel::class.java)}
 
+    // ViewModel 인스턴스 생성
+    // 생성자에 입력값이 생기면 다른 방식으로 생성해주어야 하고, ViewModelFactory도 변경해주어야 한다.
+    private val homeViewModel by lazy {ViewModelProvider(this).get(HomeViewModel::class.java)}
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeBinding.bind(view)
-//        val homeViewModel =
-//            ViewModelProvider(this).get(HomeViewModel::class.java)
-//        _binding = FragmentHomeBinding.inflate(inflater, container, false) // 64번째 줄에 있어서 없어도됨
-//        val root: View = binding.root // 얘도 없어도됨
-        // 온크리에이트 뷰에는 버튼이 들어가면 안됨. 온크리에이트뷰는 뷰를 생성하는과정(그ㅡ래서 return이 root인듯
-        // 그래서 초기화안되고 불러와서 널값 인셉션? 그런 에러 발생확률 높음)
-        // 온뷰크리에이트에서 바인딩관련된거 하기
-
-//        val textView: TextView = binding.textHome
+        getPermission() // 권한을 먼저 설정하고, 맵을 불러오자.
         initView()
         getmap()
-        getPermission()
-        observeViewModel() // 뷰를 먼저 생성하고
+        observeViewModel() // 뷰를 먼저 생성하고 LiveData를 감시해야 한다.(LiveData의 변화가 먼저 일어나면,
+        // 뷰는 생성되지 않았는데(초기화가 되지 않았는데) 뷰의 속성 변화를 하게 될 수 있다.)
     }
     private fun observeViewModel(){
-        homeViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-        }
+
     }
     private fun initView(){ // private는 여기 이 프래그먼트에서만 쓸꺼라는거
         binding.testinputbutton.setOnClickListener {
-            homeViewModel.inputdata(mGoogleMap,pathPoints,path)
+            homeViewModel.inputdata(mGoogleMap,homeViewModel.pathPoints.value!!,path)
         }
         binding.testoutputbutton.setOnClickListener {
 //            homeViewModel.outputdata(mGoogleMap)
@@ -93,7 +89,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, Googl
             homeViewModel.getplaces(null,"애견샾","")
         }
         binding.testpathlogbutton.setOnClickListener {
-            Log.d("GoogleMapPractice","저장된 경로 : ${pathPoints}")
+            Log.d("GoogleMapPractice","저장된 경로 : ${homeViewModel.pathPoints.value!!}")
         }
     }
     override fun onDestroyView() {
@@ -140,7 +136,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, Googl
     // Polygon이 클릭되었을 때 호출되는 콜백
     override fun onPolygonClick(p0: Polygon) {
     }
-    fun getPermission(){
+    private fun getPermission(){
         // 이 아래의 21의 줄이 있어야 onMapReady가 콜백이 되고, updateLocationUI()가 동작하는것 같음.
         locationPermission = // 2. Permissions()를 검사한 후, results를 입력으로 주고, 그 결과가 만약 권한이 있다면,
                 // .xml의 Fragment에 this를 연결시킴
@@ -175,17 +171,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, Googl
     @SuppressLint("MissingPermission")
     private fun updateLocationUI() {
         try {
+            Log.d("FootprintApp","updataLocationUI")
             val locationRequest = LocationRequest.create().apply {
                 interval = 1000 // 1초에 1번씩
                 fastestInterval = 500
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             } //
+//            val locationRequest = LocationRequest.Builder(1000)
+//                .build()
             locationCallback = object : LocationCallback() { // LocationCallback()이라는 익명 객체를 생성하고,
                 override fun onLocationResult(locationResult: LocationResult) { // 1초에 1번씩 하는걸 입력으로 넣어줌
                     locationResult?.let { //
                         for (location in it.locations) {
 //                            Log.d(
-//                                "GoogleMapPractice",
+//                                "FootprintApp",
 //                                "위도 : ${location.latitude} 경도: ${location.longitude}"
 //                            )
                             setLastLocation(location) // 현재 위치가 갱신이 되면(LocationCallback() 때문인듯),
@@ -208,9 +207,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, Googl
 
     private fun setLastLocation(location: Location) {
         val newLatLng = LatLng(location.latitude, location.longitude)
-        pathPoints.add(newLatLng) // 위치 데이터를 리스트에 저장
-        path.points = pathPoints // Polyline 업데이트
+        homeViewModel.pathPoints.value!!.add(newLatLng) // 위치 데이터를 리스트에 저장
+        path.points = homeViewModel.pathPoints.value!! // Polyline 업데이트
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 15f)) // 카메라를 현재 위치로 이동
+//        Log.d("FootprintApp","path.points : ${path.points}")
     }
     fun placeMarkersOnMap(places: List<PlaceModel>) {
         for (place in places) {
