@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "386137268912",
+    "project_id": "easylogin-8482d",
+    "storage_bucket": "easylogin-8482d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386137268912:android:bdb7bda698cd9fc388d175",
+        "android_client_info": {
+          "package_name": "net.flow9.thisiskotlin.googletest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKQxntvglODXQUb6P2XvAYduZeNWaVhso"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

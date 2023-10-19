@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.footprint.app.BuildConfig.GOOGLE_MAPS_API_KEY
+//import com.footprint.app.BuildConfig.GOOGLE_MAPS_API_KEY
 import com.footprint.app.api.NetWorkClient
 import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.serverdata.Location
@@ -105,7 +105,7 @@ class HomeViewModel : ViewModel() {
 //         Location(location.value!!.lat,location.value!!.lng)
 //        NetWorkClient.apiService.getplace(keyword.value!!,location.value!!,radius.value!!,type.value!!,GOOGLE_MAPS_API_KEY,nextPageToken
         NetWorkClient.apiService.getplace(
-            keyword, "${37.566610},${126.978403}", 50000, type, GOOGLE_MAPS_API_KEY, nextpagetoken
+            keyword, "${37.566610},${126.978403}", 50000, type, "AIzaSyALMOXhl-6el3pNR2P277KH3xuM8SIJcps", nextpagetoken
         ) // null이 아님을 확인 후 실행해야 될것 같다.
             ?.enqueue(object : Callback<PlaceData?> {
                 override fun onResponse(
