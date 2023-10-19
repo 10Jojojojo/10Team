@@ -104,6 +104,8 @@ class HomeViewModel : ViewModel() {
     fun getplaces(nextToken: String?,keyword:String,type:String) {
 //         Location(location.value!!.lat,location.value!!.lng)
 //        NetWorkClient.apiService.getplace(keyword.value!!,location.value!!,radius.value!!,type.value!!,GOOGLE_MAPS_API_KEY,nextPageToken
+
+
         NetWorkClient.apiService.getplace(
             keyword, "${37.566610},${126.978403}", 50000, type, GOOGLE_MAPS_API_KEY, nextpagetoken
         ) // null이 아님을 확인 후 실행해야 될것 같다.
