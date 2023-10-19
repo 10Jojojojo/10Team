@@ -52,6 +52,7 @@ android {
         dataBinding = true
         buildConfig = true
     }
+
 }
 
 dependencies {

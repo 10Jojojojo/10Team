@@ -76,8 +76,10 @@ class HomeViewModel : ViewModel() {
         currentpath.points = currentpathPoints
     }
     fun getplaces(nextToken: String?,keyword:String,type:String) {
+
     NetWorkClient.apiService.getplace(
             keyword, "${37.566610},${126.978403}", 50000, type, BuildConfig.GOOGLE_MAPS_API_KEY, nextpagetoken
+
         ) // null이 아님을 확인 후 실행해야 될것 같다.
             ?.enqueue(object : Callback<PlaceData?> {
                 override fun onResponse(
