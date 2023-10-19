@@ -23,13 +23,19 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_home, R.id.navigation_community, R.id.navigation_mypage
-            )
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.navigation_home -> {
+                    binding.appbarText.text = "홈 선택됨"
+                }
+                R.id.navigation_community -> {
+                    binding.appbarText.text = "커뮤니티 선택됨"
+                }
+                R.id.navigation_mypage -> {
+                    binding.appbarText.text = "마이페이지 선택됨"
+                }
+            }
+        }
     }
-
 }
