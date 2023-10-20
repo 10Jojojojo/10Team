@@ -1,32 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fragment_container"
-    tools:context=".ui.mypage_revise.MyPage_reviseFragment">
+    tools:context=".ui.mypage.MyPageFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/hello_blank_fragment" />
-
-        <ImageView
-            android:id="@+id/revise_pen"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/mapage_revise_cardView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:layout_marginEnd="50dp"
-            android:src="@drawable/ic_pen"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="30dp"
+            app:cardCornerRadius="50dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/profile_image"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_mypage_black_24"
+                />
+        </androidx.cardview.widget.CardView>
+
+        <EditText
+            android:id="@+id/mypage_revise_name"
+            android:layout_width="71dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="20dp"
+            android:background="@null"
+            android:text="춘식이"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/mapage_revise_cardView"
+            app:layout_constraintTop_toTopOf="@+id/mapage_revise_cardView" />
+
+        <EditText
+            android:id="@+id/town"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:text="서울특별시 송파구 잠실동"
+            android:textSize="15dp"
+            android:background="@null"
+            app:layout_constraintStart_toEndOf="@+id/mapage_revise_cardView"
+            app:layout_constraintTop_toBottomOf="@+id/mypage_revise_name" />
+
+        <EditText
+            android:id="@+id/mypage_revise_introduction"
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:text="안녕하세요"
+            android:gravity="center"
+            android:background="@drawable/background"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/town">
+
+        </EditText>
+
+        <View
+            android:layout_width="350dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="20dp"
+            android:background="#4D000000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mypage_revise_introduction">
+
+        </View>
+
+        <Button
+            android:id="@+id/savebutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="50dp"
+            android:text="저장"
+            android:textColor="#000000"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

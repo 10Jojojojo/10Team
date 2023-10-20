@@ -29,7 +29,7 @@
 
     <fragment
         android:id="@+id/navigation_mypage_revise"
-        android:name="com.footprint.app.ui.mypage_revise.MyPage_reviseFragment"
+        android:name="com.footprint.app.ui.mypage.MyPage_reviseFragment"
         android:label="mypage_revise"
         tools:layout="@layout/fragment_my_page_revise"/>
         <action
@@ -37,5 +37,10 @@
             app:destination="@+id/navigation_mypage"
         />
 
+    <fragment
+        android:id="@+id/navigation_dog_plus"
+        android:name="com.footprint.app.ui.community.CommunityFragment"
+        android:label="dogplus"
+        tools:layout="@layout/fragment_my_page_dog_plus" />
 
 </navigation>

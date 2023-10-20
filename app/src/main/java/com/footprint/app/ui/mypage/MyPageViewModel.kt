@@ -10,4 +10,8 @@ class MyPageViewModel : ViewModel() {
         value = "This is mypage Fragment"
     }
     val text: LiveData<String> = _text
+
+    var name: String = "이름"
+    var introduction : String = "자기소개"
+    var town : String = "동네"
 }
