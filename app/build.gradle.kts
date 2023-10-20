@@ -10,7 +10,6 @@ plugins {
 val localProperties = Properties().apply {
     load(rootProject.file("local.properties").inputStream())
 }
-
 val apiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
 android {
     namespace = "com.footprint.app"
@@ -25,7 +24,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // BuildConfig에 API 키 추가
-        buildConfigField("String", "API_KEY", "$apiKey")
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
 
         // 또는 리소스 값으로 API 키 추가
          resValue("string", "api_key", apiKey)
