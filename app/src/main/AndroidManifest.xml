@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.footprint.app">
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -19,11 +18,9 @@
         <activity
             android:name=".ui.login.LoginActivity"
             android:exported="false" />
-
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyALMOXhl-6el3pNR2P277KH3xuM8SIJcps" />
-
+            android:value="BuildConfig.API_KEY" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

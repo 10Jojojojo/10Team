@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -6,7 +8,10 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.gms.google-services")
 }
-
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+val apiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
 android {
     namespace = "com.footprint.app"
     compileSdk = 34
@@ -19,6 +24,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // BuildConfig에 API 키 추가
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+
+        // 또는 리소스 값으로 API 키 추가
+         resValue("string", "api_key", apiKey)
     }
 
     buildTypes {
@@ -42,6 +52,7 @@ android {
         dataBinding = true
         buildConfig = true
     }
+
 }
 
 dependencies {

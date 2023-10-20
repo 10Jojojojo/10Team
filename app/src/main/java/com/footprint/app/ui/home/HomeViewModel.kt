@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-//import com.footprint.app.BuildConfig.GOOGLE_MAPS_API_KEY
+import com.footprint.app.BuildConfig
 import com.footprint.app.api.NetWorkClient
 import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.serverdata.Location
@@ -29,29 +29,8 @@ import retrofit2.Response
 
 class HomeViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is home Fragment"
-    }
-    val text: LiveData<String> = _text
-
-    // GoogleMap 인스턴스를 참조하기 위한 변수
-    // 얘는 프래그먼트에 선언 되있어야함(뷰 관련 요소여서)
-    lateinit var mGoogleMap: GoogleMap
-
-    // FusedLocationProviderClient가 위치 업데이트를 수신할 때 호출되는 콜백을 정의하는 데 사용되는 변수
-    lateinit var locationCallback: LiveData<LocationCallback>
-
-    // 기기 위치 정보를 가져오는 여러 메서드를 제공하는 FusedLocationProviderClient 인스턴스를 참조하기 위한 변수
-    lateinit var fusedLocationClient: LiveData<FusedLocationProviderClient>
-    // 위에 3개는 프래그먼트에서 관리(뷰 라서)
-
-    // Polyline 인스턴스를 참조하기 위한 변수
-    lateinit var path: LiveData<Polyline>
-
-    private var _locationPermission = MutableLiveData<ActivityResultLauncher<Array<String>>>()
-    var locationPermission: LiveData<ActivityResultLauncher<Array<String>>> = _locationPermission
-
     // 사용자의 이동 경로 저장
+    // 이동 경로는 HomeFragment가 파괴되도 다른 Fragment에서 구글맵을 불러올 때 이용해야하니까, ViewModel에서 관리
     private var _pathPoints =
         MutableLiveData<MutableList<LatLng>>().apply { value = mutableListOf() }
     var pathPoints: LiveData<MutableList<LatLng>> = _pathPoints
@@ -77,11 +56,6 @@ class HomeViewModel : ViewModel() {
 
     val placeitems = ArrayList<PlaceModel>()
 
-    // 뷰모델에서 뷰를 가져오면 뷰객체를 가져오면 안됨. UI관련 뷰 관련된건
-    // 멤버 변수를 다 프래그먼트로 옮기고 함수도 프래그먼트로 옮기기 이유는 뷰 가 뷰모델에 있으면 안됨
-    // 프래그먼트가 파괴됫을때(on DestoryView) 구글맵같은 뷰도 파괴가되야 메모리누수가안일어나는데 이게뷰모델에 있으면 프래그먼트랑 뷰모델이랑은 다른애니까
-    // 메모리누수 무조건 발생함
-    //
     fun inputdata(mGoogleMap: GoogleMap, LatLng: MutableList<LatLng>, path: Polyline) {
         cameraPosition = mGoogleMap.cameraPosition // 현재 위치
         currentLatLng = cameraPosition.target // 카메라
@@ -102,10 +76,10 @@ class HomeViewModel : ViewModel() {
         currentpath.points = currentpathPoints
     }
     fun getplaces(nextToken: String?,keyword:String,type:String) {
-//         Location(location.value!!.lat,location.value!!.lng)
-//        NetWorkClient.apiService.getplace(keyword.value!!,location.value!!,radius.value!!,type.value!!,GOOGLE_MAPS_API_KEY,nextPageToken
-        NetWorkClient.apiService.getplace(
-            keyword, "${37.566610},${126.978403}", 50000, type, "AIzaSyALMOXhl-6el3pNR2P277KH3xuM8SIJcps", nextpagetoken
+
+    NetWorkClient.apiService.getplace(
+            keyword, "${37.566610},${126.978403}", 50000, type, BuildConfig.GOOGLE_MAPS_API_KEY, nextpagetoken
+
         ) // null이 아님을 확인 후 실행해야 될것 같다.
             ?.enqueue(object : Callback<PlaceData?> {
                 override fun onResponse(
@@ -159,3 +133,22 @@ class HomeViewModel : ViewModel() {
     }
 
 }
+
+/*
+1. ViewModel에서 관리할 변수와 Fragment에서 관리할 변수 나누기
+UI 뿐 아니라 UI 업데이트 요소도 Fragment에서 관리해야 한다.
+[HomeFragment]
+GoogleMap : 화면에 표시되는 UI
+LocationCallback : 위치 업데이트를 처리하는 콜백. 위치 업데이트는 UI 업데이트
+FusedLocationProviderClient : 위치 정보를 가져오는 클라이언트. 위치 정보를 기반으로 UI 업데이트 발생
+ActivityResultLauncher<Array<String>> : 위치 권한 요청. 위치는 위의 변수들을 확인하면 알 수 잇듯 UI 관련 요소
+path: Polyline : 구글 맵에서 이동경로를 표시하는 선 UI
+
+[HomeViewModel]
+pathPoints: MutableList<LatLng> : 사용자의 이동 경로 저장. 이동 경로는 Firebase를 통해 저장되어야 할 요소이므로 Fragment가 파괴된 후에도
+남아 있어야 한다. 따라서 ViewModel에서 관리해야 한다.
+
+2. 감시할 변수와 그렇지 않은 변수도 나누어야 될것같다는 생각이 든다.
+
+
+ */

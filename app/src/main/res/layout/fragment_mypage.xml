@@ -6,14 +6,85 @@
     android:layout_height="match_parent"
     tools:context=".ui.mypage.MyPageFragment">
 
-    <TextView
-        android:id="@+id/text_mypage"
-        android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/mapage_cardView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="30dp"
+        app:cardCornerRadius="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_mypage_black_24"
+             />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/mypage_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="춘식이"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/mapage_cardView"
+        app:layout_constraintTop_toTopOf="@+id/mapage_cardView"
+        />
+
+    <TextView
+        android:id="@+id/town"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="서울특별시 송파구 잠실동"
+        app:layout_constraintBottom_toBottomOf="@+id/mapage_cardView"
+        app:layout_constraintStart_toEndOf="@+id/mapage_cardView" />
+
+    <ImageView
+        android:id="@+id/mypage_revise"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="30dp"
+        android:src="@drawable/ic_pen"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/mypage_name" />
+
+    <TextView
+        android:id="@+id/mypage_self_introduction"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:text="안녕하세요"
+        android:gravity="center"
+        android:background="@drawable/background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/town">
+
+    </TextView>
+
+    <View
+        android:layout_width="350dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="20dp"
+        android:background="#4D000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mypage_self_introduction">
+
+    </View>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
