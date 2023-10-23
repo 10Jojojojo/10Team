@@ -14,7 +14,6 @@ import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.footprint.app.MainActivity
 import com.footprint.app.R
-import com.footprint.app.ui.home.HomeViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -42,8 +41,8 @@ import com.google.android.gms.location.LocationServices
 
         private fun startLocationUpdates() {
             val locationRequest = LocationRequest.create().apply {
-                interval = 100
-                fastestInterval = 100
+                interval = 500
+                fastestInterval = 500
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
 
@@ -51,7 +50,7 @@ import com.google.android.gms.location.LocationServices
                 override fun onLocationResult(locationResult: LocationResult) {
                     locationResult?.let {
                         for (location in it.locations) {
-                            // 이 부분에서 위치 데이터를 처리합니다. 예를 들어, broadcast를 보낼 수 있습니다.
+                            // 이 부분에서 위치 데이터를 처리한다. 예를 들어, broadcast를 보낼 수 있다.
                             sendBroadcastWithLocation(location)
                         }
                     }
@@ -89,9 +88,9 @@ import com.google.android.gms.location.LocationServices
                 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE
             )
             return NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Foreground Service")
-                .setContentText("Running...")
-                .setSmallIcon(R.mipmap.ic_launcher) // 알림 아이콘 설정
+                .setContentTitle("산책 중입니다.")
+                .setContentText("산책 중")
+                .setSmallIcon(R.drawable.ic_pawprint_on) // 알림 아이콘 설정
                 .setContentIntent(pendingIntent)
                 .build()
         }

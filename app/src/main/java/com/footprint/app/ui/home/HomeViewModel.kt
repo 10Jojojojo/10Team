@@ -16,7 +16,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -38,11 +37,11 @@ class HomeViewModel : ViewModel() {
     }
     val pathPoints: LiveData<MutableList<MutableList<LatLng>>> = _pathPoints
 
-    lateinit var cameraPosition: CameraPosition // 현재 위치
-    lateinit var currentLatLng: LatLng // 카메라
-    var currentZoom: Float = 0f // 줌
-    lateinit var currentpathPoints: MutableList<LatLng> // 사용자의 이동 경로 저장
-    lateinit var currentpath: Polyline // Polyline 객체
+    private lateinit var cameraPosition: CameraPosition // 현재 위치
+    private lateinit var currentLatLng: LatLng // 카메라
+    private var currentZoom: Float = 0f // 줌
+    private lateinit var currentpathPoints: MutableList<LatLng> // 사용자의 이동 경로 저장
+    private lateinit var currentpath: Polyline // Polyline 객체
     private var nextpagetoken: String = ""
 
     private var _keyword = MutableLiveData<String>()
@@ -59,9 +58,9 @@ class HomeViewModel : ViewModel() {
 
     val placeitems = ArrayList<PlaceModel>()
 
-    var startTime: Long = 0L // ms로 반환
-    var endTime: Long = 0L // ms로 반환
-    var walkTime: Long = 0L // ms로 반환
+    private var startTime: Long = 0L // ms로 반환
+    private var endTime: Long = 0L // ms로 반환
+    private var walkTime: Long = 0L // ms로 반환
     private val _walkstate = MutableLiveData<String>().apply { value = "산책종료" }
     val walkstate: LiveData<String> = _walkstate
     private val _time = MutableLiveData<String>().apply { value = "00:00" }
@@ -110,7 +109,7 @@ class HomeViewModel : ViewModel() {
         return (R * c).toInt()
     }
 
-    fun getTime(){
+    private fun getTime(){
         val dataFormat = SimpleDateFormat("mm:ss")
         _walkstate.value = "산책중"
         startTime = System.currentTimeMillis()
@@ -122,21 +121,19 @@ class HomeViewModel : ViewModel() {
             }
         }
     }
-    fun startwalk() {
+    fun startWalk() {
         if (_walkstate.value == "산책종료") {
             getTime()
         }
     }
 
-    fun pausewalk() {
+    fun pauseWalk() {
         walkTime = endTime
         when(_walkstate.value)
         {
             "산책일시정지" -> {
                 _walkstate.value = "산책중"
-                this.pathPoints.value?.let {
-                    it.add(mutableListOf())  // 새로운 경로 리스트 시작
-                }
+                pathPoints.value!!.add(mutableListOf())  // 새로운 경로 리스트 시작
                 getTime()
             }
             "산책중" -> {
@@ -145,7 +142,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun endwalk() {
+    fun endWalk() {
         _walkstate.value = "산책종료"
         endTime = 0L
         walkTime = 0L
@@ -154,7 +151,7 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun getplaces(nextToken: String?, keyword: String, type: String) {
+    fun getPlaces(nextToken: String?, keyword: String, type: String) {
 
         NetWorkClient.apiService.getplace(
             keyword,
@@ -194,7 +191,7 @@ class HomeViewModel : ViewModel() {
                                     it.next_page_token?.let { token ->
                                         // next_page_token이 존재하면 약 2초의 딜레이 후 추가 요청을 합니다.
                                         delay(2000)
-                                        getplaces(token, keyword, type)
+                                        getPlaces(token, keyword, type)
                                     }
                                 }
 //                                _commentitem.value?.clear()
