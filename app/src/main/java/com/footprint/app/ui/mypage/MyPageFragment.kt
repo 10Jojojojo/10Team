@@ -40,7 +40,7 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
             findNavController().navigate(R.id.mypage_revise)
 
         }
-        binding.dogPlusCard.setOnClickListener {
+        binding.myDogPlus.setOnClickListener {
             findNavController().navigate(R.id.dog)
         }
 

@@ -27,7 +27,4 @@ class MyPageViewModel : ViewModel() {
     }
 
 }
-
-
-
-data class Dog(val name: String, val age: Int, val sex: String)
+data class Dog(val dogname: String, val dogage: Int, val dogsex: String)

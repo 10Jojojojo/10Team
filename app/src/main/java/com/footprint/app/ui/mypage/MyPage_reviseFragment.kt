@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentMyPageReviseBinding
 
@@ -25,10 +26,12 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
 
         reUesrInfo()
         revisepage()
+        cance()
+        dog()
     }
 
     private fun reUesrInfo() {
-        binding.savebutton.setOnClickListener {
+        binding.save.setOnClickListener {
 
             // 사용자가 수정한 내용을 ViewModel에 저장
             val newName = binding.mypageReviseName.text.toString()
@@ -51,6 +54,25 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
         binding.mypageReviseIntroduction.setText(viewModel.introduction)
         binding.town.setText(viewModel.town)
     }
+
+    private fun cance(){
+        binding.Cance.setOnClickListener {
+            findNavController().navigate(R.id.mypage)
+        }
+    }
+
+    private fun dog(){
+        var recyclerView = binding.dogCard
+        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+
+        val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.layoutManager = layoutManager
+
+        // 어댑터 초기화 및 dogList를 전달
+        var adapter = DogAdapter(viewModel.dogList)
+        recyclerView.adapter = adapter
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

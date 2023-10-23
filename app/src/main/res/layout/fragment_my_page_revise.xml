@@ -12,7 +12,7 @@
         >
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/mapage_revise_cardView"
+            android:id="@+id/mapage_cardView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
@@ -29,66 +29,131 @@
                 />
         </androidx.cardview.widget.CardView>
 
-        <EditText
-            android:id="@+id/mypage_revise_name"
-            android:layout_width="71dp"
-            android:layout_height="42dp"
-            android:layout_marginStart="20dp"
-            android:background="@null"
-            android:text="춘식이"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/mapage_revise_cardView"
-            app:layout_constraintTop_toTopOf="@+id/mapage_revise_cardView" />
-
-        <EditText
-            android:id="@+id/town"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/mypageReviseName"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:text="서울특별시 송파구 잠실동"
-            android:textSize="15dp"
-            android:background="@null"
-            app:layout_constraintStart_toEndOf="@+id/mapage_revise_cardView"
-            app:layout_constraintTop_toBottomOf="@+id/mypage_revise_name" />
+            android:text="춘식이"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/mapage_cardView"
+            app:layout_constraintTop_toTopOf="@+id/mapage_cardView"
+            />
 
-        <EditText
-            android:id="@+id/mypage_revise_introduction"
+        <TextView
+            android:id="@+id/town"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:textSize="15sp"
+            android:text="서울특별시 송파구 잠실동"
+            app:layout_constraintBottom_toBottomOf="@+id/mapage_cardView"
+            app:layout_constraintStart_toEndOf="@+id/mapage_cardView" />
+
+        <ImageView
+            android:id="@+id/mypage_revise"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/ic_pen"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/mypageReviseName" />
+
+        <TextView
+            android:id="@+id/mypageReviseIntroduction"
             android:layout_width="350dp"
             android:layout_height="50dp"
             android:layout_marginTop="30dp"
             android:text="안녕하세요"
+            android:textSize="20sp"
             android:gravity="center"
             android:background="@drawable/background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/town">
 
-        </EditText>
+        </TextView>
 
         <View
+            android:id="@+id/view"
             android:layout_width="350dp"
             android:layout_height="2dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="100dp"
             android:background="#4D000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mypage_revise_introduction">
+            app:layout_constraintTop_toBottomOf="@+id/mypageReviseIntroduction">
 
         </View>
 
-        <Button
-            android:id="@+id/savebutton"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dog_card"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            tools:listitem="@layout/mydogpluscard"
+            >
+
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <View
+            android:id="@+id/view_2"
+            android:layout_width="350dp"
+            android:layout_height="2dp"
+            android:background="#4D000000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dog_card">
+
+        </View>
+
+        <TextView
+            android:id="@+id/myDog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="내 새끼"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/dog_card"
+            app:layout_constraintStart_toStartOf="@+id/mypageReviseIntroduction"
+            app:layout_constraintTop_toBottomOf="@+id/mypageReviseIntroduction" />
+
+        <TextView
+            android:id="@+id/save"
+            android:layout_width="75dp"
+            android:layout_height="45dp"
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="50dp"
             android:text="저장"
-            android:textColor="#000000"
-            android:textSize="20dp"
+            android:gravity="center"
+            android:textSize="30sp"
+            android:textColor="@color/white"
+            android:background="@drawable/background"
+            android:backgroundTint="#F8BDEB"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+
+        <TextView
+            android:id="@+id/Cance"
+            android:layout_width="75dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginBottom="50dp"
+            android:background="@drawable/background"
+            android:backgroundTint="#F8BDEB"
+            android:gravity="center"
+            android:text="취소"
+            android:textColor="@color/white"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
