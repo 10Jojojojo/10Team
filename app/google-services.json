@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "796616173651",
+    "project_id": "team10pro-1c49b",
+    "storage_bucket": "team10pro-1c49b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:796616173651:android:967639fa073384e96bbea6",
+        "android_client_info": {
+          "package_name": "com.footprint.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "796616173651-ll4lp11j213p2atnv1eh9ppurldkasee.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.footprint.app",
+            "certificate_hash": "24060094a4b65a2b85f3f8af02d80999c7d54b81"
+          }
+        },
+        {
+          "client_id": "796616173651-tuijqr0er165et5ln12lgud85gc39d8h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCm5x95U8m1ayqqEtztoG5HVnYOSFiXkj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "796616173651-tuijqr0er165et5ln12lgud85gc39d8h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
