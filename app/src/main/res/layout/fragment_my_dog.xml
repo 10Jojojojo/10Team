@@ -21,7 +21,7 @@
             android:gravity="center"
             android:text="반려동물 정보 입력"
             android:textColor="@color/white"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,9 +32,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="30dp"
             android:text="이름"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dog_Name">
@@ -42,14 +42,15 @@
         </TextView>
 
         <EditText
-            android:id="@+id/dogNameword"
+            android:id="@+id/dogplusNameword"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:background="@null"
             android:hint="이름을 입력해주세요"
             android:textColor="#4D000000"
-            android:textSize="15dp"
+            android:textSize="15sp"
+
             app:layout_constraintStart_toStartOf="@+id/dogName"
             app:layout_constraintTop_toBottomOf="@+id/dogName" />
 
@@ -58,8 +59,8 @@
             android:layout_width="300dp"
             android:layout_height="2dp"
             android:background="#4D000000"
-            app:layout_constraintStart_toStartOf="@+id/dogAge"
-            app:layout_constraintTop_toBottomOf="@+id/dogAge">
+            app:layout_constraintStart_toStartOf="@+id/dogplusAge"
+            app:layout_constraintTop_toBottomOf="@+id/dogplusAge">
 
         </View>
 
@@ -69,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:text="나이"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/dogName"
             app:layout_constraintTop_toBottomOf="@+id/view_5">
@@ -77,14 +78,15 @@
         </TextView>
 
         <EditText
-            android:id="@+id/dogAge"
+            android:id="@+id/dogplusAge"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:background="@null"
             android:hint="나이를 입력해주세요"
             android:textColor="#4D000000"
-            android:textSize="15dp"
+            android:textSize="15sp"
+            android:inputType="number"
             app:layout_constraintStart_toStartOf="@+id/dogage"
             app:layout_constraintTop_toBottomOf="@+id/dogage" />
 
@@ -93,8 +95,8 @@
             android:layout_width="300dp"
             android:layout_height="2dp"
             android:background="#4D000000"
-            app:layout_constraintStart_toStartOf="@+id/dogNameword"
-            app:layout_constraintTop_toBottomOf="@+id/dogNameword" />
+            app:layout_constraintStart_toStartOf="@+id/dogplusNameword"
+            app:layout_constraintTop_toBottomOf="@+id/dogplusNameword" />
 
         <TextView
             android:id="@+id/dogsex"
@@ -102,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
             android:text="성별"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/dogage"
             app:layout_constraintTop_toBottomOf="@+id/view_4">
@@ -144,16 +146,32 @@
             android:layout_width="70dp"
             android:layout_height="45dp"
             android:layout_marginEnd="50dp"
-            android:layout_marginBottom="50dp"
             android:background="@drawable/background"
             android:backgroundTint="#F8BDEB"
             android:gravity="center"
             android:text="완료"
             android:textColor="@color/white"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dogSexGroup" />
+
+        <TextView
+            android:id="@+id/cance"
+            android:layout_width="70dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="50dp"
+            android:background="@drawable/background"
+            android:backgroundTint="#F8BDEB"
+            android:gravity="center"
+            android:text="취소"
+            android:textColor="@color/white"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/dogComplete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/dogComplete" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
