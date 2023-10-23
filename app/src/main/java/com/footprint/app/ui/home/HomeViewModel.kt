@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.footprint.app.BuildConfig
 import com.footprint.app.api.NetWorkClient
+import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.serverdata.Location
 import com.footprint.app.api.serverdata.PlaceData
@@ -65,7 +66,7 @@ class HomeViewModel : ViewModel() {
     val walkstate: LiveData<String> = _walkstate
     private val _time = MutableLiveData<String>().apply { value = "00:00" }
     val time: LiveData<String> = _time
-
+    val flagList = mutableListOf<FlagModel>()
     fun inputdata(mGoogleMap: GoogleMap, LatLng: MutableList<LatLng>, path: Polyline) {
         cameraPosition = mGoogleMap.cameraPosition // 현재 위치
         currentLatLng = cameraPosition.target // 카메라

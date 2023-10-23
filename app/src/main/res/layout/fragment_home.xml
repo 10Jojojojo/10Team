@@ -80,7 +80,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="120dp"
         android:background="@drawable/home_fragment_bottombar_bg"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -107,6 +107,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/iv_pawprint"/>
 
+        <ImageView
+            android:id="@+id/iv_flag"
+            android:src="@drawable/ic_flag"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintStart_toStartOf="@id/tv_walkdistancevalue"
+            app:layout_constraintBottom_toTopOf="@id/tv_walkdistancevalue"
+            app:layout_constraintEnd_toEndOf="@id/tv_walkdistancevalue"
+            />
         <TextView
             android:id="@+id/tv_walkdistancevalue"
             android:layout_width="wrap_content"
