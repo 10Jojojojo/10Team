@@ -23,19 +23,38 @@
         android:label="@string/title_mypage"
         tools:layout="@layout/fragment_mypage"/>
         <action
-            android:id="@+id/mypage"
-            app:destination="@+id/navigation_mypage_revise"
-        />
+            android:id="@+id/mypage_revise"
+            app:destination="@+id/navigation_mypage_revise"/>
+            <action
+                android:id="@+id/dog"
+                app:destination="@+id/navigation_mydog"
+            >
+
+        </action>
+
+
 
     <fragment
         android:id="@+id/navigation_mypage_revise"
-        android:name="com.footprint.app.ui.mypage_revise.MyPage_reviseFragment"
+        android:name="com.footprint.app.ui.mypage.MyPage_reviseFragment"
         android:label="mypage_revise"
         tools:layout="@layout/fragment_my_page_revise"/>
         <action
-            android:id="@+id/mypage_revise"
+            android:id="@+id/mypage"
             app:destination="@+id/navigation_mypage"
         />
+
+    <fragment
+        android:id="@+id/navigation_mydog"
+        android:name="com.footprint.app.ui.mypage.MyDogFragment"
+        android:label="mydog"
+        tools:layout="@layout/fragment_my_dog"/>
+    <action
+        android:id="@+id/mydog"
+        app:destination="@+id/navigation_mypage">
+
+    </action>
+
 
 
 </navigation>
