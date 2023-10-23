@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -61,8 +62,8 @@ class HomeViewModel : ViewModel() {
     var startTime: Long = 0L // ms로 반환
     var endTime: Long = 0L // ms로 반환
     var walkTime: Long = 0L // ms로 반환
-    private val _walkstate = MutableLiveData<Boolean>().apply { value = false }
-    val walkstate: LiveData<Boolean> = _walkstate
+    private val _walkstate = MutableLiveData<String>().apply { value = "산책종료" }
+    val walkstate: LiveData<String> = _walkstate
     private val _time = MutableLiveData<String>().apply { value = "00:00" }
     val time: LiveData<String> = _time
 
@@ -111,10 +112,10 @@ class HomeViewModel : ViewModel() {
 
     fun getTime(){
         val dataFormat = SimpleDateFormat("mm:ss")
-        _walkstate.value = true
+        _walkstate.value = "산책중"
         startTime = System.currentTimeMillis()
         viewModelScope.launch {
-            while (walkstate.value!!) {
+            while (walkstate.value == "산책중") {
                 endTime = System.currentTimeMillis() - startTime + walkTime
                 _time.value = dataFormat.format(endTime)
                 delay(100)
@@ -122,24 +123,30 @@ class HomeViewModel : ViewModel() {
         }
     }
     fun startwalk() {
-        if (!_walkstate.value!!) {
+        if (_walkstate.value == "산책종료") {
             getTime()
         }
     }
 
     fun pausewalk() {
-        _walkstate.value = !_walkstate.value!!
         walkTime = endTime
-        if (_walkstate.value!!) {
-            this.pathPoints.value?.let {
-                it.add(mutableListOf())  // 새로운 경로 리스트 시작
+        when(_walkstate.value)
+        {
+            "산책일시정지" -> {
+                _walkstate.value = "산책중"
+                this.pathPoints.value?.let {
+                    it.add(mutableListOf())  // 새로운 경로 리스트 시작
+                }
+                getTime()
             }
-            getTime()
+            "산책중" -> {
+                _walkstate.value = "산책일시정지"
+            }
         }
     }
 
     fun endwalk() {
-        _walkstate.value = false
+        _walkstate.value = "산책종료"
         endTime = 0L
         walkTime = 0L
         _pathPoints.value = mutableListOf(mutableListOf())

@@ -2,9 +2,14 @@ package com.footprint.app.ui.home
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -15,10 +20,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.footprint.app.R
 import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.databinding.DialogHomeWalkstopBinding
 import com.footprint.app.databinding.FragmentHomeBinding
+import com.footprint.app.services.MyService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -68,25 +75,90 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
     // 생성자에 입력값이 생기면 다른 방식으로 생성해주어야 하고, ViewModelFactory도 변경해주어야 한다.
     private val homeViewModel by lazy { ViewModelProvider(this).get(HomeViewModel::class.java) }
 
+    // Polyline 중복으로 그려지는것을 막기위한 변수
+    private var currentPolyline: Polyline? = null
+
+    private val locationReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val latitude = intent.getDoubleExtra("latitude", 0.0)
+            val longitude = intent.getDoubleExtra("longitude", 0.0)
+            // 여기에서 위도/경도를 처리
+            val location = Location(LocationManager.GPS_PROVIDER).apply {
+                this.latitude = latitude
+                this.longitude = longitude
+            }
+            // 받아온 위치로 지도 UI를 업데이트합니다.
+            setLastLocation(location)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeBinding.bind(view)
         getPermission() // 권한을 먼저 설정하고, 맵을 불러오자.
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+            locationReceiver,
+            IntentFilter("LOCATION_UPDATE")
+        )
         initView()
         getmap()
         observeViewModel() // 뷰를 먼저 생성하고 LiveData를 감시해야 한다.(LiveData의 변화가 먼저 일어나면,
         // 뷰는 생성되지 않았는데(초기화가 되지 않았는데) 뷰의 속성 변화를 하게 될 수 있다.)
     }
 
+    override fun onResume() {
+        super.onResume()
+//        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+//            locationReceiver,
+//            IntentFilter("LOCATION_UPDATE")
+//        )
+    }
+
+    override fun onPause() {
+        super.onPause()
+//        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(locationReceiver)
+    }
+
+    fun startLocationService() {
+        Intent(requireContext(), MyService::class.java).also {
+            requireContext().startService(it)
+        }
+    }
+
+    fun stopLocationService() {
+        Intent(requireContext(), MyService::class.java).also {
+            requireContext().stopService(it)
+        }
+    }
+
     private fun observeViewModel() {
         // 산책하는 시간의 변화가 감지되면 산책 시간을 표기하고, 거리를 측정하여 표기한다
         homeViewModel.time.observe(viewLifecycleOwner) {
             binding.tvWalktimevalue.text = it
-            if ((homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size-1].size >= 2)) {
+            if ((homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size - 1].size >= 2)) {
                 val distanceInKm = homeViewModel.getDistance() / 1000.0
                 binding.tvWalkdistancevalue.text = String.format("%.2fkm", distanceInKm)
-            } else if(homeViewModel.pathPoints.value?.firstOrNull()?.isEmpty() == true){
+            } else if (homeViewModel.pathPoints.value?.firstOrNull()?.isEmpty() == true) {
                 binding.tvWalkdistancevalue.text = "0.00km"
+            }
+        }
+        homeViewModel.walkstate.observe(viewLifecycleOwner){
+            updateWalkStateUI()
+        }
+    }
+    fun updateWalkStateUI(){
+        when(homeViewModel.walkstate.value)
+        {
+            "산책중" ->{
+                binding.ivPause.setImageResource(R.drawable.ic_pause)
+                binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_on)
+            }
+            "산책일시정지" ->{
+                binding.ivPause.setImageResource(R.drawable.ic_play)
+            }
+            "산책종료" ->{
+                binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
+                binding.ivPause.setImageResource(R.drawable.ic_pause)
             }
         }
     }
@@ -109,16 +181,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
         binding.ivPause.setOnClickListener {
             // 일시정지 기능
             homeViewModel.pausewalk()
-            if (homeViewModel.walkstate.value!!) {
-                binding.ivPause.setImageResource(R.drawable.ic_pause)
-            } else if (!homeViewModel.walkstate.value!!) {
-                binding.ivPause.setImageResource(R.drawable.ic_play)
-            }
         }
         binding.ivPawprint.setOnClickListener {
             // 산책시작 기능
+            if (homeViewModel.walkstate.value!! == "산책종료") {
+                startLocationService()
+            }
             homeViewModel.startwalk()
-            binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_on)
         }
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
@@ -129,6 +198,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(locationReceiver)
     }
 
     // 지도 프래그먼트를 가져와서 OnMapReadyCallback을 등록
@@ -153,6 +227,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
     // Polygon이 클릭되었을 때 호출되는 콜백
     override fun onPolygonClick(p0: Polygon) {
     }
+
     private fun showDialog() {
         val builder = AlertDialog.Builder(requireContext())
         val binding_dialog = DialogHomeWalkstopBinding.inflate(layoutInflater)
@@ -164,13 +239,15 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
             dialog.dismiss()
             homeViewModel.endwalk()
             destroypolyline()
+            stopLocationService()
             binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
         }
         binding_dialog.btNo.setOnClickListener {
             dialog.dismiss()
         }
     }
-    private fun destroypolyline(){
+
+    private fun destroypolyline() {
         for (polyline in polylineList) {
             polyline.remove()
         }
@@ -214,11 +291,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
     private fun updateLocationUI() {
         try {
             Log.d("FootprintApp", "updataLocationUI")
-            val locationRequest = LocationRequest.create().apply {
-                interval = 1000 // 1초에 1번씩
-                fastestInterval = 500
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
+//            val locationRequest = LocationRequest.create().apply {
+//                interval = 1000 // 1초에 1번씩
+//                fastestInterval = 500
+//                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+//            }
             // 최초에 현재위치 받아와서 줌
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
@@ -226,46 +303,75 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
                     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
                 }
             }
-            locationCallback = object : LocationCallback() { // LocationCallback()이라는 익명 객체를 생성하고,
-                override fun onLocationResult(locationResult: LocationResult) { // 1초에 1번씩 하는걸 입력으로 넣어줌
-                    locationResult?.let { //
-                        for (location in it.locations) {
-//                            Log.d(
-//                                "FootprintApp",
-//                                "위도 : ${location.latitude} 경도: ${location.longitude}"
-//                            )
-                            setLastLocation(location) // 현재 위치가 갱신이 되면(LocationCallback() 때문인듯),
-                            // 현재 위치를 setLastLocation에 입력으로 주며 호출
-                        }
-                    }
-                }
-            }
+//            locationCallback = object : LocationCallback() { // LocationCallback()이라는 익명 객체를 생성하고,
+//                override fun onLocationResult(locationResult: LocationResult) { // 1초에 1번씩 하는걸 입력으로 넣어줌
+//                    locationResult?.let { //
+//                        for (location in it.locations) {
+////                            Log.d(
+////                                "FootprintApp",
+////                                "위도 : ${location.latitude} 경도: ${location.longitude}"
+////                            )
+//                            setLastLocation(location) // 현재 위치가 갱신이 되면(LocationCallback() 때문인듯),
+//                            // 현재 위치를 setLastLocation에 입력으로 주며 호출
+//                        }
+//                    }
+//                }
+//            }
 
             // 입력으로 위에서 만들어준 locationRequest와, 콜백을 넣어줌. 그러면
             // 위치가 바뀔때, 초당 1번씩 locationCallback이 불리게 되는듯?
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest, locationCallback,
-                Looper.myLooper()!!
-            )
+//            fusedLocationClient.requestLocationUpdates(
+//                locationRequest, locationCallback,
+//                Looper.myLooper()!!
+//            )
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)
         }
     }
 
+    //    private fun setLastLocation(location: Location) {
+//        val newLatLng = LatLng(location.latitude, location.longitude)
+//        if (homeViewModel.walkstate.value!!) {
+//            homeViewModel.pathPoints.value?.let {
+//                it[it.size-1].add(newLatLng)
+//                // 마지막 경로 리스트에 위치 추가
+//
+//                currentPolyline?.remove()
+//                // 기존의 Polyline을 제거
+//
+//                val polylineOptions =
+//                    PolylineOptions().addAll(it[it.size - 1])
+//                        .color(Color.RED).width(10f)
+//                currentPolyline = mGoogleMap.addPolyline(polylineOptions)
+//                polylineList.add(currentPolyline!!)
+//            }
+//        }
+//        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng))
+//    // 카메라를 현재 위치로 이동
+//
+//    }
     private fun setLastLocation(location: Location) {
         val newLatLng = LatLng(location.latitude, location.longitude)
-        if (homeViewModel.walkstate.value!!) {
-            homeViewModel.pathPoints.value?.let {
-                it[it.size-1].add(newLatLng)  // 마지막 경로 리스트에 위치 추가
-                val polylineOptions =
-                    PolylineOptions().addAll(it[it.size - 1])
+        if (homeViewModel.walkstate.value == "산책중") {
+            homeViewModel.pathPoints.value?.let { pathPoints ->
+
+                // 현재 위치를 가장 마지막 경로 리스트에 추가
+                pathPoints[pathPoints.size - 1].add(newLatLng)
+
+                // 모든 폴리라인을 지도에서 제거
+                polylineList.forEach { it.remove() }
+                polylineList.clear()
+
+                // 모든 폴리라인을 다시 지도에 그림
+                pathPoints.forEach { path ->
+                    val polylineOptions = PolylineOptions().addAll(path)
                         .color(Color.RED).width(10f)
-                val newPolyline = mGoogleMap.addPolyline(polylineOptions)
-                polylineList.add(newPolyline)
+                    val newPolyline = mGoogleMap.addPolyline(polylineOptions)
+                    polylineList.add(newPolyline)
+                }
             }
         }
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng)) // 카메라를 현재 위치로 이동
-//        Log.d("FootprintApp","path.points : ${path.points}")
     }
 
     fun placeMarkersOnMap(places: List<PlaceModel>) {
