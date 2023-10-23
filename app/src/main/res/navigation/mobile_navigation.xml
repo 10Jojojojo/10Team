@@ -21,5 +21,21 @@
         android:id="@+id/navigation_mypage"
         android:name="com.footprint.app.ui.mypage.MyPageFragment"
         android:label="@string/title_mypage"
-        tools:layout="@layout/fragment_mypage" />
+        tools:layout="@layout/fragment_mypage"/>
+        <action
+            android:id="@+id/mypage"
+            app:destination="@+id/navigation_mypage_revise"
+        />
+
+    <fragment
+        android:id="@+id/navigation_mypage_revise"
+        android:name="com.footprint.app.ui.mypage_revise.MyPage_reviseFragment"
+        android:label="mypage_revise"
+        tools:layout="@layout/fragment_my_page_revise"/>
+        <action
+            android:id="@+id/mypage_revise"
+            app:destination="@+id/navigation_mypage"
+        />
+
+
 </navigation>

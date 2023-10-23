@@ -1,10 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.gms.google-services")
 }
-
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+val apiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
 android {
     namespace = "com.footprint.app"
     compileSdk = 34
@@ -17,6 +24,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // BuildConfig에 API 키 추가
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+
+        // 또는 리소스 값으로 API 키 추가
+         resValue("string", "api_key", apiKey)
     }
 
     buildTypes {
@@ -40,6 +52,7 @@ android {
         dataBinding = true
         buildConfig = true
     }
+
 }
 
 dependencies {
@@ -55,4 +68,17 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 }
