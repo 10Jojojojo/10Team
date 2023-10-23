@@ -7,6 +7,7 @@
     tools:context=".ProfileActivity">
 
 
+
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -23,21 +24,24 @@
 
         <ImageView
             android:id="@+id/profile_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="101dp"
+            android:layout_height="96dp"
             android:src="@drawable/ic_mypage_black_24" />
+
     </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/protector"
-        android:layout_width="wrap_content"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="#F8BDEB"
+        android:background="@drawable/background"
+        android:textColor="@color/white"
         android:text="보호자 정보 입력"
         android:textSize="15dp"
         android:textStyle="bold"
-        android:background="#F8BDEB"
-        android:textColor="@color/white"
+        android:gravity="center"
         app:layout_constraintStart_toStartOf="@+id/nickName"
         app:layout_constraintTop_toBottomOf="@+id/mapage_cardView">
 
@@ -48,12 +52,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="10dp"
         android:text="닉네임"
         android:textSize="15dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mapage_cardView" />
+        app:layout_constraintTop_toBottomOf="@+id/protector" />
 
     <EditText
         android:id="@+id/nickNameword"
@@ -92,6 +96,19 @@
 
     </TextView>
 
+    <TextView
+        android:id="@+id/myintroduction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="자기소개"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/town"
+        app:layout_constraintTop_toBottomOf="@+id/town_position">
+
+    </TextView>
+
     <EditText
         android:id="@+id/town_position"
         android:layout_width="300dp"
@@ -108,7 +125,7 @@
     </EditText>
 
     <View
-        android:id="@+id/view_"
+        android:id="@+id/view_2"
         android:layout_width="300dp"
         android:layout_height="2dp"
         android:background="#4D000000"
@@ -117,6 +134,22 @@
         app:layout_constraintTop_toBottomOf="@+id/town_position">
 
     </View>
+
+    <TextView
+        android:id="@+id/introduction"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/background"
+        android:gravity="center"
+        android:text="자기소개"
+        android:textSize="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/myintroduction">
+
+    </TextView>
+
     <Button
         android:id="@+id/button"
         android:layout_width="60dp"
@@ -130,20 +163,172 @@
         app:layout_constraintStart_toEndOf="@+id/nickNameword"
         app:layout_constraintTop_toTopOf="@+id/nickNameword" />
 
+    <View
+        android:id="@+id/view_3"
+        android:layout_width="350dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="20dp"
+        android:background="#4D000000"
+        app:layout_constraintEnd_toEndOf="@+id/introduction"
+        app:layout_constraintStart_toStartOf="@+id/introduction"
+        app:layout_constraintTop_toBottomOf="@+id/introduction">
+
+    </View>
+
     <TextView
         android:id="@+id/dog_Name"
-        android:layout_width="wrap_content"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:background="#F8BDEB"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#F8BDEB"
+        android:background="@drawable/background"
         android:text="반려동물 정보 입력"
+        android:textColor="@color/white"
         android:textSize="15dp"
         android:textStyle="bold"
-        android:textColor="@color/white"
+        android:gravity="center"
         app:layout_constraintStart_toStartOf="@+id/town_position"
-        app:layout_constraintTop_toBottomOf="@+id/view_">
+        app:layout_constraintTop_toBottomOf="@+id/view_3">
 
     </TextView>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginBottom="-10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/mapage_cardView"
+        app:layout_constraintStart_toStartOf="@+id/mapage_cardView"
+        app:srcCompat="@android:drawable/ic_menu_camera" />
+
+    <TextView
+        android:id="@+id/dogName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="이름"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/dog_Name"
+        app:layout_constraintTop_toBottomOf="@+id/dog_Name">
+
+    </TextView>
+
+    <EditText
+        android:id="@+id/dogNameword"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@null"
+        android:hint="이름을 입력해주세요"
+        android:inputType="textPassword"
+        android:textColor="#4D000000"
+        android:textSize="15dp"
+        app:layout_constraintStart_toStartOf="@+id/dogName"
+        app:layout_constraintTop_toBottomOf="@+id/dogName" />
+
+    <View
+        android:id="@+id/view_4"
+        android:layout_width="300dp"
+        android:layout_height="2dp"
+        android:background="#4D000000"
+        app:layout_constraintEnd_toEndOf="@+id/dogNameword"
+        app:layout_constraintStart_toStartOf="@+id/dogNameword"
+        app:layout_constraintTop_toBottomOf="@+id/dogNameword">
+
+    </View>
+
+    <TextView
+        android:id="@+id/dogage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="나이"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/view_4"
+        app:layout_constraintTop_toBottomOf="@+id/view_4">
+
+    </TextView>
+
+    <EditText
+        android:id="@+id/dogAge"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@null"
+        android:hint="나이를 입력해주세요"
+        android:inputType="textPassword"
+        android:textColor="#4D000000"
+        android:textSize="15dp"
+        app:layout_constraintStart_toStartOf="@+id/dogage"
+        app:layout_constraintTop_toBottomOf="@+id/dogage" />
+
+    <View
+        android:id="@+id/view_5"
+        android:layout_width="300dp"
+        android:layout_height="2dp"
+        android:background="#4D000000"
+        app:layout_constraintEnd_toEndOf="@+id/dogAge"
+        app:layout_constraintStart_toStartOf="@+id/dogAge"
+        app:layout_constraintTop_toBottomOf="@+id/dogAge"/>
+
+    <TextView
+        android:id="@+id/dogsex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="성별"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/dog_Name"
+        app:layout_constraintTop_toBottomOf="@+id/view_5">
+
+    </TextView>
+
+
+    <RadioGroup
+        android:id="@+id/dogSex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/dogsex"
+        app:layout_constraintTop_toBottomOf="@+id/dogsex">
+
+        <RadioButton
+            android:id="@+id/man"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="남아"
+            app:layout_constraintStart_toStartOf="@+id/dogsex"
+            app:layout_constraintTop_toBottomOf="@+id/dogsex" />
+
+        <RadioButton
+            android:id="@+id/woman"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="여아"
+            app:layout_constraintStart_toStartOf="@+id/man"
+            app:layout_constraintTop_toBottomOf="@+id/man" />
+
+    </RadioGroup>
+
+
+    <TextView
+        android:id="@+id/complete"
+        android:layout_width="70dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:text="완료"
+        android:textSize="30dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/background"
+        android:backgroundTint="#F8BDEB"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

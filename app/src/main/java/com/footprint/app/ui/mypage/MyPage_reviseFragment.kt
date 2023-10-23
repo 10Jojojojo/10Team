@@ -40,7 +40,7 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
             viewModel.town = newTown
 
             // 마이 페이지로 이동
-            findNavController().navigate(R.id.mypage_revise)
+            findNavController().navigate(R.id.mypage)
         }
     }
 
