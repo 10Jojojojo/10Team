@@ -3,6 +3,7 @@ package com.footprint.app.ui.home
 import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -11,10 +12,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.footprint.app.R
 import com.footprint.app.api.model.PlaceModel
+import com.footprint.app.databinding.DialogHomeWalkstopBinding
 import com.footprint.app.databinding.FragmentHomeBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -82,6 +85,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
             if ((homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size-1].size >= 2)) {
                 val distanceInKm = homeViewModel.getDistance() / 1000.0
                 binding.tvWalkdistancevalue.text = String.format("%.2fkm", distanceInKm)
+            } else if(homeViewModel.pathPoints.value?.firstOrNull()?.isEmpty() == true){
+                binding.tvWalkdistancevalue.text = "0.00km"
             }
         }
     }
@@ -105,9 +110,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
             // 일시정지 기능
             homeViewModel.pausewalk()
             if (homeViewModel.walkstate.value!!) {
-                binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_on)
+                binding.ivPause.setImageResource(R.drawable.ic_pause)
             } else if (!homeViewModel.walkstate.value!!) {
-                binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
+                binding.ivPause.setImageResource(R.drawable.ic_play)
             }
         }
         binding.ivPawprint.setOnClickListener {
@@ -117,8 +122,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
         }
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
-            homeViewModel.endwalk()
-            binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
+            showDialog()
         }
     }
 
@@ -132,25 +136,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
     // 지도가 준비되었을 때 호출되는 콜백
     // 입력값은 childFragmentManager에서 입력하는 R.id.map_fragment값이 된다.
     override fun onMapReady(p0: GoogleMap) {
-        val seoul = LatLng(37.566610, 126.978403)
-        // 위치(위도와 경도)
-
         mGoogleMap = p0
         mGoogleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-        mGoogleMap.apply {
-            val markerOptions = MarkerOptions()
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-            // 마커 아이콘 하나 해서
-            markerOptions.position(seoul)
-            // 서울 위치에
-            markerOptions.title("서울시청")
-            // 이런
-            markerOptions.snippet("Tel:01-120")
-            // 정보들로
-            addMarker(markerOptions)
-            // 마커를 추가해줌. 이거는 현재위치와는 별개의 마커.
-        }
-
         // 위치 정보를 받음 Activity가 아닌 Fragment라 this를 requireContext()로 수정
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
@@ -165,6 +152,29 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
 
     // Polygon이 클릭되었을 때 호출되는 콜백
     override fun onPolygonClick(p0: Polygon) {
+    }
+    private fun showDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        val binding_dialog = DialogHomeWalkstopBinding.inflate(layoutInflater)
+        builder.setView(binding_dialog.root)
+        val dialog = builder.show()
+        // 다이어로그의 사각형 모서리를 둥글게 만들기 위해 콘스트레인트레이아웃의 색깔을 투명으로 만들기 위한 코드
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        binding_dialog.btYes.setOnClickListener {
+            dialog.dismiss()
+            homeViewModel.endwalk()
+            destroypolyline()
+            binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
+        }
+        binding_dialog.btNo.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+    private fun destroypolyline(){
+        for (polyline in polylineList) {
+            polyline.remove()
+        }
+        polylineList.clear()
     }
 
     private fun getPermission() {
@@ -208,9 +218,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
                 interval = 1000 // 1초에 1번씩
                 fastestInterval = 500
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            } //
-//            val locationRequest = LocationRequest.Builder(1000)
-//                .build()
+            }
+            // 최초에 현재위치 받아와서 줌
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+                }
+            }
             locationCallback = object : LocationCallback() { // LocationCallback()이라는 익명 객체를 생성하고,
                 override fun onLocationResult(locationResult: LocationResult) { // 1초에 1번씩 하는걸 입력으로 넣어줌
                     locationResult?.let { //
@@ -241,15 +256,15 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback,
         val newLatLng = LatLng(location.latitude, location.longitude)
         if (homeViewModel.walkstate.value!!) {
             homeViewModel.pathPoints.value?.let {
-                homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size-1].add(newLatLng)  // 마지막 경로 리스트에 위치 추가
+                it[it.size-1].add(newLatLng)  // 마지막 경로 리스트에 위치 추가
                 val polylineOptions =
-                    PolylineOptions().addAll(homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size - 1])
+                    PolylineOptions().addAll(it[it.size - 1])
                         .color(Color.RED).width(10f)
                 val newPolyline = mGoogleMap.addPolyline(polylineOptions)
                 polylineList.add(newPolyline)
             }
         }
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 15f)) // 카메라를 현재 위치로 이동
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng)) // 카메라를 현재 위치로 이동
 //        Log.d("FootprintApp","path.points : ${path.points}")
     }
 

@@ -32,10 +32,10 @@ class HomeViewModel : ViewModel() {
 
     // 사용자의 이동 경로 저장
     // 이동 경로는 HomeFragment가 파괴되도 다른 Fragment에서 구글맵을 불러올 때 이용해야하니까, ViewModel에서 관리
-    private var _pathPoints = MutableLiveData<MutableList<MutableList<LatLng>>>().apply {
+    private val _pathPoints = MutableLiveData<MutableList<MutableList<LatLng>>>().apply {
         value = mutableListOf(mutableListOf())
     }
-    var pathPoints: LiveData<MutableList<MutableList<LatLng>>> = _pathPoints
+    val pathPoints: LiveData<MutableList<MutableList<LatLng>>> = _pathPoints
 
     lateinit var cameraPosition: CameraPosition // 현재 위치
     lateinit var currentLatLng: LatLng // 카메라
@@ -61,10 +61,10 @@ class HomeViewModel : ViewModel() {
     var startTime: Long = 0L // ms로 반환
     var endTime: Long = 0L // ms로 반환
     var walkTime: Long = 0L // ms로 반환
-    private var _walkstate = MutableLiveData<Boolean>().apply { value = false }
-    var walkstate: LiveData<Boolean> = _walkstate
-    private var _time = MutableLiveData<String>().apply { value = "00:00" }
-    var time: LiveData<String> = _time
+    private val _walkstate = MutableLiveData<Boolean>().apply { value = false }
+    val walkstate: LiveData<Boolean> = _walkstate
+    private val _time = MutableLiveData<String>().apply { value = "00:00" }
+    val time: LiveData<String> = _time
 
     fun inputdata(mGoogleMap: GoogleMap, LatLng: MutableList<LatLng>, path: Polyline) {
         cameraPosition = mGoogleMap.cameraPosition // 현재 위치
@@ -142,6 +142,8 @@ class HomeViewModel : ViewModel() {
         _walkstate.value = false
         endTime = 0L
         walkTime = 0L
+        _pathPoints.value = mutableListOf(mutableListOf())
+        _time.value = "00:00"
     }
 
 
