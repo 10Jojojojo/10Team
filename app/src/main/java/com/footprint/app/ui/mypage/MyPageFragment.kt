@@ -63,12 +63,16 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
     }
 
 
-    private fun dog(){
+    private fun dog() {
         var recyclerView = binding.dogCard
-        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        // 어댑터 초기화 및 dogList를 전달
-        var adapter = DogAdapter(viewModel.dogList)
+        val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.layoutManager = layoutManager
+
+        // 어댑터 초기화 및 dogList와 onDeleteClickListener를 전달
+        val adapter = DogAdapter(viewModel.dogList){}
+
         recyclerView.adapter = adapter
     }
 
