@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.animation.AnimationUtils
 import com.footprint.app.databinding.ActivitySplashBinding
+import com.footprint.app.ui.login.LoginActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -43,7 +44,7 @@ class SplashActivity : AppCompatActivity() {
 
 
         Handler().postDelayed({
-            startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+            startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
             finish()
         }, 4000) // 애니메이션이 끝난 후, 5초 후에 MainActivity로 이동
     }
