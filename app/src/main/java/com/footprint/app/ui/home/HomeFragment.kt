@@ -65,6 +65,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private val polylineList = mutableListOf<Polyline>()
     private val binding get() = _binding!!
     private var markerstate = false
+    private var markerdelandinfo = "정보"
 
     // ViewModel 인스턴스 생성
     // 생성자에 입력값이 생기면 다른 방식으로 생성해주어야 하고, ViewModelFactory도 변경해주어야 한다.
@@ -192,6 +193,18 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         binding.ivFavorite.setOnClickListener {
             findNavController().navigate(R.id.homefavorite)
         }
+        binding.ivFlaginfoanddel.setOnClickListener {
+            when (markerdelandinfo) {
+                "정보" -> {
+                    markerdelandinfo = "삭제"
+                    binding.ivFlaginfoanddel.setImageResource(R.drawable.ic_flagdelete)
+                }
+                "삭제" -> {
+                    markerdelandinfo = "정보"
+                    binding.ivFlaginfoanddel.setImageResource(R.drawable.ic_flaginfo)
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -222,13 +235,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 showDialogFlag(latLng)
             }
         }
-        mGoogleMap.setOnMarkerClickListener {
-//                marker ->
-            // 이곳에서 원하는 작업을 수행
+        mGoogleMap.setOnMarkerClickListener { marker ->
+            if (markerdelandinfo=="삭제") {
 
-            // true를 반환하면 기본 마커 클릭 이벤트(예: 정보창 표시)가 발생하지 않음
-            // false를 반환하면 기본 마커 클릭 이벤트가 계속 발생
-            false
+                val targetFlag = homeViewModel.flagList.find { it.latlng == marker.position }
+                homeViewModel.flagList.remove(targetFlag)
+
+                // 마커 삭제
+                marker.remove()
+
+                // true 반환하여 기본 마커 클릭 이벤트를 방지
+                true
+            } else {
+                // 정보 보기 모드일 때의 동작 (예: 마커의 정보창 표시)
+                // false 반환하여 기본 마커 클릭 이벤트가 발생하도록
+                false
+            }
         }
         updateLocationUI()
     }
@@ -299,13 +321,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             val customIcon = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
 
             // 클릭한 위치에 커스텀 아이콘을 사용하여 마커를 추가
-            mGoogleMap.addMarker(
+            val marker = mGoogleMap.addMarker(
                 MarkerOptions()
                     .position(latLng)
                     .title(text)
                     .icon(customIcon)
             )
-            homeViewModel.flagList.add(FlagModel(R.drawable.ic_flag, text, latLng))
+            homeViewModel.flagList.add(FlagModel(R.drawable.ic_flag, text, latLng, marker))
             Log.d("FootprintApp", "${homeViewModel.flagList}")
         }
         bindingDialog.btNo.setOnClickListener {
