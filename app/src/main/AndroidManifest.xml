@@ -40,7 +40,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="BuildConfig.GOOGLE_MAPS_API_KEY" />
+            android:value="@string/api_key" />
 
         <activity
             android:name=".MainActivity"

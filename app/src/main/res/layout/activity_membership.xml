@@ -10,10 +10,10 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
-        app:defaultNavHost="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="match_parent"
+        app:navGraph="@navigation/mobile_navigation"
+        />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="10dp"
-            android:text="닉네임"
+            android:text="이름"
             android:textSize="15dp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
