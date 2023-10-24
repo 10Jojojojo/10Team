@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.footprint.app.BuildConfig
+import com.footprint.app.MainActivity
 import com.footprint.app.api.NetWorkClient
 import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.PlaceModel
@@ -110,13 +110,13 @@ class HomeViewModel : ViewModel() {
 
 
     fun getPlaces(nextToken: String?, keyword: String, type: String) {
-
+        Log.d("FootprintApp", "함수실행은 됬어요")
         NetWorkClient.apiService.getplace(
             keyword,
             "${37.566610},${126.978403}",
             50000,
             type,
-            BuildConfig.GOOGLE_MAPS_API_KEY,
+            MainActivity.apiKey,
             nextpagetoken
 
         ) // null이 아님을 확인 후 실행해야 될것 같다.
@@ -152,7 +152,7 @@ class HomeViewModel : ViewModel() {
                                 }
                             }
                         }
-
+                        Log.d("FootprintApp", "${placeitems}")
                     } else {
                         val errorBody = response.errorBody()?.string()
                         Log.e("FootprintApp", "API 에러: $errorBody")

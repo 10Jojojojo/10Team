@@ -7,11 +7,13 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -108,12 +110,11 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
     private fun openGallery() { // 갤러리를 여는 함수.
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE // READ_EXTERNAL_STORAGE 권한이 있는지 확인. 앱이 사용자의 저장소에서 파일을 읽을수 있도록 허용하는 권한. android.Manifest를 import 해와야한다.
+                Manifest.permission.READ_MEDIA_IMAGES // READ_EXTERNAL_STORAGE 권한이 있는지 확인. 앱이 사용자의 저장소에서 파일을 읽을수 있도록 허용하는 권한. android.Manifest를 import 해와야한다.
             ) != PackageManager.PERMISSION_GRANTED // PackageManager.PERMISSION_GRANTED는 권한 승인상태. 승인상태가 아니라면, 아래의 실행문을 실행하게 된다.
         ) {
             Log.d("FootprintApp","openGallery1")
-            // 이런 밑줄친거는 신규 버전에서 안된다. 예전버전에서만 된다. 그래서 수정을 해주어야 한다.
-            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_PERMISSION)
+            requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES), REQUEST_PERMISSION)
             // requestPermissions 메서드를 이용해 사용자에게 해당 권한을 요청함.
         } else { // 권한이 없는상태가 아니라면(= 권한이 있는 상태라면)
             Log.d("FootprintApp","openGallery2")
