@@ -28,6 +28,7 @@ import java.lang.Math.cos
 import java.lang.Math.sin
 import java.lang.Math.sqrt
 import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.math.pow
 
 class HomeViewModel : ViewModel() {
@@ -69,28 +70,6 @@ class HomeViewModel : ViewModel() {
     val time: LiveData<String> = _time
     val flagList = mutableListOf<FlagModel>()
     val walkList = mutableListOf<WalkModel>()
-    fun inputdata(mGoogleMap: GoogleMap, LatLng: MutableList<LatLng>, path: Polyline) {
-        cameraPosition = mGoogleMap.cameraPosition // 현재 위치
-        currentLatLng = cameraPosition.target // 카메라
-        currentZoom = cameraPosition.zoom // 줌
-        currentpathPoints = LatLng // 사용자의 이동 경로 저장
-        currentpath = path // Polyline 객체
-        Log.d(
-            "FootprintApp",
-            "저장된 데이터는요 현재위치 : ${cameraPosition}/n카메라 : ${currentLatLng}/n줌 : ${currentZoom}/n 사용자의 이동 경로 : ${currentpathPoints}/n PolyLine : ${currentpath}"
-        )
-    }
-
-    fun outputdata(mGoogleMap: GoogleMap) {
-        val newCameraPosition = CameraPosition.builder()
-            .target(currentLatLng)
-            .zoom(currentZoom)
-            .build()
-        mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition))
-
-        // Polyline 경로 설정
-        currentpath.points = currentpathPoints
-    }
 
     fun getDistance(): Int {
         val R = 6372.8 * 1000
@@ -113,7 +92,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun getTime(){
-        val dataFormat = SimpleDateFormat("mm:ss")
+        val dataFormat = SimpleDateFormat("mm:ss", Locale.KOREA)
         _walkstate.value = "산책중"
         startTime = System.currentTimeMillis()
         viewModelScope.launch {
@@ -173,7 +152,7 @@ class HomeViewModel : ViewModel() {
                     if (response.isSuccessful) {
                         response.body()?.let {
                             nextpagetoken = it.next_page_token
-                            if (!it.results.isNullOrEmpty()) {
+                            if (it.results.isNotEmpty()) {
                                 for (item in it.results) {
                                     val location = item.geometry.location
                                     val nextpage = it.next_page_token
@@ -188,24 +167,16 @@ class HomeViewModel : ViewModel() {
                                         placeitems.add(place)
                                     }
                                 }
-                                Log.d("FootprintApp", "장소 API 잘받아와짐")
-                                Log.d("FootprintApp", "${nextpagetoken}")
                                 viewModelScope.launch(Dispatchers.IO) {
-                                    it.next_page_token?.let { token ->
+                                    it.next_page_token.let { token ->
                                         // next_page_token이 존재하면 약 2초의 딜레이 후 추가 요청을 합니다.
                                         delay(2000)
                                         getPlaces(token, keyword, type)
                                     }
                                 }
-//                                _commentitem.value?.clear()
-//                                _commentitem.value?.addAll(commentItems)
-//                                _commentitem.postValue(_commentitem.value)
-//                                Log.d("FootprintApp", "${_commentitem.value?.size}")
-//                                Log.d("FootprintApp", "${_commentitem.value}")
                             }
                         }
 
-                        Log.d("FootprintApp", "${placeitems}")
                     } else {
                         val errorBody = response.errorBody()?.string()
                         Log.e("FootprintApp", "API 에러: $errorBody")

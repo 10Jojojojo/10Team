@@ -7,7 +7,7 @@
     tools:context=".ui.home.HomeFragment">
 
     <fragment
-        android:id="@+id/map_fragment"
+        android:id="@+id/map_fragmentstop"
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
