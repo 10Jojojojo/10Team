@@ -30,14 +30,36 @@
         app:layout_constraintTop_toBottomOf="@id/tv_dialogtext" />
 
     <ImageView
+        android:id="@+id/iv_flag1select"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_pawprint_off"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/iv_flag1"
+        app:layout_constraintEnd_toEndOf="@id/iv_flag1"
+        app:layout_constraintStart_toStartOf="@id/iv_flag1"
+        app:layout_constraintTop_toTopOf="@id/iv_flag1" />
+
+    <ImageView
         android:id="@+id/iv_flag2"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_margin="10dp"
         android:src="@drawable/ic_flag_blue"
-        app:layout_constraintStart_toEndOf="@id/iv_flag1"
         app:layout_constraintEnd_toStartOf="@id/iv_flag3"
+        app:layout_constraintStart_toEndOf="@id/iv_flag1"
         app:layout_constraintTop_toBottomOf="@id/tv_dialogtext" />
+
+    <ImageView
+        android:id="@+id/iv_flag2select"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_pawprint_off"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/iv_flag2"
+        app:layout_constraintEnd_toEndOf="@id/iv_flag2"
+        app:layout_constraintStart_toStartOf="@id/iv_flag2"
+        app:layout_constraintTop_toTopOf="@id/iv_flag2" />
 
     <ImageView
         android:id="@+id/iv_flag3"
@@ -45,9 +67,20 @@
         android:layout_height="50dp"
         android:layout_margin="10dp"
         android:src="@drawable/ic_flag_green"
-        app:layout_constraintStart_toEndOf="@id/iv_flag2"
         app:layout_constraintEnd_toStartOf="@id/iv_flag4"
+        app:layout_constraintStart_toEndOf="@id/iv_flag2"
         app:layout_constraintTop_toBottomOf="@id/tv_dialogtext" />
+
+    <ImageView
+        android:id="@+id/iv_flag3select"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_pawprint_off"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/iv_flag3"
+        app:layout_constraintEnd_toEndOf="@id/iv_flag3"
+        app:layout_constraintStart_toStartOf="@id/iv_flag3"
+        app:layout_constraintTop_toTopOf="@id/iv_flag3" />
 
     <ImageView
         android:id="@+id/iv_flag4"
@@ -55,9 +88,20 @@
         android:layout_height="50dp"
         android:layout_margin="10dp"
         android:src="@drawable/ic_flag_purple"
-        app:layout_constraintStart_toEndOf="@id/iv_flag3"
         app:layout_constraintEnd_toStartOf="@id/iv_flag5"
+        app:layout_constraintStart_toEndOf="@id/iv_flag3"
         app:layout_constraintTop_toBottomOf="@id/tv_dialogtext" />
+
+    <ImageView
+        android:id="@+id/iv_flag4select"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_pawprint_off"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/iv_flag4"
+        app:layout_constraintEnd_toEndOf="@id/iv_flag4"
+        app:layout_constraintStart_toStartOf="@id/iv_flag4"
+        app:layout_constraintTop_toTopOf="@id/iv_flag4" />
 
     <ImageView
         android:id="@+id/iv_flag5"
@@ -67,6 +111,17 @@
         android:src="@drawable/ic_flag_yellow"
         app:layout_constraintEnd_toEndOf="@id/tv_dialogtext"
         app:layout_constraintTop_toBottomOf="@id/tv_dialogtext" />
+
+    <ImageView
+        android:id="@+id/iv_flag5select"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_pawprint_off"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/iv_flag5"
+        app:layout_constraintEnd_toEndOf="@id/iv_flag5"
+        app:layout_constraintStart_toStartOf="@id/iv_flag5"
+        app:layout_constraintTop_toTopOf="@id/iv_flag5" />
 
 
     <androidx.appcompat.widget.AppCompatButton

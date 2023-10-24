@@ -9,8 +9,24 @@
         android:id="@+id/navigation_home"
         android:name="com.footprint.app.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
-
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/homestop"
+            app:destination="@+id/navigation_homestop" />
+        <action
+            android:id="@+id/homefavorite"
+            app:destination="@+id/navigation_homefavorite" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_homestop"
+        android:name="com.footprint.app.ui.home.HomeStopFragment"
+        android:label="종료화면"
+        tools:layout="@layout/fragment_home_stop" />
+    <fragment
+        android:id="@+id/navigation_homefavorite"
+        android:name="com.footprint.app.ui.home.HomeFavoriteFragment"
+        android:label="즐겨찾기"
+        tools:layout="@layout/fragment_home_favorite" />
     <fragment
         android:id="@+id/navigation_community"
         android:name="com.footprint.app.ui.community.CommunityFragment"
@@ -21,40 +37,36 @@
         android:id="@+id/navigation_mypage"
         android:name="com.footprint.app.ui.mypage.MyPageFragment"
         android:label="@string/title_mypage"
-        tools:layout="@layout/fragment_mypage"/>
-        <action
-            android:id="@+id/mypage_revise"
-            app:destination="@+id/navigation_mypage_revise"/>
-            <action
-                android:id="@+id/dog"
-                app:destination="@+id/navigation_mydog"
-            >
+        tools:layout="@layout/fragment_mypage" />
+    <action
+        android:id="@+id/mypage_revise"
+        app:destination="@+id/navigation_mypage_revise" />
+    <action
+        android:id="@+id/dog"
+        app:destination="@+id/navigation_mydog">
 
-        </action>
-
+    </action>
 
 
     <fragment
         android:id="@+id/navigation_mypage_revise"
         android:name="com.footprint.app.ui.mypage.MyPage_reviseFragment"
         android:label="mypage_revise"
-        tools:layout="@layout/fragment_my_page_revise"/>
-        <action
-            android:id="@+id/mypage"
-            app:destination="@+id/navigation_mypage"
-        />
+        tools:layout="@layout/fragment_my_page_revise" />
+    <action
+        android:id="@+id/mypage"
+        app:destination="@+id/navigation_mypage" />
 
     <fragment
         android:id="@+id/navigation_mydog"
         android:name="com.footprint.app.ui.mypage.MyDogFragment"
         android:label="mydog"
-        tools:layout="@layout/fragment_my_dog"/>
+        tools:layout="@layout/fragment_my_dog" />
     <action
         android:id="@+id/mydog"
         app:destination="@+id/navigation_mypage">
 
     </action>
-
 
 
 </navigation>

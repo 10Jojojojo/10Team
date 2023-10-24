@@ -22,6 +22,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.fragment.findNavController
 import com.footprint.app.R
 import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.PlaceModel
@@ -178,6 +179,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
             showDialogWalkstate()
+
         }
         binding.ivFlag.setOnClickListener {
             if (markerstate) {
@@ -186,6 +188,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 binding.ivFlag.alpha = 1f
             }
             markerstate = !markerstate
+        }
+        binding.ivFavorite.setOnClickListener {
+            findNavController().navigate(R.id.homefavorite)
         }
     }
 
@@ -241,6 +246,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             destroyPolyline()
             stopLocationService()
             binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
+            //위도,경도는 평균값으로 하는게 좋을듯..
+//            homeViewModel.walkList.add(WalkModel(1,2,getAddressFromLatLng(homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size - 1][0])!!,
+//                SimpleDateFormat("yyyy-MM-dd").format(Date()),homeViewModel.pathPoints.value!!))
+            Log.d("FootprintApp", "${homeViewModel.walkList}")
+            findNavController().navigate(R.id.homestop)
         }
         bindingDialog.btNo.setOnClickListener {
             dialog.dismiss()
@@ -256,33 +266,39 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         var flag = R.drawable.ic_flag
         bindingDialog.ivFlag1.setOnClickListener {
+            updateFlagSelection(bindingDialog, R.drawable.ic_flag)
             flag = R.drawable.ic_flag
         }
         bindingDialog.ivFlag2.setOnClickListener {
+            updateFlagSelection(bindingDialog, R.drawable.ic_flag_blue)
             flag = R.drawable.ic_flag_blue
         }
         bindingDialog.ivFlag3.setOnClickListener {
+            updateFlagSelection(bindingDialog, R.drawable.ic_flag_green)
             flag = R.drawable.ic_flag_green
         }
         bindingDialog.ivFlag4.setOnClickListener {
+            updateFlagSelection(bindingDialog, R.drawable.ic_flag_purple)
             flag = R.drawable.ic_flag_purple
         }
         bindingDialog.ivFlag5.setOnClickListener {
+            updateFlagSelection(bindingDialog, R.drawable.ic_flag_yellow)
             flag = R.drawable.ic_flag_yellow
         }
+
         bindingDialog.btYes.setOnClickListener {
             val text = bindingDialog.tvDialogtext.text.toString()
             dialog.dismiss()
-            // 커스텀 아이콘으로 비트맵을 가져옵니다.
+            // 커스텀 아이콘으로 비트맵을 가져옴
             val originalBitmap = BitmapFactory.decodeResource(resources, flag)
 
-            // 원하는 크기로 비트맵 크기를 조절합니다.
+            // 원하는 크기로 비트맵 크기를 조절
             val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, 80, 80, false)
 
-            // 조절된 비트맵으로 아이콘을 설정합니다.
+            // 조절된 비트맵으로 아이콘을 설정
             val customIcon = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
 
-            // 클릭한 위치에 커스텀 아이콘을 사용하여 마커를 추가합니다.
+            // 클릭한 위치에 커스텀 아이콘을 사용하여 마커를 추가
             mGoogleMap.addMarker(
                 MarkerOptions()
                     .position(latLng)
@@ -294,6 +310,40 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         bindingDialog.btNo.setOnClickListener {
             dialog.dismiss()
+        }
+    }
+
+    private fun hideAllSelectionIndicators(binding: DialogHomeFlagBinding) {
+        binding.ivFlag1select.visibility = View.GONE
+        binding.ivFlag2select.visibility = View.GONE
+        binding.ivFlag3select.visibility = View.GONE
+        binding.ivFlag4select.visibility = View.GONE
+        binding.ivFlag5select.visibility = View.GONE
+    }
+
+    private fun updateFlagSelection(binding: DialogHomeFlagBinding, selectedFlag: Int) {
+        hideAllSelectionIndicators(binding)
+
+        when (selectedFlag) {
+            R.drawable.ic_flag -> {
+                binding.ivFlag1select.visibility = View.VISIBLE
+            }
+
+            R.drawable.ic_flag_blue -> {
+                binding.ivFlag2select.visibility = View.VISIBLE
+            }
+
+            R.drawable.ic_flag_green -> {
+                binding.ivFlag3select.visibility = View.VISIBLE
+            }
+
+            R.drawable.ic_flag_purple -> {
+                binding.ivFlag4select.visibility = View.VISIBLE
+            }
+
+            R.drawable.ic_flag_yellow -> {
+                binding.ivFlag5select.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -378,6 +428,25 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng)) // 카메라를 현재 위치로 이동
     }
+
+//    private fun getAddressFromLatLng(latLng: LatLng): String? {
+//        val latitude = latLng.latitude
+//        val longitude = latLng.longitude
+//        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+//        return try {
+//            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+//            if (!addresses.isNullOrEmpty()) {
+//                val address = addresses[0]
+//                // 여러 세부 주소 구성 요소 중에서 원하는 형식의 주소를 얻는다.
+//                "${address.adminArea} ${address.subAdminArea} ${address.locality}"
+//            } else {
+//                null
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            null
+//        }
+//    }
 
     private fun placeMarkersOnMap(places: List<PlaceModel>) {
         for (place in places) {
