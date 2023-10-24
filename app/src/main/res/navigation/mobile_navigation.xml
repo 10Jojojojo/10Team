@@ -26,7 +26,17 @@
         android:id="@+id/navigation_homefavorite"
         android:name="com.footprint.app.ui.home.HomeFavoriteFragment"
         android:label="즐겨찾기"
-        tools:layout="@layout/fragment_home_favorite" />
+        tools:layout="@layout/fragment_home_favorite">
+        <action
+            android:id="@+id/homefavoriteitem"
+            app:destination="@+id/navigation_homefavoriteitem" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_homefavoriteitem"
+        android:name="com.footprint.app.ui.home.HomeFavoriteItemFragment"
+        android:label="즐겨찾기상세"
+        tools:layout="@layout/fragment_home_favorite_item">
+    </fragment>
     <fragment
         android:id="@+id/navigation_community"
         android:name="com.footprint.app.ui.community.CommunityFragment"
@@ -68,5 +78,14 @@
 
     </action>
 
+    <activity
+        android:id="@+id/Membership"
+        android:name="com.footprint.app.membershipActivity"
+        android:label="membership"
+        tools:layout="@layout/activity_membership" />
+    <action
+        android:id="@+id/membership"
+        app:destination="@+id/navigation_home">
 
+    </action>
 </navigation>

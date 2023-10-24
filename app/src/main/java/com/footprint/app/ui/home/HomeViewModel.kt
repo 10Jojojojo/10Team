@@ -10,23 +10,14 @@ import com.footprint.app.api.NetWorkClient
 import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.model.WalkModel
-import com.footprint.app.api.serverdata.Location
 import com.footprint.app.api.serverdata.PlaceData
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Polyline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Math.asin
-import java.lang.Math.cos
-import java.lang.Math.sin
-import java.lang.Math.sqrt
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.pow
@@ -39,25 +30,8 @@ class HomeViewModel : ViewModel() {
         value = mutableListOf(mutableListOf())
     }
     val pathPoints: LiveData<MutableList<MutableList<LatLng>>> = _pathPoints
-
-    private lateinit var cameraPosition: CameraPosition // 현재 위치
-    private lateinit var currentLatLng: LatLng // 카메라
-    private var currentZoom: Float = 0f // 줌
-    private lateinit var currentpathPoints: MutableList<LatLng> // 사용자의 이동 경로 저장
-    private lateinit var currentpath: Polyline // Polyline 객체
     private var nextpagetoken: String = ""
 
-    private var _keyword = MutableLiveData<String>()
-    var keyword: LiveData<String> = _keyword
-
-    private var _location = MutableLiveData<Location>()
-    var location: LiveData<Location> = _location
-
-    private var _radius = MutableLiveData<Int>()
-    var radius: LiveData<Int> = _radius
-
-    private var _type = MutableLiveData<String>()
-    var type: LiveData<String> = _type
 
     val placeitems = ArrayList<PlaceModel>()
 
@@ -72,9 +46,9 @@ class HomeViewModel : ViewModel() {
     val walkList = mutableListOf<WalkModel>()
 
     fun getDistance(): Int {
-        val R = 6372.8 * 1000
+        val radius = 6372.8 * 1000
         var c = 0.0
-        for (i in 0..pathPoints.value!!.size-1) {
+        for (i in 0..<pathPoints.value!!.size) {
             for (j in 0 until pathPoints.value!![i].size - 1) {
                 val lat1 = pathPoints.value!![i][j].latitude
                 val lon1 = pathPoints.value!![i][j].longitude
@@ -82,13 +56,15 @@ class HomeViewModel : ViewModel() {
                 val lon2 = pathPoints.value!![i][j + 1].longitude
                 val dLat = Math.toRadians(lat2 - lat1)
                 val dLon = Math.toRadians(lon2 - lon1)
-                val a = sin(dLat / 2).pow(2.0) + sin(dLon / 2).pow(2.0) * cos(Math.toRadians(lat1)) * cos(
+                val a = kotlin.math.sin(dLat / 2).pow(2.0) + kotlin.math.sin(dLon / 2).pow(2.0) * kotlin.math.cos(
+                    Math.toRadians(lat1)
+                ) * kotlin.math.cos(
                     Math.toRadians(lat2)
                 )
-                c = c + 2 * asin(sqrt(a))
+                c += 2 * kotlin.math.asin(kotlin.math.sqrt(a))
             }
         }
-        return (R * c).toInt()
+        return (radius * c).toInt()
     }
 
     private fun getTime(){
@@ -169,7 +145,7 @@ class HomeViewModel : ViewModel() {
                                 }
                                 viewModelScope.launch(Dispatchers.IO) {
                                     it.next_page_token.let { token ->
-                                        // next_page_token이 존재하면 약 2초의 딜레이 후 추가 요청을 합니다.
+                                        // next_page_token이 존재하면 약 2초의 딜레이 후 추가 요청
                                         delay(2000)
                                         getPlaces(token, keyword, type)
                                     }

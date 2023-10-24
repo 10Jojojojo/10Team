@@ -7,10 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.footprint.app.api.model.WalkModel
 import com.footprint.app.databinding.WalkitemBinding
+import com.footprint.app.util.ItemClick
 import java.io.File
 
 class FavoriteAdapter(private val context: Context, private val walkitems: MutableList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.CommentViewHolder>() {
 
+    var itemClick: ItemClick? = null
     inner class CommentViewHolder(private val binding: WalkitemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(walk: WalkModel) {
             val filePath = File(context.getExternalFilesDir(null), "map_snapshot[${walk.dateid}].png").absolutePath
@@ -18,6 +20,9 @@ class FavoriteAdapter(private val context: Context, private val walkitems: Mutab
             binding.tvDistancetext.text = walk.distance
             binding.tvIdtext.text = walk.name
             binding.tvTimetext.text = walk.walktime
+            binding.root.setOnClickListener{
+                itemClick?.onClick(it, position)
+            }
         }
     }
 

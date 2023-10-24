@@ -75,6 +75,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private var markerstate = false
     private var markerdelandinfo = "정보"
 
+//    //산책 시작,종료 마커는 지워지지 않게 하기위한 변수
+//    private var startMarker: Marker? = null
+//    private var endMarker: Marker? = null
+
     // ViewModel 인스턴스 생성
     // 생성자에 입력값이 생기면 다른 방식으로 생성해주어야 하고, ViewModelFactory도 변경해주어야 한다.
     // private val homeViewModel by lazy { ViewModelProvider(this)[HomeViewModel::class.java] }
@@ -183,12 +187,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             // 산책시작 기능
             if (homeViewModel.walkstate.value!! == "산책종료") {
                 startLocationService()
+//                addMarker(R.drawable.ic_pawprint_on)
             }
             homeViewModel.startWalk()
         }
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
             if (homeViewModel.walkstate.value != "산책종료") {
+//                addMarker(R.drawable.ic_pawprint_off)
                 showDialogWalkstate()
             }
 
@@ -232,19 +238,23 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         // Polyline 초기 설정
         polyline = mGoogleMap.addPolyline(PolylineOptions().color(Color.RED).width(10f))
 
+        //지도 클릭 리스너
         mGoogleMap.setOnMapClickListener { latLng ->
             if (markerstate) {
                 showDialogFlag(latLng)
             }
         }
+        //마커 클릭 리스너
         mGoogleMap.setOnMarkerClickListener { marker ->
             if (markerdelandinfo == "삭제") {
 
                 val targetFlag = homeViewModel.flagList.find { it.latlng == marker.position }
                 homeViewModel.flagList.remove(targetFlag)
 
-                // 마커 삭제
-                marker.remove()
+                // 마커 삭제(시작마커,종료마커는 제외)
+//                if (marker != startMarker && marker != endMarker) {
+                    marker.remove()
+//                }
 
                 // true 반환하여 기본 마커 클릭 이벤트를 방지
                 true
@@ -485,6 +495,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         CoroutineScope(Dispatchers.Main).launch {
             val snapshotPath = saveMapSnapshot(googleMap)
             homeViewModel.walkList[homeViewModel.walkList.size-1].snapshotPath = snapshotPath
+
             destroyPolyline()
             stopLocationService()
             binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
@@ -492,7 +503,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             homeViewModel.endWalk()
         }
     }
-
     private suspend fun saveMapSnapshot(googleMap: GoogleMap): String {
         // 스냅샷 경로를 저장할 변수를 비동기적으로 초기화
         val deferredPath = CompletableDeferred<String>()
@@ -516,6 +526,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         return deferredPath.await()
     }
 
+//    private fun addMarker(drawable: Int) {
+//        val bitmap = BitmapFactory.decodeResource(resources, drawable)
+//        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
+//        val customMarker = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
+//
+//        val markerOptions = MarkerOptions()
+//            .position(mGoogleMap.cameraPosition.target)
+//            .icon(customMarker)
+//        // 특별한 마커를 변수에 저장
+////        if(startMarker == null){
+////            startMarker = mGoogleMap.addMarker(markerOptions)
+////        } else if(endMarker == null){
+////            endMarker = mGoogleMap.addMarker(markerOptions)
+////        }
+//        mGoogleMap.addMarker(markerOptions)
+//    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
