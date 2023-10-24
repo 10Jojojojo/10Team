@@ -107,9 +107,19 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginBottom="10dp"
-            app:layout_constraintStart_toStartOf="@id/tv_walkdistancevalue"
+            app:layout_constraintStart_toEndOf="@id/iv_pause"
+            app:layout_constraintEnd_toStartOf="@id/iv_flaginfoanddel"
             app:layout_constraintBottom_toTopOf="@id/tv_walkdistancevalue"
-            app:layout_constraintEnd_toEndOf="@id/tv_walkdistancevalue"
+            />
+        <ImageView
+            android:id="@+id/iv_flaginfoanddel"
+            android:src="@drawable/ic_flaginfo"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintEnd_toStartOf="@id/iv_pawprint"
+            app:layout_constraintStart_toEndOf="@id/iv_flag"
+            app:layout_constraintBottom_toTopOf="@id/tv_walkdistancevalue"
             />
         <TextView
             android:id="@+id/tv_walkdistancevalue"
