@@ -33,15 +33,12 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.navigation_home -> {
                     // 선택된 프래그먼트에 따라 다르게 UI 구성 코드 작성하기
-                    binding.appbarText.text = "홈 선택됨"
                 }
                 R.id.navigation_community -> {
                     // 선택된 프래그먼트에 따라 다르게 UI 구성 코드 작성하기
-                    binding.appbarText.text = "커뮤니티 선택됨"
                 }
                 R.id.navigation_mypage -> {
                     // 선택된 프래그먼트에 따라 다르게 UI 구성 코드 작성하기
-                    binding.appbarText.text = "마이페이지 선택됨"
                 }
             }
         }
