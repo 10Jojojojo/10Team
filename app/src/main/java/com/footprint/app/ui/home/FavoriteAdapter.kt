@@ -10,7 +10,7 @@ import com.footprint.app.databinding.WalkitemBinding
 import com.footprint.app.util.ItemClick
 import java.io.File
 
-class FavoriteAdapter(private val context: Context, private val walkitems: MutableList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.CommentViewHolder>() {
+class FavoriteAdapter(private val context: Context, private val items: MutableList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.CommentViewHolder>() {
 
     var itemClick: ItemClick? = null
     inner class CommentViewHolder(private val binding: WalkitemBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -21,7 +21,7 @@ class FavoriteAdapter(private val context: Context, private val walkitems: Mutab
             binding.tvIdtext.text = walk.name
             binding.tvTimetext.text = walk.walktime
             binding.root.setOnClickListener{
-                itemClick?.onClick(it, position)
+                itemClick?.onClick(it, adapterPosition)
             }
         }
     }
@@ -31,10 +31,10 @@ class FavoriteAdapter(private val context: Context, private val walkitems: Mutab
         return CommentViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = walkitems.size
+    override fun getItemCount(): Int = items.size
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
-        holder.bind(walkitems[position])
+        holder.bind(items[position])
     }
 
 }

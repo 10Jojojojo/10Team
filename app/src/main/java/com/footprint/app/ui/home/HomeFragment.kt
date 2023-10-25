@@ -50,6 +50,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // Fragment()에 R.layout.fragment_home를 입력으로 주면, 생성자 주입이라고 하는건데 (공식문서에는없음)
 // onCreateView에서 하는동작을 대체해줌.
@@ -75,6 +78,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private val binding get() = _binding!!
     private var markerstate = false
     private var markerdelandinfo = "정보"
+    private var starttime = ""
 
 //    //산책 시작,종료 마커는 지워지지 않게 하기위한 변수
 //    private var startMarker: Marker? = null
@@ -233,7 +237,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         // Polyline 초기 설정
-        polyline = mGoogleMap.addPolyline(PolylineOptions().color(Color.RED).width(10f))
+        polyline = mGoogleMap.addPolyline(
+            PolylineOptions().color(Color.RED).width(10f)
+//                .pattern(listOf(Dot(), Gap(10f), Dash(30f), Gap(10f)))
+//                    .startCap(SquareCap())
+//                    .endCap(SquareCap())
+        )
 
         //지도 클릭 리스너
         mGoogleMap.setOnMapClickListener { latLng ->
@@ -250,7 +259,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
                 // 마커 삭제(시작마커,종료마커는 제외)
 //                if (marker != startMarker && marker != endMarker) {
-                    marker.remove()
+                marker.remove()
 //                }
 
                 // true 반환하여 기본 마커 클릭 이벤트를 방지
@@ -263,6 +272,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         updateLocationUI()
     }
+
     private fun showDialogWalkstart() {
         val builder = AlertDialog.Builder(requireContext())
         val bindingDialog = DialogHomeWalkBinding.inflate(layoutInflater)
@@ -271,6 +281,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         bindingDialog.btYes.setOnClickListener {
             dialog.dismiss()
             if (homeViewModel.walkstate.value!! == "산책종료") {
+                starttime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
                 startLocationService()
 //                addMarker(R.drawable.ic_pawprint_on)
             }
@@ -280,6 +291,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             dialog.dismiss()
         }
     }
+
     private fun showDialogWalkstate() {
         val builder = AlertDialog.Builder(requireContext())
         val bindingDialog = DialogHomeWalkstopBinding.inflate(layoutInflater)
@@ -294,7 +306,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                     binding.tvWalkdistancevalue.text.toString(),
                     binding.tvWalktimevalue.text.toString(),
                     homeViewModel.pathPoints.value!!,
-                    mGoogleMap.cameraPosition
+                    mGoogleMap.cameraPosition,
+                    starttime = starttime,
+                    endtime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
                 )
             )
             captureMapSnapshot(mGoogleMap)
@@ -310,6 +324,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             dialog.dismiss()
         }
     }
+
     private fun showDialogFlag(latLng: LatLng) {
         val builder = AlertDialog.Builder(requireContext())
         val bindingDialog = DialogHomeFlagBinding.inflate(layoutInflater)
@@ -474,6 +489,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 pathPoints.forEach { path ->
                     val polylineOptions = PolylineOptions().addAll(path)
                         .color(Color.RED).width(10f)
+//                        .pattern(listOf(Dot(), Gap(10f), Dash(30f), Gap(10f)))
                     val newPolyline = mGoogleMap.addPolyline(polylineOptions)
                     polylineList.add(newPolyline)
                 }
@@ -503,11 +519,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         return resultkeyword
     }
+
     private fun captureMapSnapshot(googleMap: GoogleMap) {
         // 코루틴 스코프 내에서 비동기 작업 시작
         CoroutineScope(Dispatchers.Main).launch {
             val snapshotPath = saveMapSnapshot(googleMap)
-            homeViewModel.walkList[homeViewModel.walkList.size-1].snapshotPath = snapshotPath
+            homeViewModel.walkList[homeViewModel.walkList.size - 1].snapshotPath = snapshotPath
 
             destroyPolyline()
             stopLocationService()
@@ -516,6 +533,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             homeViewModel.endWalk()
         }
     }
+
     private suspend fun saveMapSnapshot(googleMap: GoogleMap): String {
         // 스냅샷 경로를 저장할 변수를 비동기적으로 초기화
         val deferredPath = CompletableDeferred<String>()
@@ -523,7 +541,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             CoroutineScope(Dispatchers.Main).launch {
                 val path = withContext(Dispatchers.IO) {
                     // 외부 파일 저장 디렉토리에 "map_snapshot[index].png" 파일을 생성
-                    val file = File(context?.getExternalFilesDir(null), "map_snapshot[" + homeViewModel.walkList[homeViewModel.walkList.size-1].dateid + "].png")
+                    val file = File(
+                        context?.getExternalFilesDir(null),
+                        "map_snapshot[" + homeViewModel.walkList[homeViewModel.walkList.size - 1].dateid + "].png"
+                    )
                     val fos = FileOutputStream(file)
                     // 비트맵을 PNG 형식으로 파일에 저장
                     bitmap?.compress(Bitmap.CompressFormat.PNG, 90, fos)
@@ -539,7 +560,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         return deferredPath.await()
     }
 
-//    private fun addMarker(drawable: Int) {
+    //    private fun addMarker(drawable: Int) {
 //        val bitmap = BitmapFactory.decodeResource(resources, drawable)
 //        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
 //        val customMarker = BitmapDescriptorFactory.fromBitmap(scaledBitmap)

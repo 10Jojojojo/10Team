@@ -28,7 +28,10 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
             homeViewModel.walkList[index].distance
         binding.tvWalktimelabel.text =
             homeViewModel.walkList[index].walktime
-
+        binding.tvWalkstarttimevalue.text =
+            homeViewModel.walkList[index].starttime
+        binding.tvWalkendtimevalue.text =
+            homeViewModel.walkList[index].endtime
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
@@ -40,11 +43,12 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
                 )
             )
             val cameraPosition = CameraPosition.Builder()
-                .target(lastWalk.target)  // 카메라의 타겟 위치
+                .target(lastWalk.target)  // 카메라 의 타겟 위치
                 .zoom(lastWalk.zoom)
+                .tilt(lastWalk.tilt) // 카메라 의 회전 상태
                 .build()
 
-            // 카메라를 해당 위치로 이동
+            // 카메라 를 해당 위치로 이동
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
             for (path in homeViewModel.walkList[index].pathpoint) {
