@@ -28,6 +28,7 @@ import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.model.WalkModel
 import com.footprint.app.databinding.DialogHomeFlagBinding
+import com.footprint.app.databinding.DialogHomeWalkBinding
 import com.footprint.app.databinding.DialogHomeWalkstopBinding
 import com.footprint.app.databinding.FragmentHomeBinding
 import com.footprint.app.services.MyService
@@ -185,11 +186,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         binding.ivPawprint.setOnClickListener {
             // 산책시작 기능
-            if (homeViewModel.walkstate.value!! == "산책종료") {
-                startLocationService()
-//                addMarker(R.drawable.ic_pawprint_on)
-            }
-            homeViewModel.startWalk()
+            showDialogWalkstart()
         }
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
@@ -266,7 +263,23 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         updateLocationUI()
     }
-
+    private fun showDialogWalkstart() {
+        val builder = AlertDialog.Builder(requireContext())
+        val bindingDialog = DialogHomeWalkBinding.inflate(layoutInflater)
+        builder.setView(bindingDialog.root)
+        val dialog = builder.show()
+        bindingDialog.btYes.setOnClickListener {
+            dialog.dismiss()
+            if (homeViewModel.walkstate.value!! == "산책종료") {
+                startLocationService()
+//                addMarker(R.drawable.ic_pawprint_on)
+            }
+            homeViewModel.startWalk()
+        }
+        bindingDialog.btNo.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
     private fun showDialogWalkstate() {
         val builder = AlertDialog.Builder(requireContext())
         val bindingDialog = DialogHomeWalkstopBinding.inflate(layoutInflater)
