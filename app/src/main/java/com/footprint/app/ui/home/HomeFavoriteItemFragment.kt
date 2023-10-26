@@ -21,17 +21,16 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
         _binding = FragmentHomeFavoriteItemBinding.bind(view)
         val index = arguments?.getInt("position",0)!!
 
-        binding.tvWalktimevalue.text = homeViewModel.walkList[index].name
         binding.tvWalkdistancevalue.text =
-            homeViewModel.walkList[index].date
-        binding.tvWalkdistancelabel.text =
             homeViewModel.walkList[index].distance
-        binding.tvWalktimelabel.text =
+        binding.tvWalktimevalue.text =
             homeViewModel.walkList[index].walktime
         binding.tvWalkstarttimevalue.text =
             homeViewModel.walkList[index].starttime
         binding.tvWalkendtimevalue.text =
             homeViewModel.walkList[index].endtime
+        binding.tvWalkdatevalue.text =
+            homeViewModel.walkList[index].date
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->

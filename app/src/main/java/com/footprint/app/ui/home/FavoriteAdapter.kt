@@ -20,6 +20,7 @@ class FavoriteAdapter(private val context: Context, private val items: MutableLi
             binding.tvDistancetext.text = walk.distance
             binding.tvIdtext.text = walk.name
             binding.tvTimetext.text = walk.walktime
+            binding.tvWalkdatevalue.text = walk.date
             binding.root.setOnClickListener{
                 itemClick?.onClick(it, adapterPosition)
             }

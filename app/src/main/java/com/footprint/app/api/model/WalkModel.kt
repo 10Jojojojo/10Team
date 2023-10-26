@@ -14,7 +14,7 @@ data class WalkModel(
     val currentLocation: CameraPosition,
     var snapshotPath: String? = null,  // 스냅샷 파일의 경로 저장
     var petimage: Uri? = null, // 산책한 반려동물 사진
-    val name:String = "내새끼 이름",
+    val name:String = "내새끼",
     var starttime:String = "",
     var endtime:String = "",
     val date:String = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),

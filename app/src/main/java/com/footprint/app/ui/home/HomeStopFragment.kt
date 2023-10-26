@@ -20,17 +20,16 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeStopBinding.bind(view)
-        binding.tvWalktimevalue.text = homeViewModel.walkList[homeViewModel.walkList.size - 1].name
         binding.tvWalkdistancevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].date
-        binding.tvWalkdistancelabel.text =
             homeViewModel.walkList[homeViewModel.walkList.size - 1].distance
-        binding.tvWalktimelabel.text =
+        binding.tvWalktimevalue.text =
             homeViewModel.walkList[homeViewModel.walkList.size - 1].walktime
         binding.tvWalkstarttimevalue.text =
             homeViewModel.walkList[homeViewModel.walkList.size - 1].starttime
         binding.tvWalkendtimevalue.text =
             homeViewModel.walkList[homeViewModel.walkList.size - 1].endtime
+        binding.tvWalkdatevalue.text =
+            homeViewModel.walkList[homeViewModel.walkList.size - 1].date
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
