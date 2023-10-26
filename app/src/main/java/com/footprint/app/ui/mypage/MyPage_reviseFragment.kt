@@ -18,6 +18,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.footprint.app.Constants.REQUEST_GALLERY
+import com.footprint.app.Constants.REQUEST_PERMISSION
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentMyPageReviseBinding
 
@@ -26,9 +28,6 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
     private lateinit var viewModel: MyPageViewModel
     private var _binding: FragmentMyPageReviseBinding? = null
     private val binding get() = _binding!!
-    // 권한 요청 ID
-    private val REQUEST_GALLERY = 1
-    private val REQUEST_PERMISSION = 2
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMyPageReviseBinding.bind(view)
