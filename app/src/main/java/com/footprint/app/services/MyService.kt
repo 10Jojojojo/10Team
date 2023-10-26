@@ -36,12 +36,12 @@ import com.google.android.gms.location.LocationServices
         }
 
         override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+            // 위치 업데이트 시작
+            startLocationUpdates()
             // 알림 채널 생성 및 서비스를 foreground 상태로 만들기
             createNotificationChannel()
             val notification = getNotification()
             startForeground(1, notification)
-            // 위치 업데이트 시작
-            startLocationUpdates()
             return START_STICKY
         }
         // 주기적인 위치 업데이트를 시작하는 함수

@@ -6,43 +6,43 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.footprint.app.R
-import com.footprint.app.databinding.FragmentHomeStopBinding
+import com.footprint.app.databinding.FragmentHomeFavoriteItemBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.PolylineOptions
 
-
-class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
-    private var _binding: FragmentHomeStopBinding? = null
+class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) {
+    private var _binding: FragmentHomeFavoriteItemBinding? = null
     private val binding get() = _binding!!
+    private val index = arguments?.getInt("position",0)!!
     private val homeViewModel by activityViewModels<HomeViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentHomeStopBinding.bind(view)
+        _binding = FragmentHomeFavoriteItemBinding.bind(view)
         initView()
         initGoogleMap()
     }
     private fun initView() {
         binding.tvWalkdistancevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].distance
+            homeViewModel.walkList[index].distance
         binding.tvWalktimevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].walktime
+            homeViewModel.walkList[index].walktime
         binding.tvWalkstarttimevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].starttime
+            homeViewModel.walkList[index].starttime
         binding.tvWalkendtimevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].endtime
+            homeViewModel.walkList[index].endtime
         binding.tvWalkdatevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].date
+            homeViewModel.walkList[index].date
     }
     private fun initGoogleMap() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
-            val lastWalk = homeViewModel.walkList[homeViewModel.walkList.size - 1].currentLocation
+            val lastWalk = homeViewModel.walkList[index].currentLocation
             googleMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
-                    homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint[0][0],
+                    homeViewModel.walkList[index].pathpoint[0][0],
                     20f
                 )
             )
@@ -55,7 +55,7 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
             // 카메라 를 해당 위치로 이동
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
-            for (path in homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint) {
+            for (path in homeViewModel.walkList[index].pathpoint) {
                 googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.BLUE))
             }
         }

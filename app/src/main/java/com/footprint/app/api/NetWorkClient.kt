@@ -1,6 +1,7 @@
 package com.footprint.app.api
 
 //mport com.footprint.app.BuildConfig
+import com.footprint.app.BuildConfig
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -14,10 +15,10 @@ object NetWorkClient {
     private fun createOkHttpClient(): OkHttpClient {
         val interceptor = HttpLoggingInterceptor()
         // 디버그 모드에서는 HTTP 요청 및 응답 내용을 로그에 출력
-//        if (BuildConfig.DEBUG)
-//            interceptor.level = HttpLoggingInterceptor.Level.BODY
-//        else
-//            interceptor.level = HttpLoggingInterceptor.Level.NONE
+        if (BuildConfig.DEBUG)
+            interceptor.level = HttpLoggingInterceptor.Level.BODY
+        else
+            interceptor.level = HttpLoggingInterceptor.Level.NONE
 
         // OkHttpClient를 생성하고 설정을 추가
         return OkHttpClient.Builder()

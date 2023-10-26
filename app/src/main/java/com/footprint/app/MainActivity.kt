@@ -15,12 +15,15 @@ import com.footprint.app.services.MyService
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    companion object {
+        lateinit var apiKey: String
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        apiKey = getString(R.string.api_key)
 //        val intent = Intent(this, MyService::class.java)
 //        startService(intent)
         val navView: BottomNavigationView = binding.navView

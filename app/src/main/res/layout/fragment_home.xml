@@ -21,6 +21,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="180dp"
         android:outlineProvider="none"
+        android:visibility="gone"
         app:borderWidth="0dp"
         app:elevation="2dp"
         app:fabCustomSize="30dp"
@@ -35,6 +36,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="130dp"
         android:outlineProvider="none"
+        android:visibility="gone"
         app:borderWidth="0dp"
         app:elevation="2dp"
         app:fabCustomSize="30dp"
@@ -49,6 +51,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="80dp"
         android:outlineProvider="none"
+        android:visibility="gone"
         app:borderWidth="0dp"
         app:elevation="2dp"
         app:fabCustomSize="30dp"
@@ -63,6 +66,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="30dp"
         android:outlineProvider="none"
+        android:visibility="gone"
         app:borderWidth="0dp"
         app:elevation="2dp"
         app:fabCustomSize="30dp"
@@ -90,38 +94,48 @@
         <TextView
             android:id="@+id/tv_walkdistancelabel"
             android:layout_width="wrap_content"
-            android:text="산책 거리"
-            android:gravity="bottom"
             android:layout_height="30dp"
-            android:textStyle="bold"
-            android:textSize="18sp"
             android:layout_marginBottom="5dp"
-            app:layout_constraintStart_toEndOf="@id/iv_pause"
+            android:gravity="bottom"
+            android:text="산책 거리"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/iv_pawprint"/>
+            app:layout_constraintEnd_toStartOf="@id/iv_pawprint"
+            app:layout_constraintStart_toEndOf="@id/iv_pause" />
 
         <ImageView
             android:id="@+id/iv_flag"
-            android:src="@drawable/ic_flag"
-            android:alpha="0.3"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginBottom="10dp"
-            app:layout_constraintStart_toStartOf="@id/tv_walkdistancevalue"
+            android:alpha="0.3"
+            android:src="@drawable/ic_flag"
             app:layout_constraintBottom_toTopOf="@id/tv_walkdistancevalue"
-            app:layout_constraintEnd_toEndOf="@id/tv_walkdistancevalue"
-            />
+            app:layout_constraintEnd_toStartOf="@id/iv_flaginfoanddel"
+            app:layout_constraintStart_toEndOf="@id/iv_pause" />
+
+        <ImageView
+            android:id="@+id/iv_flaginfoanddel"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="10dp"
+            android:src="@drawable/ic_flaginfo"
+            app:layout_constraintBottom_toTopOf="@id/tv_walkdistancevalue"
+            app:layout_constraintEnd_toStartOf="@id/iv_pawprint"
+            app:layout_constraintStart_toEndOf="@id/iv_flag" />
+
         <TextView
             android:id="@+id/tv_walkdistancevalue"
             android:layout_width="wrap_content"
-            android:text="0.00km"
-            android:gravity="bottom"
             android:layout_height="30dp"
-            android:textStyle="bold"
+            android:gravity="bottom"
+            android:text="0.00km"
             android:textSize="18sp"
-            app:layout_constraintStart_toEndOf="@id/iv_pause"
+            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/tv_walkdistancelabel"
-            app:layout_constraintEnd_toStartOf="@id/iv_pawprint"/>
+            app:layout_constraintEnd_toStartOf="@id/iv_pawprint"
+            app:layout_constraintStart_toEndOf="@id/iv_pause" />
 
         <ImageView
             android:id="@+id/iv_pawprint"
@@ -136,37 +150,38 @@
         <TextView
             android:id="@+id/tv_walktimevalue"
             android:layout_width="wrap_content"
-            android:text="00:00"
-            android:gravity="bottom"
             android:layout_height="30dp"
-            android:textStyle="bold"
+            android:gravity="bottom"
+            android:text="00:00"
             android:textSize="18sp"
-            app:layout_constraintStart_toEndOf="@id/iv_pawprint"
+            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/tv_walktimelabel"
-            app:layout_constraintEnd_toStartOf="@id/iv_square"/>
+            app:layout_constraintEnd_toStartOf="@id/iv_square"
+            app:layout_constraintStart_toEndOf="@id/iv_pawprint" />
+
         <ImageView
             android:id="@+id/iv_favorite"
-            android:src="@drawable/ic_favorite"
-            android:alpha="1"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginBottom="10dp"
-            app:layout_constraintStart_toStartOf="@id/tv_walktimevalue"
+            android:alpha="1"
+            android:src="@drawable/ic_favorite"
             app:layout_constraintBottom_toTopOf="@id/tv_walktimevalue"
             app:layout_constraintEnd_toEndOf="@id/tv_walktimevalue"
-            />
+            app:layout_constraintStart_toStartOf="@id/tv_walktimevalue" />
+
         <TextView
             android:id="@+id/tv_walktimelabel"
             android:layout_width="wrap_content"
-            android:text="산책 시간"
-            android:gravity="bottom"
             android:layout_height="30dp"
-            android:textStyle="bold"
-            android:textSize="18sp"
             android:layout_marginBottom="5dp"
-            app:layout_constraintStart_toEndOf="@id/iv_pawprint"
+            android:gravity="bottom"
+            android:text="산책 시간"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/iv_square"/>
+            app:layout_constraintEnd_toStartOf="@id/iv_square"
+            app:layout_constraintStart_toEndOf="@id/iv_pawprint" />
 
         <ImageView
             android:id="@+id/iv_square"

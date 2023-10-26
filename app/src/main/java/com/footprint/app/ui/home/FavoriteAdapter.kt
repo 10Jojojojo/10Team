@@ -1,23 +1,29 @@
 package com.footprint.app.ui.home
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Adapter
+import com.bumptech.glide.Glide
 import com.footprint.app.api.model.WalkModel
 import com.footprint.app.databinding.WalkitemBinding
+import com.footprint.app.util.ItemClick
+import java.io.File
 
-class FavoriteAdapter(private val comments: ArrayList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.CommentViewHolder>() {
+class FavoriteAdapter(private val context: Context, private val items: MutableList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.CommentViewHolder>() {
 
+    var itemClick: ItemClick? = null
     inner class CommentViewHolder(private val binding: WalkitemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(walk: WalkModel) {
-//            Glide.with(binding.root.context).
-//            load(comment.authorProfileImageUrl).
-//            into(binding.authorImage)
-//
-//            binding.authorName.text = comment.authorDisplayName
-//            binding.commentText.text = comment.textOriginal
-//            binding.commentDate.text = comment.publishedAt
+            val filePath = File(context.getExternalFilesDir(null), "map_snapshot[${walk.dateid}].png").absolutePath
+            Glide.with(context).load(filePath).into(binding.ivMapImage)
+            binding.tvDistancetext.text = walk.distance
+            binding.tvIdtext.text = walk.name
+            binding.tvTimetext.text = walk.walktime
+            binding.tvWalkdatevalue.text = walk.date
+            binding.root.setOnClickListener{
+                itemClick?.onClick(it, adapterPosition)
+            }
         }
     }
 
@@ -26,10 +32,10 @@ class FavoriteAdapter(private val comments: ArrayList<WalkModel>) : RecyclerView
         return CommentViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = comments.size
+    override fun getItemCount(): Int = items.size
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
-        holder.bind(comments[position])
+        holder.bind(items[position])
     }
 
 }

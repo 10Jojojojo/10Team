@@ -27,7 +27,6 @@ class MyDogFragment : Fragment(R.layout.fragment_my_dog) {
         setupCancelButton()
     }
 
-
     private fun setupCancelButton() {
         binding.cance.setOnClickListener {
             findNavController().navigate(R.id.mypage)
