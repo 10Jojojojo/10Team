@@ -7,13 +7,9 @@
     tools:context=".membershipActivity"
     android:id="@+id/fragmentContainer">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/nav_host_fragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:navGraph="@navigation/mobile_navigation"
-        />
+        android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -338,5 +334,5 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

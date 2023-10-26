@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.mypage.MyPageFragment">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -133,5 +139,5 @@
         app:layout_constraintTop_toTopOf="@+id/myDog" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
