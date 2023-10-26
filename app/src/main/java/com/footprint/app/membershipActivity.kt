@@ -140,4 +140,5 @@ class membershipActivity : AppCompatActivity() {
     {
         myprofile = ProfileModel(nickName,dogName,dogAgeText,dogAge,dogSex,selectedImageUri)
     }
+
 }

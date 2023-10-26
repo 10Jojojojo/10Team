@@ -17,11 +17,13 @@
             android:id="@+id/homefavorite"
             app:destination="@+id/navigation_homefavorite" />
     </fragment>
+
     <fragment
         android:id="@+id/navigation_homestop"
         android:name="com.footprint.app.ui.home.HomeStopFragment"
         android:label="종료화면"
         tools:layout="@layout/fragment_home_stop" />
+
     <fragment
         android:id="@+id/navigation_homefavorite"
         android:name="com.footprint.app.ui.home.HomeFavoriteFragment"
@@ -31,17 +33,39 @@
             android:id="@+id/homefavoriteitem"
             app:destination="@+id/navigation_homefavoriteitem" />
     </fragment>
+
     <fragment
         android:id="@+id/navigation_homefavoriteitem"
         android:name="com.footprint.app.ui.home.HomeFavoriteItemFragment"
         android:label="즐겨찾기상세"
         tools:layout="@layout/fragment_home_favorite_item">
     </fragment>
+
     <fragment
         android:id="@+id/navigation_community"
         android:name="com.footprint.app.ui.community.CommunityFragment"
         android:label="@string/title_community"
-        tools:layout="@layout/fragment_community" />
+        tools:layout="@layout/fragment_community">
+        <action
+            android:id="@+id/communityPlus"
+            app:destination="@+id/navigation_communityPlus" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_communityPlus"
+        android:name="com.footprint.app.ui.community.Community_plusFragment"
+        tools:layout="@layout/fragment_community_plus"
+        android:label="커뮤니티플러스">
+
+        <action
+            android:id="@+id/community"
+            app:destination="@+id/navigation_community">
+
+        </action>
+
+    </fragment>
+
+
 
     <fragment
         android:id="@+id/navigation_mypage"
@@ -88,4 +112,7 @@
         app:destination="@+id/navigation_home">
 
     </action>
+
+
+
 </navigation>

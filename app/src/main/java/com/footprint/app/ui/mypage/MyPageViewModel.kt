@@ -13,7 +13,6 @@ class MyPageViewModel : ViewModel() {
     }
     val text: LiveData<String> = _text
 
-
     val dogList = MutableLiveData<MutableList<Dog>>()
 
     var name: String = "이름"
