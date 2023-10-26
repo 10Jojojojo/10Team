@@ -20,6 +20,10 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeStopBinding.bind(view)
+        initView()
+        initGoogleMap()
+    }
+    private fun initView() {
         binding.tvWalkdistancevalue.text =
             homeViewModel.walkList[homeViewModel.walkList.size - 1].distance
         binding.tvWalktimevalue.text =
@@ -30,6 +34,8 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
             homeViewModel.walkList[homeViewModel.walkList.size - 1].endtime
         binding.tvWalkdatevalue.text =
             homeViewModel.walkList[homeViewModel.walkList.size - 1].date
+    }
+    private fun initGoogleMap() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
@@ -54,7 +60,6 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
             }
         }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

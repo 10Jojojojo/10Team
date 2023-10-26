@@ -15,12 +15,15 @@ import com.google.android.gms.maps.model.PolylineOptions
 class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) {
     private var _binding: FragmentHomeFavoriteItemBinding? = null
     private val binding get() = _binding!!
+    private val index = arguments?.getInt("position",0)!!
     private val homeViewModel by activityViewModels<HomeViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeFavoriteItemBinding.bind(view)
-        val index = arguments?.getInt("position",0)!!
-
+        initView()
+        initGoogleMap()
+    }
+    private fun initView() {
         binding.tvWalkdistancevalue.text =
             homeViewModel.walkList[index].distance
         binding.tvWalktimevalue.text =
@@ -31,6 +34,8 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
             homeViewModel.walkList[index].endtime
         binding.tvWalkdatevalue.text =
             homeViewModel.walkList[index].date
+    }
+    private fun initGoogleMap() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
@@ -55,7 +60,6 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
             }
         }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
