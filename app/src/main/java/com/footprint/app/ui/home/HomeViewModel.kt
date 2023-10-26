@@ -1,23 +1,15 @@
 package com.footprint.app.ui.home
 
-import android.util.Log
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.footprint.app.MainActivity
-import com.footprint.app.api.NetWorkClient
 import com.footprint.app.api.model.FlagModel
-import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.model.WalkModel
-import com.footprint.app.api.serverdata.PlaceData
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.pow
@@ -30,9 +22,9 @@ class HomeViewModel : ViewModel() {
         value = mutableListOf(mutableListOf())
     }
     val pathPoints: LiveData<MutableList<MutableList<LatLng>>> = _pathPoints
-    private var nextpagetoken: String = ""
-
-    val placeitems = ArrayList<PlaceModel>()
+//    private var nextpagetoken: String = ""
+//
+//    val placeitems = ArrayList<PlaceModel>()
 
     private var startTime: Long = 0L // ms로 반환
     private var endTime: Long = 0L // ms로 반환
@@ -67,7 +59,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun getTime(){
-        val dataFormat = SimpleDateFormat("mm:ss", Locale.KOREA)
+        val dataFormat = SimpleDateFormat("mm : ss", Locale.KOREA)
         _walkstate.value = "산책중"
         startTime = System.currentTimeMillis()
         viewModelScope.launch {
@@ -108,61 +100,61 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun getPlaces(nextToken: String?, keyword: String, type: String) {
-        Log.d("FootprintApp", "함수 실행은 됬어요")
-        NetWorkClient.apiService.getplace(
-            keyword,
-            "${37.566610},${126.978403}",
-            50000,
-            type,
-            MainActivity.apiKey,
-            nextpagetoken
-
-        ) // null 이 아님을 확인 후 실행 해야 될것 같다.
-            ?.enqueue(object : Callback<PlaceData?> {
-                override fun onResponse(
-                    call: Call<PlaceData?>,
-                    response: Response<PlaceData?>
-                ) {
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            nextpagetoken = it.next_page_token
-                            if (it.results.isNotEmpty()) {
-                                for (item in it.results) {
-                                    val location = item.geometry.location
-                                    val nextpage = it.next_page_token
-                                    val place = PlaceModel(
-                                        location,
-                                        type,
-                                        keyword,
-                                    )
-
-//                                     중복 체크
-                                    if (!placeitems.contains(place)) {
-                                        placeitems.add(place)
-                                    }
-                                }
-                                viewModelScope.launch(Dispatchers.IO) {
-                                    it.next_page_token.let { token ->
-                                        // next_page_token 이 존재 하면 약 2초의 딜레이 후 추가 요청
-                                        delay(2000)
-                                        getPlaces(token, keyword, type)
-                                    }
-                                }
-                            }
-                        }
-                        Log.d("FootprintApp", "${placeitems}")
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        Log.e("FootprintApp", "API 에러: $errorBody")
-                    }
-                }
-
-                override fun onFailure(call: Call<PlaceData?>, t: Throwable) {
-                    Log.e("FootprintApp", "에러 : ${t.message}")
-                }
-            })
-    }
+//    fun getPlaces(nextToken: String?, keyword: String, type: String) {
+//        Log.d("FootprintApp", "함수 실행은 됬어요")
+//        NetWorkClient.apiService.getplace(
+//            keyword,
+//            "${37.566610},${126.978403}",
+//            50000,
+//            type,
+//            MainActivity.apiKey,
+//            nextpagetoken
+//
+//        ) // null 이 아님을 확인 후 실행 해야 될것 같다.
+//            ?.enqueue(object : Callback<PlaceData?> {
+//                override fun onResponse(
+//                    call: Call<PlaceData?>,
+//                    response: Response<PlaceData?>
+//                ) {
+//                    if (response.isSuccessful) {
+//                        response.body()?.let {
+//                            nextpagetoken = it.next_page_token
+//                            if (it.results.isNotEmpty()) {
+//                                for (item in it.results) {
+//                                    val location = item.geometry.location
+//                                    val nextpage = it.next_page_token
+//                                    val place = PlaceModel(
+//                                        location,
+//                                        type,
+//                                        keyword,
+//                                    )
+//
+////                                     중복 체크
+//                                    if (!placeitems.contains(place)) {
+//                                        placeitems.add(place)
+//                                    }
+//                                }
+//                                viewModelScope.launch(Dispatchers.IO) {
+//                                    it.next_page_token.let { token ->
+//                                        // next_page_token 이 존재 하면 약 2초의 딜레이 후 추가 요청
+//                                        delay(2000)
+//                                        getPlaces(token, keyword, type)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        Log.d("FootprintApp", "${placeitems}")
+//                    } else {
+//                        val errorBody = response.errorBody()?.string()
+//                        Log.e("FootprintApp", "API 에러: $errorBody")
+//                    }
+//                }
+//
+//                override fun onFailure(call: Call<PlaceData?>, t: Throwable) {
+//                    Log.e("FootprintApp", "에러 : ${t.message}")
+//                }
+//            })
+//    }
 
 }
 

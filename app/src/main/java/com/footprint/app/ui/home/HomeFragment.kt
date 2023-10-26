@@ -25,7 +25,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
 import com.footprint.app.R
 import com.footprint.app.api.model.FlagModel
-import com.footprint.app.api.model.PlaceModel
 import com.footprint.app.api.model.WalkModel
 import com.footprint.app.databinding.DialogHomeFlagBinding
 import com.footprint.app.databinding.DialogHomeWalkBinding
@@ -169,21 +168,21 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     private fun initView() { // private는 여기 이 프래그먼트에서만 쓸꺼라는거
-        binding.testinputbutton.setOnClickListener {
-//            homeViewModel.inputdata(mGoogleMap, homeViewModel.pathPoints.value!!, path)
-
-        }
-        binding.testoutputbutton.setOnClickListener {
-//            homeViewModel.outputdata(mGoogleMap)
-            placeMarkersOnMap(homeViewModel.placeitems)
-        }
-        binding.testapibutton.setOnClickListener {
-            homeViewModel.getPlaces(null, "병원", "")
-            homeViewModel.getPlaces(null, "애견샾", "")
-        }
-        binding.testpathlogbutton.setOnClickListener {
-//            Log.d("GoogleMapPractice", "저장된 경로 : ${homeViewModel.pathPoints.value!!}")
-        }
+//        binding.testinputbutton.setOnClickListener {
+////            homeViewModel.inputdata(mGoogleMap, homeViewModel.pathPoints.value!!, path)
+//
+//        }
+//        binding.testoutputbutton.setOnClickListener {
+////            homeViewModel.outputdata(mGoogleMap)
+//            placeMarkersOnMap(homeViewModel.placeitems)
+//        }
+//        binding.testapibutton.setOnClickListener {
+//            homeViewModel.getPlaces(null, "병원", "")
+//            homeViewModel.getPlaces(null, "애견샾", "")
+//        }
+//        binding.testpathlogbutton.setOnClickListener {
+////            Log.d("GoogleMapPractice", "저장된 경로 : ${homeViewModel.pathPoints.value!!}")
+//        }
         binding.ivPause.setOnClickListener {
             // 일시정지 기능
             homeViewModel.pauseWalk()
@@ -498,27 +497,27 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng)) // 카메라를 현재 위치로 이동
     }
 
-    private fun placeMarkersOnMap(places: List<PlaceModel>) {
-        for (place in places) {
-            val location = LatLng(place.location.lat, place.location.lng)
-            val markerOptions = MarkerOptions()
-                .position(location)
-//                .title(place.name)
-//                .snippet(place.address)
-                .icon(BitmapDescriptorFactory.fromResource(image(place.keyword)))
-            mGoogleMap.addMarker(markerOptions)
-        }
-    }
+//    private fun placeMarkersOnMap(places: List<PlaceModel>) {
+//        for (place in places) {
+//            val location = LatLng(place.location.lat, place.location.lng)
+//            val markerOptions = MarkerOptions()
+//                .position(location)
+////                .title(place.name)
+////                .snippet(place.address)
+//                .icon(BitmapDescriptorFactory.fromResource(image(place.keyword)))
+//            mGoogleMap.addMarker(markerOptions)
+//        }
+//    }
 
-    private fun image(keyword: String): Int {
-        var resultkeyword = 0
-        if (keyword == "병원") {
-            resultkeyword = R.drawable.ic_marker_shop
-        } else if (keyword == "애견샾") {
-            resultkeyword = R.drawable.ic_marker_hospital
-        }
-        return resultkeyword
-    }
+//    private fun image(keyword: String): Int {
+//        var resultkeyword = 0
+//        if (keyword == "병원") {
+//            resultkeyword = R.drawable.ic_marker_shop
+//        } else if (keyword == "애견샾") {
+//            resultkeyword = R.drawable.ic_marker_hospital
+//        }
+//        return resultkeyword
+//    }
 
     private fun captureMapSnapshot(googleMap: GoogleMap) {
         // 코루틴 스코프 내에서 비동기 작업 시작

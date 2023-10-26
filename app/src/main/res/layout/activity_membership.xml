@@ -46,7 +46,7 @@
             android:background="@drawable/background"
             android:textColor="@color/white"
             android:text="보호자 정보 입력"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:gravity="center"
             app:layout_constraintStart_toStartOf="@+id/nickName"
@@ -61,7 +61,7 @@
             android:layout_marginStart="30dp"
             android:layout_marginTop="10dp"
             android:text="닉네임"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/protector" />
@@ -73,9 +73,9 @@
             android:layout_marginTop="5dp"
             android:background="@null"
             android:hint="한글,영문,숫자 조합 2~10자리"
-            android:inputType="textPassword"
+            android:inputType="text"
             android:textColor="#4D000000"
-            android:textSize="15dp"
+            android:textSize="15sp"
             app:layout_constraintStart_toStartOf="@+id/nickName"
             app:layout_constraintTop_toBottomOf="@+id/nickName" />
 
@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="동네"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/protector"
             app:layout_constraintTop_toBottomOf="@+id/view_1">
@@ -109,7 +109,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="자기소개"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/town"
             app:layout_constraintTop_toBottomOf="@+id/town_position">
@@ -123,9 +123,9 @@
             android:layout_marginTop="5dp"
             android:background="@null"
             android:hint="동네를 입력해주세요"
-            android:inputType="textPassword"
+            android:inputType="text"
             android:textColor="#4D000000"
-            android:textSize="15dp"
+            android:textSize="15sp"
             app:layout_constraintStart_toStartOf="@+id/town"
             app:layout_constraintTop_toBottomOf="@+id/town">
 
@@ -150,7 +150,7 @@
             android:background="@drawable/background"
             android:gravity="center"
             android:text="자기소개"
-            android:textSize="15dp"
+            android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/myintroduction">
@@ -164,7 +164,7 @@
             android:gravity="center"
             android:text="중복확인"
             android:textColor="@color/black"
-            android:textSize="5dp"
+            android:textSize="5sp"
             app:layout_constraintBottom_toBottomOf="@+id/nickNameword"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/nickNameword"
@@ -191,7 +191,7 @@
             android:background="@drawable/background"
             android:text="반려동물 정보 입력"
             android:textColor="@color/white"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:gravity="center"
             app:layout_constraintStart_toStartOf="@+id/town_position"
@@ -215,7 +215,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="이름"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/dog_Name"
             app:layout_constraintTop_toBottomOf="@+id/dog_Name">
@@ -229,9 +229,9 @@
             android:layout_marginTop="5dp"
             android:background="@null"
             android:hint="이름을 입력해주세요"
-            android:inputType="textPassword"
+            android:inputType="text"
             android:textColor="#4D000000"
-            android:textSize="15dp"
+            android:textSize="15sp"
             app:layout_constraintStart_toStartOf="@+id/dogName"
             app:layout_constraintTop_toBottomOf="@+id/dogName" />
 
@@ -252,7 +252,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="나이"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/view_4"
             app:layout_constraintTop_toBottomOf="@+id/view_4">
@@ -266,9 +266,9 @@
             android:layout_marginTop="5dp"
             android:background="@null"
             android:hint="나이를 입력해주세요"
-            android:inputType="textPassword"
+            android:inputType="number"
             android:textColor="#4D000000"
-            android:textSize="15dp"
+            android:textSize="15sp"
             app:layout_constraintStart_toStartOf="@+id/dogage"
             app:layout_constraintTop_toBottomOf="@+id/dogage" />
 
@@ -287,7 +287,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="성별"
-            android:textSize="15dp"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/dog_Name"
             app:layout_constraintTop_toBottomOf="@+id/view_5">
@@ -328,7 +328,7 @@
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="30dp"
             android:text="완료"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:textStyle="bold"
             android:gravity="center"
             android:background="@drawable/background"
