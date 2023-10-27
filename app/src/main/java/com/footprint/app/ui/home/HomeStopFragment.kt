@@ -56,7 +56,7 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
             for (path in homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint) {
-                googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.BLUE))
+                googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.parseColor("#${homeViewModel.colorCode}")).width(homeViewModel.lineWidthText.toFloat()))
             }
         }
     }

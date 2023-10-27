@@ -10,10 +10,10 @@ import com.footprint.app.databinding.WalkitemBinding
 import com.footprint.app.util.ItemClick
 import java.io.File
 
-class FavoriteAdapter(private val context: Context, private val items: MutableList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.CommentViewHolder>() {
+class FavoriteAdapter(private val context: Context, private val items: MutableList<WalkModel>) : RecyclerView.Adapter<FavoriteAdapter.WalkViewHolder>() {
 
     var itemClick: ItemClick? = null
-    inner class CommentViewHolder(private val binding: WalkitemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class WalkViewHolder(private val binding: WalkitemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(walk: WalkModel) {
             val filePath = File(context.getExternalFilesDir(null), "map_snapshot[${walk.dateid}].png").absolutePath
             Glide.with(context).load(filePath).into(binding.ivMapImage)
@@ -27,14 +27,14 @@ class FavoriteAdapter(private val context: Context, private val items: MutableLi
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WalkViewHolder {
         val binding = WalkitemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return CommentViewHolder(binding)
+        return WalkViewHolder(binding)
     }
 
     override fun getItemCount(): Int = items.size
 
-    override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: WalkViewHolder, position: Int) {
         holder.bind(items[position])
     }
 
