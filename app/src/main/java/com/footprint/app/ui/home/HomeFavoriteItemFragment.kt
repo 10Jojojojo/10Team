@@ -15,7 +15,8 @@ import com.google.android.gms.maps.model.PolylineOptions
 class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) {
     private var _binding: FragmentHomeFavoriteItemBinding? = null
     private val binding get() = _binding!!
-    private val index = arguments?.getInt("position",0)!!
+    //arguments 에 대해, by lazy 없이 멤버 변수로 초기화 하면 이때는 아직 null 이 나온다. 그래서 지연 초기화 를 한다.
+    private val index by lazy { arguments?.getInt("position", 0)!! }
     private val homeViewModel by activityViewModels<HomeViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -23,6 +24,7 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
         initView()
         initGoogleMap()
     }
+
     private fun initView() {
         binding.tvWalkdistancevalue.text =
             homeViewModel.walkList[index].distance
@@ -35,6 +37,7 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
         binding.tvWalkdatevalue.text =
             homeViewModel.walkList[index].date
     }
+
     private fun initGoogleMap() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
@@ -56,10 +59,11 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
             for (path in homeViewModel.walkList[index].pathpoint) {
-                googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.BLUE))
+                googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.parseColor("#${homeViewModel.colorCode}")).width(homeViewModel.lineWidthText.toFloat()))
             }
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

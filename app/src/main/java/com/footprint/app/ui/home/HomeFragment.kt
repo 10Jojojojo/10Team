@@ -13,6 +13,8 @@ import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -27,6 +29,7 @@ import com.footprint.app.R
 import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.WalkModel
 import com.footprint.app.databinding.DialogHomeFlagBinding
+import com.footprint.app.databinding.DialogHomePolylineBinding
 import com.footprint.app.databinding.DialogHomeWalkBinding
 import com.footprint.app.databinding.DialogHomeWalkstopBinding
 import com.footprint.app.databinding.FragmentHomeBinding
@@ -140,13 +143,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 binding.tvWalkdistancevalue.text = String.format("%.2fkm", 0.00)
             }
         }
-        homeViewModel.walkstate.observe(viewLifecycleOwner) {
+        homeViewModel.walkState.observe(viewLifecycleOwner) {
             updateWalkStateUI()
         }
     }
+    private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding,colorCode:String)
+    {
+        val colorPattern = "^[0-9a-fA-F]{6}$".toRegex()
+        if (!colorPattern.matches(colorCode)) {
+            return
+        }
+        inflate.vExampleline.setBackgroundColor(Color.parseColor("#${colorCode}"))
+    }
+
 
     private fun updateWalkStateUI() {
-        when (homeViewModel.walkstate.value) {
+        when (homeViewModel.walkState.value) {
             "산책중" -> {
                 binding.ivPause.setImageResource(R.drawable.ic_pause)
                 binding.ivPawprint.alpha = 1f
@@ -154,7 +166,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 binding.ivPawprint.tag = R.drawable.ic_pawprint_on
             }
 
-            "산책일시정지" -> {
+            "산책 일시 정지" -> {
                 binding.ivPause.setImageResource(R.drawable.ic_play)
                 binding.ivPawprint.alpha = 0.3f
             }
@@ -193,7 +205,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
-            if (homeViewModel.walkstate.value != "산책종료") {
+            if (homeViewModel.walkState.value != "산책종료") {
 //                addMarker(R.drawable.ic_pawprint_off)
                 showDialogWalkstate()
             }
@@ -223,12 +235,15 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 }
             }
         }
+        binding.vExampleline.setOnClickListener {
+            showDialogPolyline()
+        }
     }
 
-    // 지도 프래그먼트를 가져와서 OnMapReadyCallback을 등록
+// 지도 프래그먼트를 가져와서 OnMapReadyCallback을 등록
 
     // 지도가 준비되었을 때 호출되는 콜백
-    // 입력값은 childFragmentManager에서 입력하는 R.id.map_fragment값이 된다.
+// 입력값은 childFragmentManager에서 입력하는 R.id.map_fragment값이 된다.
     override fun onMapReady(p0: GoogleMap) {
         mGoogleMap = p0
         mGoogleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
@@ -237,7 +252,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         // Polyline 초기 설정
         polyline = mGoogleMap.addPolyline(
-            PolylineOptions().color(Color.RED).width(10f)
+            PolylineOptions().color(Color.parseColor("#${homeViewModel.colorCode}"))
+                .width(homeViewModel.lineWidthText.toFloat())
 //                .pattern(listOf(Dot(), Gap(10f), Dash(30f), Gap(10f)))
 //                    .startCap(SquareCap())
 //                    .endCap(SquareCap())
@@ -279,7 +295,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         val dialog = builder.show()
         bindingDialog.btYes.setOnClickListener {
             dialog.dismiss()
-            if (homeViewModel.walkstate.value!! == "산책종료") {
+            if (homeViewModel.walkState.value!! == "산책종료") {
                 starttime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
                 startLocationService()
 //                addMarker(R.drawable.ic_pawprint_on)
@@ -318,6 +334,51 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 //            findNavController().navigate(R.id.homestop)
 //            homeViewModel.endWalk()
 //            }
+        }
+        bindingDialog.btNo.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
+    private fun showDialogPolyline() {
+        val builder = AlertDialog.Builder(requireContext())
+        val bindingDialog = DialogHomePolylineBinding.inflate(layoutInflater)
+        builder.setView(bindingDialog.root)
+        val dialog = builder.show()
+        // 다이어로그의 사각형 모서리를 둥글게 만들기 위해 콘스트레인트레이아웃의 색깔을 투명으로 만들기 위한 코드
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        homeViewModel.colorCodeData.observe(viewLifecycleOwner) { text ->
+            updateShowDialogPolyline(bindingDialog,text)
+        }
+        bindingDialog.etColortext.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                homeViewModel.updateText(s.toString())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+        bindingDialog.btYes.setOnClickListener {
+            // 색깔 코드 유효성 검사
+            val colorCode = bindingDialog.etColortext.text.toString().trim()
+            val colorPattern = "^[0-9a-fA-F]{6}$".toRegex()
+            if (!colorPattern.matches(colorCode)) {
+                showToast("색깔 코드를 올바르게 입력해주세요. (예: FFFFFF)")
+                return@setOnClickListener
+            }
+            // 궤도의 두께 유효성 검사
+            val lineWidthText = bindingDialog.etLinewidthtext.text.toString().trim()
+            val lineWidth = lineWidthText.toIntOrNull()
+            if (lineWidth == null || lineWidth < 0 || lineWidth > 100) {
+                showToast("두께는 0부터 100까지의 숫자로 입력해주세요.")
+                return@setOnClickListener
+            }
+            homeViewModel.colorCode = colorCode
+            homeViewModel.lineWidthText = lineWidth.toString()
+            binding.vExampleline.setBackgroundColor(Color.parseColor("#${homeViewModel.colorCode}"))
+//            bindingDialog.vExampleline.layoutParams.width = lineWidth
+            dialog.dismiss()
         }
         bindingDialog.btNo.setOnClickListener {
             dialog.dismiss()
@@ -474,7 +535,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     private fun setLastLocation(location: Location) {
         val newLatLng = LatLng(location.latitude, location.longitude)
-        if (homeViewModel.walkstate.value == "산책중") {
+        if (homeViewModel.walkState.value == "산책중") {
             homeViewModel.pathPoints.value?.let { pathPoints ->
 
                 // 현재 위치를 가장 마지막 경로 리스트에 추가
@@ -487,7 +548,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 // 모든 폴리라인을 다시 지도에 그림
                 pathPoints.forEach { path ->
                     val polylineOptions = PolylineOptions().addAll(path)
-                        .color(Color.RED).width(10f)
+                        .color(Color.parseColor("#${homeViewModel.colorCode}"))
+                        .width(homeViewModel.lineWidthText.toFloat())
 //                        .pattern(listOf(Dot(), Gap(10f), Dash(30f), Gap(10f)))
                     val newPolyline = mGoogleMap.addPolyline(polylineOptions)
                     polylineList.add(newPolyline)
@@ -575,6 +637,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 ////        }
 //        mGoogleMap.addMarker(markerOptions)
 //    }
+    private fun showToast(message: String) {
+        // 토스트 메시지 표시
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
