@@ -8,4 +8,5 @@ object Constants {
     // CommunityAdapter 에서 ViewType 을 나눌 때 사용 되는 상수
     const val TYPE_POST = 1
     const val TYPE_TAG = 2
+    const val TYPE_IMAGE = 3
 }

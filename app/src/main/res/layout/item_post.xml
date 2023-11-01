@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_container"
@@ -92,6 +93,19 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_title"
                 app:layout_constraintBottom_toTopOf="@id/iv_thumbnail" />
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_image"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:itemCount="6"
+                tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:orientation="vertical">
+
+            </androidx.recyclerview.widget.RecyclerView>
             <ImageView
                 android:id="@+id/iv_thumbnail"
                 android:layout_width="300dp"
