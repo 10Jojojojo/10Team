@@ -84,7 +84,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.14.2")
-    implementation("androidx.fragment:fragment-ktx:1.6.1")
-    implementation("androidx.activity:activity-ktx:1.8.0")
 
 }

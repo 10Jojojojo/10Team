@@ -38,6 +38,10 @@ class HomeViewModel : ViewModel() {
 
     var lineWidthText = "10"
     var colorCode = "000000"
+
+    private val _lineWidthTextData = MutableLiveData<Float?>()
+    val lineWidthTextData: LiveData<Float?> = _lineWidthTextData
+
     private val _colorCodeData = MutableLiveData<String>()
     val colorCodeData: LiveData<String> = _colorCodeData
     fun getDistance(): Int {
@@ -106,8 +110,11 @@ class HomeViewModel : ViewModel() {
         _pathPoints.value = mutableListOf(mutableListOf())
         _time.value = "00:00"
     }
-    fun updateText(newText: String) {
+    fun updateColorCode(newText: String) {
         _colorCodeData.value = newText
+    }
+    fun updateWidth(newNumber: Float?) {
+        _lineWidthTextData.value = newNumber
     }
 
 
