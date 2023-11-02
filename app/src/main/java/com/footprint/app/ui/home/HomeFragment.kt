@@ -42,6 +42,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
@@ -64,6 +65,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     // GoogleMap 인스턴스를 참조하기 위한 변수
     // 화면 표시 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
     private lateinit var mGoogleMap: GoogleMap
+
     // 기기 위치 정보를 가져오는 여러 메서드를 제공하는 FusedLocationProviderClient 인스턴스를 참조하기 위한 변수
     // 화면 업데이트 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -81,9 +83,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private var markerdelandinfo = "정보"
     private var starttime = ""
 
-//    //산책 시작,종료 마커는 지워지지 않게 하기위한 변수
-//    private var startMarker: Marker? = null
-//    private var endMarker: Marker? = null
+    //산책 시작,종료 마커는 지워지지 않게 하기위한 변수
+    private var startMarker: Marker? = null
+    private var endMarker: Marker? = null
 
     // ViewModel 인스턴스 생성
     // 생성자에 입력값이 생기면 다른 방식으로 생성해주어야 하고, ViewModelFactory도 변경해주어야 한다.
@@ -104,6 +106,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             setLastLocation(location)
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeBinding.bind(view)
@@ -134,11 +137,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         // 산책하는 시간의 변화가 감지되면 산책 시간을 표기하고, 거리를 측정하여 표기한다
         homeViewModel.time.observe(viewLifecycleOwner) {
             binding.tvWalktimevalue.text = it
-            if ((homeViewModel.pathPoints.value!![homeViewModel.pathPoints.value!!.size - 1].size >= 2)) {
-                val distanceInKm = homeViewModel.getDistance() / 1000.0
-                binding.tvWalkdistancevalue.text = String.format("%.2fkm", distanceInKm)
-            } else if (homeViewModel.pathPoints.value?.firstOrNull()?.isEmpty() == true) {
-                binding.tvWalkdistancevalue.text = String.format("%.2fkm", 0.00)
+            homeViewModel.pathPoints.value?.let { pathPoints ->
+                if ((pathPoints[pathPoints.size - 1].size >= 2)) {
+                    val distanceInKm = homeViewModel.getDistance() / 1000.0
+                    binding.tvWalkdistancevalue.text = String.format("%.2fkm", distanceInKm)
+                } else if (pathPoints.first().isEmpty()) {
+                    binding.tvWalkdistancevalue.text = String.format("%.2fkm", 0.00)
+                }
             }
         }
         homeViewModel.walkState.observe(viewLifecycleOwner) {
@@ -155,7 +160,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding, width: Float?) {
-        width?.let{
+        width?.let {
             if (width > 0.0F && width <= 100F) {
                 inflate.vExampleline.layoutParams.height =
                     (width
@@ -216,7 +221,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
             if (homeViewModel.walkState.value != "산책종료") {
-//                addMarker(R.drawable.ic_pawprint_off)
                 showDialogWalkstate()
             }
 
@@ -283,9 +287,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 homeViewModel.flagList.remove(targetFlag)
 
                 // 마커 삭제(시작마커,종료마커는 제외)
-//                if (marker != startMarker && marker != endMarker) {
+                if (marker != startMarker
+                    && marker != endMarker
+                    ) {
                 marker.remove()
-//                }
+                }
 
                 // true 반환하여 기본 마커 클릭 이벤트를 방지
                 true
@@ -308,7 +314,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             if (homeViewModel.walkState.value!! == "산책종료") {
                 starttime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
                 startLocationService()
-//                addMarker(R.drawable.ic_pawprint_on)
+                addMarker(R.drawable.ic_pawprint_on)
             }
             homeViewModel.startWalk()
         }
@@ -326,6 +332,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         bindingDialog.btYes.setOnClickListener {
             dialog.dismiss()
+            addMarker(R.drawable.ic_pawprint_off)
             homeViewModel.walkList.add(
                 WalkModel(
                     binding.tvWalkdistancevalue.text.toString(),
@@ -361,7 +368,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             updateShowDialogPolyline(bindingDialog, text)
         }
         homeViewModel.lineWidthTextData.observe(viewLifecycleOwner) { number ->
-                updateShowDialogPolyline(bindingDialog, number)
+            updateShowDialogPolyline(bindingDialog, number)
         }
         bindingDialog.etColortext.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -614,6 +621,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
             findNavController().navigate(R.id.homestop)
             homeViewModel.endWalk()
+            delStartEndMarker()
         }
     }
 
@@ -643,22 +651,29 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         return deferredPath.await()
     }
 
-    //    private fun addMarker(drawable: Int) {
-//        val bitmap = BitmapFactory.decodeResource(resources, drawable)
-//        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
-//        val customMarker = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
-//
-//        val markerOptions = MarkerOptions()
-//            .position(mGoogleMap.cameraPosition.target)
-//            .icon(customMarker)
-//        // 특별한 마커를 변수에 저장
-////        if(startMarker == null){
-////            startMarker = mGoogleMap.addMarker(markerOptions)
-////        } else if(endMarker == null){
-////            endMarker = mGoogleMap.addMarker(markerOptions)
-////        }
+        private fun addMarker(drawable: Int) {
+        val bitmap = BitmapFactory.decodeResource(resources, drawable)
+        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
+        val customMarker = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
+
+        val markerOptions = MarkerOptions()
+            .position(mGoogleMap.cameraPosition.target)
+            .icon(customMarker)
+//         특별한 마커를 변수에 저장
+        if(startMarker == null){
+            startMarker = mGoogleMap.addMarker(markerOptions)
+        }
+        else if(endMarker == null){
+            endMarker = mGoogleMap.addMarker(markerOptions)
+        }
 //        mGoogleMap.addMarker(markerOptions)
-//    }
+    }
+    private fun delStartEndMarker(){
+        startMarker?.remove()
+        startMarker = null
+        endMarker?.remove()
+        endMarker = null
+    }
     private fun showToast(message: String) {
         // 토스트 메시지 표시
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
