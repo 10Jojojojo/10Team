@@ -20,6 +20,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.footprint.app.Constants
+import com.footprint.app.FirebaseDatabaseManager
 import com.footprint.app.R
 import com.footprint.app.api.model.ImageModel
 import com.footprint.app.api.model.PostModel
@@ -30,7 +31,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class Community_plusFragment : Fragment(R.layout.fragment_community_plus) {
+class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
 
     private var _binding: FragmentCommunityPlusBinding? = null
     // 다른 Fragment 에서도 homeViewModel instance 를 참조 하기 위해 수정
@@ -49,17 +50,18 @@ class Community_plusFragment : Fragment(R.layout.fragment_community_plus) {
     private fun goCommunityPage(){
         binding.btComplete.setOnClickListener {
             communityViewModel.post.add(PostModel(
-                profileImageUrl = null,    // 프로필 사진 URL
+//                profileImageUrl = null,    // 프로필 사진 URL
                 nickname = "내새끼",           // 닉네임
                 postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),// 글 작성 일자
                 title = binding.etTitle.text.toString(),            // 글 제목
                 content =  binding.etContent.text.toString(),            // 글 내용
-                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
+//                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
                 likesCount = 0,            // 좋아요 수
                 commentsCount = 0 ,          // 댓글 수
             ))
-            Log.d("ffffff","${communityViewModel.post}")
-            findNavController().navigate(R.id.community)
+            FirebaseDatabaseManager.savePostList(communityViewModel.post.last())
+//            findNavController().navigate(R.id.community)
+            findNavController().popBackStack() // 현재 프래그먼트 백스택에서 프래그먼트를 없앤다.
         }
 
         communityViewModel.images.clear()

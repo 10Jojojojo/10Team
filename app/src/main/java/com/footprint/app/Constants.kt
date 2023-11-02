@@ -9,4 +9,8 @@ object Constants {
     const val TYPE_POST = 1
     const val TYPE_TAG = 2
     const val TYPE_IMAGE = 3
+
+    // Firebase 에서 데이터 를 불러 왔는 지 확인 하기 위한 상수
+    const val STATUS_NOT_LOADED = 1
+    const val STATUS_LOADED = 2
 }

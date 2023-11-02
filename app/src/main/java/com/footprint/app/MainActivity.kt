@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -35,13 +36,19 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.navigation_home -> {
+                    binding.navView.isVisible = true
                     // 선택된 프래그먼트에 따라 다르게 UI 구성 코드 작성하기
                 }
                 R.id.navigation_community -> {
+                    binding.navView.isVisible = true
                     // 선택된 프래그먼트에 따라 다르게 UI 구성 코드 작성하기
                 }
                 R.id.navigation_mypage -> {
+                    binding.navView.isVisible = true
                     // 선택된 프래그먼트에 따라 다르게 UI 구성 코드 작성하기
+                }
+                else -> {
+                    binding.navView.isVisible = false
                 }
             }
         }

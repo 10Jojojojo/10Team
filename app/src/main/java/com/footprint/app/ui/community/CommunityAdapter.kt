@@ -3,7 +3,6 @@ package com.footprint.app.ui.community
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.footprint.app.Constants.TYPE_POST
@@ -17,10 +16,11 @@ import com.footprint.app.databinding.ItemImageBinding
 import com.footprint.app.databinding.ItemPostBinding
 import com.footprint.app.databinding.ItemTagBinding
 import com.footprint.app.util.ItemClick
-
-class CommunityAdapter(private val context: Context, private val items: List<Any>) :
+class CommunityAdapter(private val context: Context, private val items: List<*>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     //Any 는 모든 타입을 받을 수 있다.
+    //* 는 파라미터 타입을 지정하지
+    // 전혀 관련없는 뷰홀더는 여러개의 어댑터로 만들기
 
     var itemClick: ItemClick? = null
 
@@ -88,8 +88,11 @@ class CommunityAdapter(private val context: Context, private val items: List<Any
                 (holder as PostHolder).bind(items[position] as PostModel)
                 // RecyclerView 안에 새로운 RecyclerView 를 추가 하려면 onBindViewHolder 에서 RecyclerView Adapter 를 정의해 주어야 한다.
                 // 동일한 Item 과 동일한 Adapter 를 사용 하므로, CommunityAdapter 를 그대로 사용 한다.
-                holder.binding.rvImage.layoutManager = LinearLayoutManager(context)
-                holder.binding.rvImage.adapter = CommunityAdapter(context, (items[position] as PostModel).postImageUrl)
+                // 이미지를 가로가 아닌 세로로 볼수있도록
+                // 뷰페이저2로 만드는것을 고민? 좌우스와이프? 뷰페이저2도 어댑터가 있는데 얘도 리사이클러뷰 어댑터를 사용함
+                // 각 포스트 항목들이 뷰페이저를 가지고있음
+//                holder.binding.rvImage.layoutManager = LinearLayoutManager(context)
+//                holder.binding.rvImage.adapter = CommunityAdapter(context, (items[position] as PostModel).postImageUrl)
             }
 
             is TagModel -> (holder as TagHolder).bind(items[position] as TagModel)
