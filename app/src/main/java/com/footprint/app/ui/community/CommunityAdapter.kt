@@ -32,9 +32,6 @@ class CommunityAdapter(private val context: Context, private val items: List<Any
             Glide.with(context)
                 .load(R.drawable.dummy_petimage)
                 .into(binding.ivPet)
-            Glide.with(context)
-                .load(postModel.postImageUrl)
-                .into(binding.ivThumbnail)
             binding.tvNickname.text = postModel.nickname
             binding.tvPostdate.text = postModel.postDate
             binding.tvTitle.text = postModel.title
@@ -59,7 +56,9 @@ class CommunityAdapter(private val context: Context, private val items: List<Any
                 Glide.with(context)
                     .load(imageModel.selectedImageUri)
                     .into(binding.ivImage)
-
+            }
+            binding.ivImage.setOnClickListener {
+                itemClick?.onClick(it, adapterPosition)
             }
         }
     }

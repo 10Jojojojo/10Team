@@ -37,7 +37,7 @@ class Community_plusFragment : Fragment(R.layout.fragment_community_plus) {
     private val communityViewModel by activityViewModels<CommunityViewModel>()
     private val binding get() = _binding!!
 
-    // CommunityAdapter의 인스턴스를 클래스 레벨 변수로 저장
+    // CommunityAdapter 의 instance 를 클래스 레벨 변수로 저장
     private lateinit var communityAdapter: CommunityAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -54,7 +54,7 @@ class Community_plusFragment : Fragment(R.layout.fragment_community_plus) {
                 postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),// 글 작성 일자
                 title = binding.etTitle.text.toString(),            // 글 제목
                 content =  binding.etContent.text.toString(),            // 글 내용
-                postImageUrl = communityViewModel.images.toMutableList(),      // 게시글 의 사진 URL (게시글 에 사진이 없을 수 있어서 Nullable)
+                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
                 likesCount = 0,            // 좋아요 수
                 commentsCount = 0 ,          // 댓글 수
             ))
@@ -77,6 +77,10 @@ class Community_plusFragment : Fragment(R.layout.fragment_community_plus) {
             CommunityAdapter(requireContext(), communityViewModel.images as List<Any>).apply {
                 itemClick = object : ItemClick {
                     override fun onClick(view: View, position: Int) {
+                        communityViewModel.images.removeAt(position)
+                        notifyItemRemoved(position)
+                        notifyItemRangeChanged(position, communityViewModel.images.size - position)
+
                     }
                 }
             }
