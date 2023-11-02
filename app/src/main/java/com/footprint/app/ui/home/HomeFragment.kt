@@ -64,7 +64,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     // GoogleMap 인스턴스를 참조하기 위한 변수
     // 화면 표시 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
     private lateinit var mGoogleMap: GoogleMap
-
     // 기기 위치 정보를 가져오는 여러 메서드를 제공하는 FusedLocationProviderClient 인스턴스를 참조하기 위한 변수
     // 화면 업데이트 요소로써, ViewModel이 아닌 Fragment에서 사용하고, Fragment에서만 사용하므로 private로 선언
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -105,7 +104,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             setLastLocation(location)
         }
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeBinding.bind(view)
@@ -147,13 +145,25 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             updateWalkStateUI()
         }
     }
-    private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding,colorCode:String)
-    {
+
+    private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding, colorCode: String) {
         val colorPattern = "^[0-9a-fA-F]{6}$".toRegex()
         if (!colorPattern.matches(colorCode)) {
             return
         }
         inflate.vExampleline.setBackgroundColor(Color.parseColor("#${colorCode}"))
+    }
+
+    private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding, width: Float?) {
+        width?.let{
+            if (width > 0.0F && width <= 100F) {
+                inflate.vExampleline.layoutParams.height =
+                    (width
+//                            * (requireContext().resources.displayMetrics.density)
+                            )
+                        .toInt()
+            }
+        }
     }
 
 
@@ -348,11 +358,23 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         // 다이어로그의 사각형 모서리를 둥글게 만들기 위해 콘스트레인트레이아웃의 색깔을 투명으로 만들기 위한 코드
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         homeViewModel.colorCodeData.observe(viewLifecycleOwner) { text ->
-            updateShowDialogPolyline(bindingDialog,text)
+            updateShowDialogPolyline(bindingDialog, text)
+        }
+        homeViewModel.lineWidthTextData.observe(viewLifecycleOwner) { number ->
+                updateShowDialogPolyline(bindingDialog, number)
         }
         bindingDialog.etColortext.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                homeViewModel.updateText(s.toString())
+                homeViewModel.updateColorCode(s.toString())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+        bindingDialog.etLinewidthtext.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                homeViewModel.updateWidth(s.toString().toFloatOrNull())
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
