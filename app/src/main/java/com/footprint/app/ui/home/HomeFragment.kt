@@ -7,31 +7,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
+import com.footprint.app.GoogleMapUtil
 import com.footprint.app.R
-import com.footprint.app.api.model.FlagModel
-import com.footprint.app.api.model.WalkModel
-import com.footprint.app.databinding.DialogHomeFlagBinding
-import com.footprint.app.databinding.DialogHomePolylineBinding
-import com.footprint.app.databinding.DialogHomeWalkBinding
-import com.footprint.app.databinding.DialogHomeWalkstopBinding
 import com.footprint.app.databinding.FragmentHomeBinding
 import com.footprint.app.services.MyService
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -40,22 +31,19 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 // Fragment()에 R.layout.fragment_home를 입력으로 주면, 생성자 주입이라고 하는건데 (공식문서에는없음)
 // onCreateView에서 하는동작을 대체해줌.
@@ -82,10 +70,21 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     private var markerstate = false
     private var markerdelandinfo = "정보"
     private var starttime = ""
+    private lateinit var currentLatLng: LatLng
 
     //산책 시작,종료 마커는 지워지지 않게 하기위한 변수
     private var startMarker: Marker? = null
     private var endMarker: Marker? = null
+    private var currentMarker: Marker? = null
+    private var restartMarkerList: MutableList<Marker?> = mutableListOf()
+    private var pauseMarkerList: MutableList<Marker?> = mutableListOf()
+    private var dialogManager: HomeDialogManager? = null
+
+    // 현재 위치로 돌아가는 작업을 관리하는 Job
+    private var returnToLocationJob: Job? = null
+
+    // 사용자의 스크롤 여부를 확인하는 플래그
+    private var isUserInteracting = false
 
     // ViewModel 인스턴스 생성
     // 생성자에 입력값이 생기면 다른 방식으로 생성해주어야 하고, ViewModelFactory도 변경해주어야 한다.
@@ -101,6 +100,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             val location = Location(LocationManager.GPS_PROVIDER).apply {
                 this.latitude = latitude
                 this.longitude = longitude
+                currentLatLng = LatLng(latitude, longitude)
             }
             // 받아온 위치로 지도 UI를 업데이트
             setLastLocation(location)
@@ -151,27 +151,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
     }
 
-    private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding, colorCode: String) {
-        val colorPattern = "^[0-9a-fA-F]{6}$".toRegex()
-        if (!colorPattern.matches(colorCode)) {
-            return
-        }
-        inflate.vExampleline.setBackgroundColor(Color.parseColor("#${colorCode}"))
-    }
-
-    private fun updateShowDialogPolyline(inflate: DialogHomePolylineBinding, width: Float?) {
-        width?.let {
-            if (width > 0.0F && width <= 100F) {
-                inflate.vExampleline.layoutParams.height =
-                    (width
-//                            * (requireContext().resources.displayMetrics.density)
-                            )
-                        .toInt()
-            }
-        }
-    }
-
-
     private fun updateWalkStateUI() {
         when (homeViewModel.walkState.value) {
             "산책중" -> {
@@ -195,33 +174,43 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
     }
 
     private fun initView() { // private는 여기 이 프래그먼트에서만 쓸꺼라는거
-//        binding.testinputbutton.setOnClickListener {
-////            homeViewModel.inputdata(mGoogleMap, homeViewModel.pathPoints.value!!, path)
-//
-//        }
-//        binding.testoutputbutton.setOnClickListener {
-////            homeViewModel.outputdata(mGoogleMap)
-//            placeMarkersOnMap(homeViewModel.placeitems)
-//        }
-//        binding.testapibutton.setOnClickListener {
-//            homeViewModel.getPlaces(null, "병원", "")
-//            homeViewModel.getPlaces(null, "애견샾", "")
-//        }
-//        binding.testpathlogbutton.setOnClickListener {
-////            Log.d("GoogleMapPractice", "저장된 경로 : ${homeViewModel.pathPoints.value!!}")
-//        }
         binding.ivPause.setOnClickListener {
             // 일시정지 기능
             homeViewModel.pauseWalk()
+            when (homeViewModel.walkState.value) {
+                "산책 일시 정지" -> {
+                    pauseMarkerList.add(
+                        GoogleMapUtil.addMarker(
+                            requireContext(),
+                            mGoogleMap,
+                            currentLatLng,
+                            R.drawable.ic_placeholder_pause,
+                            "일시정지"
+                        )
+                    )
+                }
+
+                "산책중" -> {
+                    restartMarkerList.add(
+                        GoogleMapUtil.addMarker(
+                            requireContext(),
+                            mGoogleMap,
+                            currentLatLng,
+                            R.drawable.ic_placeholder_restart,
+                            "산책중"
+                        )
+                    )
+                }
+            }
         }
         binding.ivPawprint.setOnClickListener {
             // 산책시작 기능
-            showDialogWalkstart()
+            dialogManager?.showDialogWalkstart(currentLatLng)
         }
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
             if (homeViewModel.walkState.value != "산책종료") {
-                showDialogWalkstate()
+                dialogManager?.showDialogWalkstate(currentLatLng,starttime)
             }
 
         }
@@ -250,7 +239,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             }
         }
         binding.vExampleline.setOnClickListener {
-            showDialogPolyline()
+            dialogManager?.showDialogPolyline()
         }
     }
 
@@ -260,6 +249,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 // 입력값은 childFragmentManager에서 입력하는 R.id.map_fragment값이 된다.
     override fun onMapReady(p0: GoogleMap) {
         mGoogleMap = p0
+
+        // 다이어로그 매니저에 구글맵 변수가 들어가므로, 초기화 이후 함수 호출
+        createDialogManager()
+
         mGoogleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         // 위치 정보를 받음 Activity가 아닌 Fragment라 this를 requireContext()로 수정
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
@@ -276,7 +269,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         //지도 클릭 리스너
         mGoogleMap.setOnMapClickListener { latLng ->
             if (markerstate) {
-                showDialogFlag(latLng)
+                dialogManager?.showDialogFlag(latLng)
             }
         }
         //마커 클릭 리스너
@@ -288,11 +281,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
                 // 마커 삭제(시작마커,종료마커는 제외)
                 if (marker != startMarker
+                    && marker != currentMarker
                     && marker != endMarker
-                    ) {
-                marker.remove()
+                    && !restartMarkerList.contains(marker)
+                    && !pauseMarkerList.contains(marker)
+                ) {
+                    marker.remove()
                 }
-
                 // true 반환하여 기본 마커 클릭 이벤트를 방지
                 true
             } else {
@@ -301,209 +296,43 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 false
             }
         }
+        mGoogleMap.setOnCameraMoveStartedListener { reason ->
+            if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+                // 사용자가 지도를 움직였을 때
+                isUserInteracting = true
+                // 이전에 예약된 작업이 있다면 취소합니다.
+                returnToLocationJob?.cancel()
+            }
+        }
+
+        mGoogleMap.setOnCameraIdleListener {
+            // 사용자가 지도 움직임을 멈추면
+            if (isUserInteracting) {
+                // 3초 후에 현재 위치로 돌아가는 작업을 예약
+                returnToLocationJob = lifecycleScope.launch {
+                    delay(3000) // 3초 대기
+                    if (isUserInteracting) {
+                        // 사용자가 다시 지도를 움직이지 않았다면 현재 위치로 이동
+//                        currentLatLng.let {
+//                            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it))
+//                        }
+                        // 사용자가 다시 지도를 움직이지 않았다면 현재 위치로 이동
+                        currentLatLng.let { latLng ->
+                            mGoogleMap.animateCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    latLng,
+                                    mGoogleMap.cameraPosition.zoom
+                                )
+                            )
+                        }
+                        // 작업이 완료된 후에는 플래그를 다시 false로 설정
+                        isUserInteracting = false
+                    }
+                }
+            }
+        }
         updateLocationUI()
     }
-
-    private fun showDialogWalkstart() {
-        val builder = AlertDialog.Builder(requireContext())
-        val bindingDialog = DialogHomeWalkBinding.inflate(layoutInflater)
-        builder.setView(bindingDialog.root)
-        val dialog = builder.show()
-        bindingDialog.btYes.setOnClickListener {
-            dialog.dismiss()
-            if (homeViewModel.walkState.value!! == "산책종료") {
-                starttime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
-                startLocationService()
-                addMarker(R.drawable.ic_pawprint_on)
-            }
-            homeViewModel.startWalk()
-        }
-        bindingDialog.btNo.setOnClickListener {
-            dialog.dismiss()
-        }
-    }
-
-    private fun showDialogWalkstate() {
-        val builder = AlertDialog.Builder(requireContext())
-        val bindingDialog = DialogHomeWalkstopBinding.inflate(layoutInflater)
-        builder.setView(bindingDialog.root)
-        val dialog = builder.show()
-        // 다이어로그의 사각형 모서리를 둥글게 만들기 위해 콘스트레인트레이아웃의 색깔을 투명으로 만들기 위한 코드
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        bindingDialog.btYes.setOnClickListener {
-            dialog.dismiss()
-            addMarker(R.drawable.ic_pawprint_off)
-            homeViewModel.walkList.add(
-                WalkModel(
-                    binding.tvWalkdistancevalue.text.toString(),
-                    binding.tvWalktimevalue.text.toString(),
-                    homeViewModel.pathPoints.value!!,
-                    mGoogleMap.cameraPosition,
-                    starttime = starttime,
-                    endtime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
-                )
-            )
-            captureMapSnapshot(mGoogleMap)
-//            savedFilePath.observe(viewLifecycleOwner){
-//            destroyPolyline()
-//            stopLocationService()
-//            binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
-//            findNavController().navigate(R.id.homestop)
-//            homeViewModel.endWalk()
-//            }
-        }
-        bindingDialog.btNo.setOnClickListener {
-            dialog.dismiss()
-        }
-    }
-
-    private fun showDialogPolyline() {
-        val builder = AlertDialog.Builder(requireContext())
-        val bindingDialog = DialogHomePolylineBinding.inflate(layoutInflater)
-        builder.setView(bindingDialog.root)
-        val dialog = builder.show()
-        // 다이어로그의 사각형 모서리를 둥글게 만들기 위해 콘스트레인트레이아웃의 색깔을 투명으로 만들기 위한 코드
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        homeViewModel.colorCodeData.observe(viewLifecycleOwner) { text ->
-            updateShowDialogPolyline(bindingDialog, text)
-        }
-        homeViewModel.lineWidthTextData.observe(viewLifecycleOwner) { number ->
-            updateShowDialogPolyline(bindingDialog, number)
-        }
-        bindingDialog.etColortext.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                homeViewModel.updateColorCode(s.toString())
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-        bindingDialog.etLinewidthtext.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                homeViewModel.updateWidth(s.toString().toFloatOrNull())
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-        bindingDialog.btYes.setOnClickListener {
-            // 색깔 코드 유효성 검사
-            val colorCode = bindingDialog.etColortext.text.toString().trim()
-            val colorPattern = "^[0-9a-fA-F]{6}$".toRegex()
-            if (!colorPattern.matches(colorCode)) {
-                showToast("색깔 코드를 올바르게 입력해주세요. (예: FFFFFF)")
-                return@setOnClickListener
-            }
-            // 궤도의 두께 유효성 검사
-            val lineWidthText = bindingDialog.etLinewidthtext.text.toString().trim()
-            val lineWidth = lineWidthText.toIntOrNull()
-            if (lineWidth == null || lineWidth < 0 || lineWidth > 100) {
-                showToast("두께는 0부터 100까지의 숫자로 입력해주세요.")
-                return@setOnClickListener
-            }
-            homeViewModel.colorCode = colorCode
-            homeViewModel.lineWidthText = lineWidth.toString()
-            binding.vExampleline.setBackgroundColor(Color.parseColor("#${homeViewModel.colorCode}"))
-//            bindingDialog.vExampleline.layoutParams.width = lineWidth
-            dialog.dismiss()
-        }
-        bindingDialog.btNo.setOnClickListener {
-            dialog.dismiss()
-        }
-    }
-
-    private fun showDialogFlag(latLng: LatLng) {
-        val builder = AlertDialog.Builder(requireContext())
-        val bindingDialog = DialogHomeFlagBinding.inflate(layoutInflater)
-        builder.setView(bindingDialog.root)
-        val dialog = builder.show()
-        // 다이어로그의 사각형 모서리를 둥글게 만들기 위해 콘스트레인트레이아웃의 색깔을 투명으로 만들기 위한 코드
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        var flag = R.drawable.ic_flag
-        bindingDialog.ivFlag1.setOnClickListener {
-            updateFlagSelection(bindingDialog, R.drawable.ic_flag)
-            flag = R.drawable.ic_flag
-        }
-        bindingDialog.ivFlag2.setOnClickListener {
-            updateFlagSelection(bindingDialog, R.drawable.ic_flag_blue)
-            flag = R.drawable.ic_flag_blue
-        }
-        bindingDialog.ivFlag3.setOnClickListener {
-            updateFlagSelection(bindingDialog, R.drawable.ic_flag_green)
-            flag = R.drawable.ic_flag_green
-        }
-        bindingDialog.ivFlag4.setOnClickListener {
-            updateFlagSelection(bindingDialog, R.drawable.ic_flag_purple)
-            flag = R.drawable.ic_flag_purple
-        }
-        bindingDialog.ivFlag5.setOnClickListener {
-            updateFlagSelection(bindingDialog, R.drawable.ic_flag_yellow)
-            flag = R.drawable.ic_flag_yellow
-        }
-
-        bindingDialog.btYes.setOnClickListener {
-            val text = bindingDialog.tvDialogtext.text.toString()
-            dialog.dismiss()
-            // 커스텀 아이콘으로 비트맵을 가져옴
-            val originalBitmap = BitmapFactory.decodeResource(resources, flag)
-
-            // 원하는 크기로 비트맵 크기를 조절
-            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, 80, 80, false)
-
-            // 조절된 비트맵으로 아이콘을 설정
-            val customIcon = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
-
-            // 클릭한 위치에 커스텀 아이콘을 사용하여 마커를 추가
-            val marker = mGoogleMap.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .title(text)
-                    .icon(customIcon)
-            )
-            homeViewModel.flagList.add(FlagModel(R.drawable.ic_flag, text, latLng, marker))
-            Log.d("FootprintApp", "${homeViewModel.flagList}")
-        }
-        bindingDialog.btNo.setOnClickListener {
-            dialog.dismiss()
-        }
-    }
-
-    private fun hideAllSelectionIndicators(binding: DialogHomeFlagBinding) {
-        binding.ivFlag1select.visibility = View.GONE
-        binding.ivFlag2select.visibility = View.GONE
-        binding.ivFlag3select.visibility = View.GONE
-        binding.ivFlag4select.visibility = View.GONE
-        binding.ivFlag5select.visibility = View.GONE
-    }
-
-    private fun updateFlagSelection(binding: DialogHomeFlagBinding, selectedFlag: Int) {
-        hideAllSelectionIndicators(binding)
-
-        when (selectedFlag) {
-            R.drawable.ic_flag -> {
-                binding.ivFlag1select.visibility = View.VISIBLE
-            }
-
-            R.drawable.ic_flag_blue -> {
-                binding.ivFlag2select.visibility = View.VISIBLE
-            }
-
-            R.drawable.ic_flag_green -> {
-                binding.ivFlag3select.visibility = View.VISIBLE
-            }
-
-            R.drawable.ic_flag_purple -> {
-                binding.ivFlag4select.visibility = View.VISIBLE
-            }
-
-            R.drawable.ic_flag_yellow -> {
-                binding.ivFlag5select.visibility = View.VISIBLE
-            }
-        }
-    }
-
     private fun destroyPolyline() {
         for (polyline in polylineList) {
             polyline.remove()
@@ -552,7 +381,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             // 최초에 현재위치 받아와서 줌
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    currentLatLng = LatLng(location.latitude, location.longitude)
                     mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
                 }
             }
@@ -585,46 +414,24 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 }
             }
         }
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(newLatLng)) // 카메라를 현재 위치로 이동
-    }
-
-//    private fun placeMarkersOnMap(places: List<PlaceModel>) {
-//        for (place in places) {
-//            val location = LatLng(place.location.lat, place.location.lng)
-//            val markerOptions = MarkerOptions()
-//                .position(location)
-////                .title(place.name)
-////                .snippet(place.address)
-//                .icon(BitmapDescriptorFactory.fromResource(image(place.keyword)))
-//            mGoogleMap.addMarker(markerOptions)
-//        }
-//    }
-
-//    private fun image(keyword: String): Int {
-//        var resultkeyword = 0
-//        if (keyword == "병원") {
-//            resultkeyword = R.drawable.ic_marker_shop
-//        } else if (keyword == "애견샾") {
-//            resultkeyword = R.drawable.ic_marker_hospital
-//        }
-//        return resultkeyword
-//    }
-
-    private fun captureMapSnapshot(googleMap: GoogleMap) {
-        // 코루틴 스코프 내에서 비동기 작업 시작
-        CoroutineScope(Dispatchers.Main).launch {
-            val snapshotPath = saveMapSnapshot(googleMap)
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].snapshotPath = snapshotPath
-
-            destroyPolyline()
-            stopLocationService()
-            binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
-            findNavController().navigate(R.id.homestop)
-            homeViewModel.endWalk()
-            delStartEndMarker()
+        if (currentMarker == null) {
+            // 처음 위치를 설정할 때 마커를 추가합니다.
+            currentMarker = GoogleMapUtil.addMarkerAndText(
+                requireContext(),
+                mGoogleMap,
+                currentLatLng,
+                R.drawable.ic_placeholder_current,
+                "내 위치"
+            )
+            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(newLatLng))
+        } else {
+            // 위치가 업데이트 되면 마커의 위치를 갱신합니다.
+            currentMarker!!.position = newLatLng
+            if (!isUserInteracting) {
+                mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(newLatLng))
+            }
         }
     }
-
     private suspend fun saveMapSnapshot(googleMap: GoogleMap): String {
         // 스냅샷 경로를 저장할 변수를 비동기적으로 초기화
         val deferredPath = CompletableDeferred<String>()
@@ -651,32 +458,59 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         return deferredPath.await()
     }
 
-        private fun addMarker(drawable: Int) {
-        val bitmap = BitmapFactory.decodeResource(resources, drawable)
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false)
-        val customMarker = BitmapDescriptorFactory.fromBitmap(scaledBitmap)
-
-        val markerOptions = MarkerOptions()
-            .position(mGoogleMap.cameraPosition.target)
-            .icon(customMarker)
-//         특별한 마커를 변수에 저장
-        if(startMarker == null){
-            startMarker = mGoogleMap.addMarker(markerOptions)
-        }
-        else if(endMarker == null){
-            endMarker = mGoogleMap.addMarker(markerOptions)
-        }
-//        mGoogleMap.addMarker(markerOptions)
-    }
-    private fun delStartEndMarker(){
+    private fun delStartEndMarker() {
         startMarker?.remove()
         startMarker = null
         endMarker?.remove()
         endMarker = null
+        for (i in 0..<restartMarkerList.size) {
+            restartMarkerList[i]?.remove()
+            restartMarkerList[i] = null
+        }
+        for (i in 0..<pauseMarkerList.size) {
+            pauseMarkerList[i]?.remove()
+            pauseMarkerList[i] = null
+        }
     }
-    private fun showToast(message: String) {
-        // 토스트 메시지 표시
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    private fun createDialogManager() {
+        dialogManager = HomeDialogManager(
+            requireContext(),
+            homeViewModel,
+            mGoogleMap,
+            layoutInflater,
+            binding,
+            viewLifecycleOwner,
+            startLocationService = {
+                // 위치 서비스 시작 로직 구현
+                startLocationService()
+            },
+            captureMapSnapshot = { googleMap ->
+                // 코루틴 스코프 내에서 비동기 작업 시작
+                CoroutineScope(Dispatchers.Main).launch {
+                    val snapshotPath = saveMapSnapshot(googleMap)
+                    homeViewModel.walkList[homeViewModel.walkList.size - 1].snapshotPath =
+                        snapshotPath
+
+                    destroyPolyline()
+                    stopLocationService()
+                    binding.ivPawprint.setImageResource(R.drawable.ic_pawprint_off)
+                    findNavController().navigate(R.id.homestop)
+                    homeViewModel.endWalk()
+                    delStartEndMarker()
+                }
+            },
+            onWalkStarted = { time, marker ->
+                starttime = time
+                startMarker = marker
+            },
+            onWalkEnded = {marker ->
+                endMarker = marker
+            },
+            showToast = { message ->
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+
+            }
+        )
     }
 
     override fun onDestroyView() {
@@ -686,85 +520,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
+        returnToLocationJob?.cancel() // 프래그먼트/액티비티가 종료될 때 코루틴을 취소
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(locationReceiver)
     }
 }
-
-/*
-1. 있던 예제를 이식해서 경로가 찍히고, 그 경로를 저장하는것 까지는 함
-2. 해야될 것 2가지
-2-1. 내가 저장한 경로 불러와서 지도와 함께 다른 화면에 표시하기 - 우선 홈 프래그먼트에 지도 2개 만들어서, 버튼 하나 만들어서 해보기
-화면 캡처 / 지도에 경로 저장 2가지 경우가 다 있음.
-펫피(네이버) : 화면 캡처 / 바라봄(구글) : 지도에 경로가 저장됨 / 마베독(카카오) : 지도에 경로가 저장됨.
-맵은 하나만 불러와서 그걸 재활용할지, 아니면 맵을 글쓰기나 나의 활동관리 목록에서 또 만들어야할지.
-그리고, 이러한 지도에 대해서, 구글 맵 / 네이버지도 / 카카오맵 등등이 있는데, 어떤 어플은 어떤걸 썻는지도 확인하면 좋음.
-왜냐면 , 데이터 받아오는 비용이나 혹은 경로 저장같은 기능 등등 우리가 구현하고자 하는것들의 구현 난이도가 어떤게 좋을지 모르니까, 대체로 많이쓴것을
-쓰면 좋음. 근데 일단은 3개다 제각각으로 쓰였음
-
-mGoogleMap 자체를 저장하는것은 GoogleMap 객체는 많은 내부 상태와 연관된 UI 컴포넌트를 가지고 있어서 추천되지 않고,
-현재 위치와 카메라, 줌
-val cameraPosition = mGoogleMap.cameraPosition
-val currentLatLng = cameraPosition.target
-val currentZoom = cameraPosition.zoom
-움직였던 경로
-private var pathPoints = mutableListOf<LatLng>() // 사용자의 이동 경로 저장
-private lateinit var path: Polyline // Polyline 객체
-
-pathPoints.add(newLatLng) // 위치 데이터를 리스트에 저장
-path.points = pathPoints // Polyline 업데이트
-등 필요한 데이터만 저장하면 됨.
-
-경로를 저장해서, 다른 mGoogleMap에 표현해보자.
-
-다른 프래그먼트에서도, 구글맵을 표현해야 하기 때문에, 코드를 분리할 필요가 있다. 코드 정리하기
-
-2-2. 애견샾, 동물병원 등등 API 받아와서 지도에 표시하기
-
-2-3.
- */
-
-/*
-인풋 데이터와 아웃풋 데이터 함수는 호출해서 되는거 같지만, 현재 위치 고정이라던지 그런거 푸는것도 넣어야할듯.
-그리고 아웃풋 데이터로 저장된 이동경로를 불러와도, 다시 이전의 경로로 바로 되돌아가는듯.
-현재 데이터를 초기화하면서, 이후 아웃풋 데이터를 해야될거같음.
-그리고 카메라 설정도 풀어야함.
-함수를 프래그먼트쪽에서 카메라 설정 초기화하고 경로 초기화하고 그렇게 구글맵 초기화 후 아웃풋 데이타를 가저오는식으로.
-
-아니면, 어짜피 게시글 쪽에서 지도 띄워야하는데, 그때 또 구글맵 만들텐데
-그 때 구글맵 불러오고, 데이터 정의해주면 될듯. 그 땐 현재위치 그런거 없애고.
-
-있어야 될꺼 :
-홈은 데이터 저장 & 테스트 프래그먼트 이동
-테스트는 데이터 불러오기 & 홈 프래그로 이동
-
- 스크롤 리스너
- 구글 지도에서
- 스크롤 하는걸 감지를 하니까, 스크롤 할때는 버튼 hide 하면 좋을듯(플로팅버튼)
-
- //        googleMap.snapshot { bitmap ->
-//            // 외부 파일 저장 디렉토리에 "map_snapshot[index].png" 파일을 생성
-//            val file = File(context?.getExternalFilesDir(null), "map_snapshot["+homeViewModel.walkList[homeViewModel.walkList.size-1].toString() +"].png")
-//            val fos = FileOutputStream(file)
-//            // 비트맵을 PNG 형식으로 파일에 저장
-//            bitmap?.compress(Bitmap.CompressFormat.PNG, 90, fos)
-//            fos.close()
-//            // 파일의 절대 경로를 deferredPath에 설정
-//            deferredPath.complete(file.absolutePath)
-//        }
-        // 위의 코드가 문제가 있다는데 먼지 잘 모르겠음. 나중에 알아보기.
-        googleMap.snapshot { bitmap ->
-            CoroutineScope(Dispatchers.Main).launch {
-                val path = withContext(Dispatchers.IO) {
-                    // 외부 파일 저장 디렉토리에 "map_snapshot[index].png" 파일을 생성
-                    val file = File(context?.getExternalFilesDir(null), "map_snapshot[" + homeViewModel.walkList[homeViewModel.walkList.size-1].dateid + "].png")
-                    val fos = FileOutputStream(file)
-                    // 비트맵을 PNG 형식으로 파일에 저장
-                    bitmap?.compress(Bitmap.CompressFormat.PNG, 90, fos)
-                    fos.close()
-
-                    file.absolutePath // 이 값을 반환합니다.
-                }
-                deferredPath.complete(path)
-            }
-        }
- */

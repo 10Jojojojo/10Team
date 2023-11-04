@@ -11,4 +11,6 @@
     <color name="pink_100">#F8BDEB</color>
     <color name="pink_300">#FC69AF</color>
     <color name="gray_500">#9E9E9E</color>
+    <color name="selector_blue">#33B5E5</color>
+    <color name="selector_gray">#CCCCCC</color>
 </resources>

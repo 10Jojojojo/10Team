@@ -66,12 +66,12 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
             addMarker(
                 googleMap,
-                R.drawable.ic_pawprint_on,
+                R.drawable.ic_placeholder_start,
                 homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.first().first()
             )
             addMarker(
                 googleMap,
-                R.drawable.ic_pawprint_off,
+                R.drawable.ic_placeholder_end,
                 homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.last().last()
             )
 

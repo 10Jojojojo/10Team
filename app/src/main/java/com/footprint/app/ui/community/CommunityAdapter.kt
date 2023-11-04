@@ -3,7 +3,9 @@ package com.footprint.app.ui.community
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.footprint.app.Constants.TYPE_POST
 import com.footprint.app.Constants.TYPE_TAG
@@ -16,6 +18,8 @@ import com.footprint.app.databinding.ItemImageBinding
 import com.footprint.app.databinding.ItemPostBinding
 import com.footprint.app.databinding.ItemTagBinding
 import com.footprint.app.util.ItemClick
+import com.google.android.material.tabs.TabLayoutMediator
+
 class CommunityAdapter(private val context: Context, private val items: List<*>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     //Any 는 모든 타입을 받을 수 있다.
@@ -93,6 +97,21 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
                 // 각 포스트 항목들이 뷰페이저를 가지고있음
 //                holder.binding.rvImage.layoutManager = LinearLayoutManager(context)
 //                holder.binding.rvImage.adapter = CommunityAdapter(context, (items[position] as PostModel).postImageUrl)
+
+                // ViewPager2로 변경
+                val postImages = (items[position] as PostModel).postImageUrl
+                holder.binding.vp2PostImage.adapter = CommunityAdapter(context, postImages)
+                holder.binding.vp2PostImage.orientation = ViewPager2.ORIENTATION_HORIZONTAL // 가로 스와이프 설정
+
+                // 페이지 인디케이터 설정 (옵션)
+                // 예를 들어, TabLayoutMediator를 사용하여 TabLayout을 ViewPager2와 연결할 수 있습니다.
+                // 이 부분은 구현에 따라 달라질 수 있습니다.
+//                TabLayoutMediator(holder.binding.tabLayout, holder.binding.viewPager2) { tab, position ->
+//                    // 여기에 페이지 인디케이터 설정
+//                }.attach()
+                // Indicator에 viewPager 설정
+                holder.binding.indicatorVp2PostImage.setViewPager(holder.binding.vp2PostImage)
+
             }
 
             is TagModel -> (holder as TagHolder).bind(items[position] as TagModel)

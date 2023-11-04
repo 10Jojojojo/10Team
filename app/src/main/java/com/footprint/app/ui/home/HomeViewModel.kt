@@ -73,6 +73,11 @@ class HomeViewModel : ViewModel() {
         val dataFormat = SimpleDateFormat("mm : ss", Locale.KOREA)
         _walkState.value = "산책중"
         startTime = System.currentTimeMillis()
+        // 이론적으로는 메모리가 부족하면 뷰가 먼저 파괴되고, 뷰의 라이프사이클이 파괴되면서 뷰모델도 제거가 되기떄문에, 서비스에 옮겨두는게 좋음
+        // 시간되면 해보기(일단 문제없이 돌아가기는 하니까 인지만 하고 후순위로) 서비스에도 코루틴 사용가능 똑같이 그리고 디스패처도 지정해서
+        // 전역변수로 코루틴 스코프 객체를 만들어서 하면 될듯
+        // 구글링으로, 서비스에서 코루틴 사용방법 이런 키워드로 검색해보기
+        // 시간계산의 경우 CPU 연산을 조금 사용해서, 디스패처는 디폴트로 사용하기
         viewModelScope.launch {
             while (walkState.value == "산책중") {
                 endTime = System.currentTimeMillis() - startTime + walkTime

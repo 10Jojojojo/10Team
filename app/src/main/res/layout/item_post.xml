@@ -79,8 +79,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:text="글제목글제목글제목글제목"
-                android:textStyle="bold"
                 android:textSize="20sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@id/cl_recyclerview"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -94,19 +94,41 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_content">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_image"
+                <!--                <androidx.recyclerview.widget.RecyclerView-->
+                <!--                    android:id="@+id/rv_image"-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
+                <!--                    app:layout_constraintStart_toStartOf="parent"-->
+                <!--                    app:layout_constraintTop_toTopOf="parent"-->
+                <!--                    tools:itemCount="6"-->
+                <!--                    tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
+                <!--                    tools:orientation="vertical">-->
+
+                <!--                </androidx.recyclerview.widget.RecyclerView>-->
+                <me.relex.circleindicator.CircleIndicator3
+                    android:id="@+id/indicator_vp2_post_image"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="32dp"
+                    app:ci_drawable_unselected="@drawable/gray_radius"
+                    app:ci_drawable="@drawable/blue_radius"
+                    app:ci_animator="@animator/scale_with_alpha"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/vp2_post_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/vp2_post_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:itemCount="6"
-                    tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:orientation="vertical">
+                    app:layout_constraintTop_toBottomOf="@id/indicator_vp2_post_image"
+                    tools:itemCount="6">
 
-                </androidx.recyclerview.widget.RecyclerView>
+                </androidx.viewpager2.widget.ViewPager2>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView

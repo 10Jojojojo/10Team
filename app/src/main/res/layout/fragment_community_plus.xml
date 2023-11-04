@@ -109,18 +109,39 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_content"
+<!--                    <androidx.recyclerview.widget.RecyclerView-->
+<!--                        android:id="@+id/rv_content"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="match_parent" />-->
+                    <me.relex.circleindicator.CircleIndicator3
+                        android:id="@+id/indicator_vp2_post_image"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="32dp"
+                        app:ci_drawable_unselected="@drawable/gray_radius"
+                        app:ci_drawable="@drawable/blue_radius"
+                        app:ci_animator="@animator/scale_with_alpha"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/vp2_post_image"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/vp2_post_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_constraintBottom_toTopOf="@id/et_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/indicator_vp2_post_image"
+                        tools:itemCount="6">
 
+                    </androidx.viewpager2.widget.ViewPager2>
                     <EditText
                         android:id="@+id/et_content"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="내용을 입력해 주세요."
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/rv_content" />
+                        app:layout_constraintTop_toBottomOf="@id/vp2_post_image" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

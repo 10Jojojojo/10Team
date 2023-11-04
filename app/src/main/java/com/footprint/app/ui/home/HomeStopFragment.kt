@@ -61,8 +61,8 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
             // 카메라 를 해당 위치로 이동
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
-            addMarker(googleMap, R.drawable.ic_pawprint_on,homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.first().first() )
-            addMarker(googleMap, R.drawable.ic_pawprint_off, homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.last().last())
+            addMarker(googleMap, R.drawable.ic_placeholder_start,homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.first().first() )
+            addMarker(googleMap, R.drawable.ic_placeholder_end, homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.last().last())
             for (path in homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint) {
                 googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.parseColor("#${homeViewModel.colorCode}")).width(homeViewModel.lineWidthText.toFloat()))
             }

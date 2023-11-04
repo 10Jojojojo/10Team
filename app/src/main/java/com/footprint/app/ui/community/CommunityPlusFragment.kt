@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import com.footprint.app.Constants
 import com.footprint.app.FirebaseDatabaseManager
 import com.footprint.app.R
@@ -50,16 +51,16 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
     private fun goCommunityPage(){
         binding.btComplete.setOnClickListener {
             communityViewModel.post.add(PostModel(
-//                profileImageUrl = null,    // 프로필 사진 URL
+                profileImageUrl = null,    // 프로필 사진 URL
                 nickname = "내새끼",           // 닉네임
                 postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),// 글 작성 일자
                 title = binding.etTitle.text.toString(),            // 글 제목
                 content =  binding.etContent.text.toString(),            // 글 내용
-//                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
+                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
                 likesCount = 0,            // 좋아요 수
                 commentsCount = 0 ,          // 댓글 수
             ))
-            FirebaseDatabaseManager.savePostList(communityViewModel.post.last())
+//            FirebaseDatabaseManager.savePostList(communityViewModel.post.last())
 //            findNavController().navigate(R.id.community)
             findNavController().popBackStack() // 현재 프래그먼트 백스택에서 프래그먼트를 없앤다.
         }
@@ -76,18 +77,28 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
     }
     private fun recyclerView(){
         communityAdapter =
-            CommunityAdapter(requireContext(), communityViewModel.images as List<Any>).apply {
+            CommunityAdapter(requireContext(), communityViewModel.images).apply {
                 itemClick = object : ItemClick {
                     override fun onClick(view: View, position: Int) {
                         communityViewModel.images.removeAt(position)
                         notifyItemRemoved(position)
                         notifyItemRangeChanged(position, communityViewModel.images.size - position)
-
+                        binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
                     }
                 }
             }
-        binding.rvContent.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvContent.adapter = communityAdapter
+//        binding.rvContent.layoutManager = LinearLayoutManager(requireContext())
+//        binding.rvContent.adapter = communityAdapter
+        binding.vp2PostImage.orientation = ViewPager2.ORIENTATION_HORIZONTAL // 가로 스와이프 설정
+        binding.vp2PostImage.adapter = communityAdapter
+        // 페이지 인디케이터 설정 (옵션)
+        // 예를 들어, TabLayoutMediator를 사용하여 TabLayout을 ViewPager2와 연결할 수 있습니다.
+        // 이 부분은 구현에 따라 달라질 수 있습니다.
+//                TabLayoutMediator(holder.binding.tabLayout, holder.binding.viewPager2) { tab, position ->
+//                    // 여기에 페이지 인디케이터 설정
+//                }.attach()
+        // Indicator에 viewPager 설정
+//        binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
     }
     private fun spinnerView() {
         // 스피너 에 들어갈 데이터 (첫 번째 옵션 으로 안내 메시지 포함)
@@ -199,6 +210,7 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
             val imageUri = data?.data
             communityViewModel.images.add(ImageModel(imageUri))
             communityAdapter.notifyItemInserted(communityViewModel.images.size - 1)
+            binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
         }
     }
     private fun showToast(message: String) {

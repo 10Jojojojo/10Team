@@ -28,7 +28,7 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
 
         _binding = FragmentCommunityBinding.bind(view)
         initView()
-        loadData()
+//        loadData()
     }
 
     private fun initView() {
