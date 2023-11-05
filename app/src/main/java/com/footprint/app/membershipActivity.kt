@@ -79,7 +79,7 @@ class membershipActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            createProfile(nickName,dogName,dogAgeText,dogAge,dogSex,selectedImageUri)
+//            createProfile(nickName,dogName,dogAgeText,dogAge,dogSex,selectedImageUri)
             Log.d("FootprintApp","프로필 모델 : ${myprofile}")
         }
     }
@@ -136,9 +136,9 @@ class membershipActivity : AppCompatActivity() {
         // 토스트 메시지 표시
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
-    private fun createProfile(nickName:String,dogName:String,dogAgeText:String,dogAge:Int,dogSex:String,selectedImageUri:Uri?)
-    {
-        myprofile = ProfileModel(nickName,dogName,dogAgeText,dogAge,dogSex,selectedImageUri)
-    }
+//    private fun createProfile(nickName:String,dogName:String,dogAgeText:String,dogAge:Int,dogSex:String,selectedImageUri:Uri?)
+//    {
+//        myprofile = ProfileModel(nickName,dogName,dogAgeText,dogAge,dogSex,selectedImageUri)
+//    }
 
 }

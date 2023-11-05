@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
+import com.footprint.app.api.model.FlagModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -67,4 +68,28 @@ object GoogleMapUtil {
         val markerOptions = MarkerOptions().position(latlng).title(textValue).icon(customMarker)
         return mGoogleMap.addMarker(markerOptions)
     }
+    fun addFlagsToMap(
+        context: Context,
+        mGoogleMap: GoogleMap,
+        flags: MutableList<FlagModel>,
+        imageWidth: Int = 100,
+        imageHeight: Int = 100
+    ) {
+        // 모든 플래그 모델을 순회하며 마커를 추가합니다.
+        flags.forEach { flagModel ->
+            // 이미지 리소스 ID를 사용하여 마커를 생성합니다.
+            val marker = addMarker(
+                context = context,
+                mGoogleMap = mGoogleMap,
+                latlng = flagModel.latlng,
+                resourceId = flagModel.flag,
+                textValue = flagModel.text,
+                imageWidth = imageWidth,
+                imageHeight = imageHeight
+            )
+            // 생성된 마커를 FlagModel에 저장합니다.
+            flagModel.marker = marker
+        }
+    }
+
 }

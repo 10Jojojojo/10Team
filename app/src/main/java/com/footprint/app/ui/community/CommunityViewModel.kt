@@ -1,14 +1,14 @@
 package com.footprint.app.ui.community
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.footprint.app.Constants.STATUS_NOT_LOADED
-import com.footprint.app.api.model.ImageModel
 import com.footprint.app.api.model.PostModel
 import com.footprint.app.api.model.TagModel
 
 class CommunityViewModel : ViewModel() {
 
-    val images = mutableListOf<ImageModel>()
+    val images = mutableListOf<Uri>()
     val post = mutableListOf<PostModel>()
     var postState:Int = STATUS_NOT_LOADED
     val dummyTag = listOf(

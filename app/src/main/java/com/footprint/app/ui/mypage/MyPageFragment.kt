@@ -2,12 +2,17 @@ package com.footprint.app.ui.mypage
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.footprint.app.FirebaseDatabaseManager.readProfile
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentMypageBinding
+import com.footprint.app.ui.home.HomeViewModel
 
 class MyPageFragment : Fragment(R.layout.fragment_mypage) {
 
@@ -17,6 +22,7 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
     private var _binding: FragmentMypageBinding? = null
     private val binding get() = _binding!!
 
+    private val homeViewModel by activityViewModels<HomeViewModel>()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -31,7 +37,20 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         uesrInfo()
 
         dog()
-
+        readProfile("-NiUywbbHbsxPZrYtRZF") {
+            it?.let {
+                // 이미지 URL이 있는 경우에만 Glide를 사용하여 로드
+                Glide.with(requireContext())
+                    .load(it.selectedImageUri) // selectedImageUri에 저장된 이미지 URL
+                    .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
+                    .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
+                    .into(binding.profileImage) // 해당 이미지를 표시할 ImageView
+                homeViewModel.flagList= it.markerList.toMutableList()
+            } ?: run {
+                // profileModel이 null인 경우, 즉 데이터 로드 실패 또는 해당 프로필이 존재하지 않는 경우 처리
+                Toast.makeText(requireContext(), "프로필을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // 마이페이지에서 수정 페이지로 이동

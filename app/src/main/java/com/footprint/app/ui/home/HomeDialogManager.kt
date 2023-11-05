@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleOwner
+import com.footprint.app.FirebaseDatabaseManager
 import com.footprint.app.GoogleMapUtil
 import com.footprint.app.R
 import com.footprint.app.api.model.FlagModel
@@ -79,6 +80,7 @@ class HomeDialogManager(
             onWalkEnded(endMarker)
             homeViewModel.walkList.add(
                 WalkModel(
+                    key = "",
                     binding.tvWalkdistancevalue.text.toString(),
                     binding.tvWalktimevalue.text.toString(),
                     homeViewModel.pathPoints.value!!,
@@ -87,6 +89,8 @@ class HomeDialogManager(
                     endtime = SimpleDateFormat("a HH : mm", Locale.KOREA).format(Date())
                 )
             )
+//            FirebaseDatabaseManager.saveWalkList(homeViewModel.walkList.last())
+            FirebaseDatabaseManager.uploadSnapshotAndSaveWalkModel(mGoogleMap,homeViewModel.walkList.last())
             captureMapSnapshot(mGoogleMap)
         }
         bindingDialog.btNo.setOnClickListener {
@@ -184,7 +188,7 @@ class HomeDialogManager(
             val text = bindingDialog.tvDialogtext.text.toString()
             val marker = GoogleMapUtil.addMarker(context,mGoogleMap,latLng,flag,text,80,80)
             dialog.dismiss()
-            homeViewModel.flagList.add(FlagModel(R.drawable.ic_flag, text, latLng, marker))
+            homeViewModel.flagList.add(FlagModel("",R.drawable.ic_flag, text, latLng, marker))
         }
         bindingDialog.btNo.setOnClickListener {
             dialog.dismiss()

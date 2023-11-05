@@ -50,6 +50,13 @@
             android:id="@+id/communityPlus"
             app:destination="@+id/navigation_communityPlus"
             app:launchSingleTop="true" />
+
+        <action
+            android:id="@+id/communityPost"
+            app:destination="@+id/navigation_communityPost"
+            app:launchSingleTop="true" >
+
+        </action>
     </fragment>
 
     <fragment
@@ -108,7 +115,12 @@
         app:destination="@+id/navigation_home">
 
     </action>
-
+    <fragment
+        android:id="@+id/navigation_communityPost"
+        android:name="com.footprint.app.ui.community.CommunityPostFragment"
+        tools:layout="@layout/fragment_community_post"
+        android:label="커뮤니티포스트">
+    </fragment>
 
 
 </navigation>

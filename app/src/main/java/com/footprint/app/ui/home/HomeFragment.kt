@@ -21,8 +21,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.fragment.findNavController
+import com.footprint.app.Constants.STATUS_LOADED
+import com.footprint.app.Constants.STATUS_NOT_LOADED
+import com.footprint.app.FirebaseDatabaseManager
+import com.footprint.app.FirebaseDatabaseManager.readWalkList
 import com.footprint.app.GoogleMapUtil
+import com.footprint.app.GoogleMapUtil.addFlagsToMap
 import com.footprint.app.R
+import com.footprint.app.api.model.FlagModel
 import com.footprint.app.databinding.FragmentHomeBinding
 import com.footprint.app.services.MyService
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -35,6 +41,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,8 +49,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // Fragment()에 R.layout.fragment_home를 입력으로 주면, 생성자 주입이라고 하는건데 (공식문서에는없음)
 // onCreateView에서 하는동작을 대체해줌.
@@ -119,6 +130,16 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         getMap()
         observeViewModel() // 뷰를 먼저 생성하고 LiveData를 감시해야 한다.(LiveData의 변화가 먼저 일어나면,
         // 뷰는 생성되지 않았는데(초기화가 되지 않았는데) 뷰의 속성 변화를 하게 될 수 있다.)
+        loadData()
+    }
+
+    private fun loadData() {
+        if (homeViewModel.walkState2 == STATUS_NOT_LOADED) {
+            readWalkList(homeViewModel.walkList) {
+                // 여기서 UI 갱신
+                homeViewModel.walkState2 = STATUS_LOADED
+            }
+        }
     }
 
     private fun startLocationService() {
@@ -210,7 +231,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         binding.ivSquare.setOnClickListener {
             // 산책정지 기능
             if (homeViewModel.walkState.value != "산책종료") {
-                dialogManager?.showDialogWalkstate(currentLatLng,starttime)
+                dialogManager?.showDialogWalkstate(currentLatLng, starttime)
             }
 
         }
@@ -252,6 +273,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
 
         // 다이어로그 매니저에 구글맵 변수가 들어가므로, 초기화 이후 함수 호출
         createDialogManager()
+
+        //마커데이터 있으면 추가해주는 로직
+        if(homeViewModel.flagList != emptyList<FlagModel>()){
+            addFlagsToMap(requireContext(),mGoogleMap,homeViewModel.flagList,80,80)}
 
         mGoogleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
         // 위치 정보를 받음 Activity가 아닌 Fragment라 this를 requireContext()로 수정
@@ -333,6 +358,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
         }
         updateLocationUI()
     }
+
     private fun destroyPolyline() {
         for (polyline in polylineList) {
             polyline.remove()
@@ -432,31 +458,67 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             }
         }
     }
-    private suspend fun saveMapSnapshot(googleMap: GoogleMap): String {
-        // 스냅샷 경로를 저장할 변수를 비동기적으로 초기화
-        val deferredPath = CompletableDeferred<String>()
-        googleMap.snapshot { bitmap ->
-            CoroutineScope(Dispatchers.Main).launch {
-                val path = withContext(Dispatchers.IO) {
-                    // 외부 파일 저장 디렉토리에 "map_snapshot[index].png" 파일을 생성
-                    val file = File(
-                        context?.getExternalFilesDir(null),
-                        "map_snapshot[" + homeViewModel.walkList[homeViewModel.walkList.size - 1].dateid + "].png"
-                    )
-                    val fos = FileOutputStream(file)
-                    // 비트맵을 PNG 형식으로 파일에 저장
-                    bitmap?.compress(Bitmap.CompressFormat.PNG, 90, fos)
-                    fos.close()
 
-                    file.absolutePath // 이 값을 반환합니다.
+    //    private suspend fun saveMapSnapshot(googleMap: GoogleMap): String {
+//        // 스냅샷 경로를 저장할 변수를 비동기적으로 초기화
+//        val deferredPath = CompletableDeferred<String>()
+//        googleMap.snapshot { bitmap ->
+//            CoroutineScope(Dispatchers.Main).launch {
+//                val path = withContext(Dispatchers.IO) {
+//                    // 외부 파일 저장 디렉토리에 "map_snapshot[index].png" 파일을 생성
+//                    val file = File(
+//                        context?.getExternalFilesDir(null),
+//                        "map_snapshot[" + homeViewModel.walkList[homeViewModel.walkList.size - 1].dateid + "].png"
+//                    )
+//                    val fos = FileOutputStream(file)
+//                    // 비트맵을 PNG 형식으로 파일에 저장
+//                    bitmap?.compress(Bitmap.CompressFormat.PNG, 90, fos)
+//                    fos.close()
+//
+//                    file.absolutePath // 이 값을 반환합니다.
+//                }
+//                deferredPath.complete(path)
+//            }
+//        }
+//        // 스냅샷의 파일 경로를 반환
+//        // await()를 통해 해당 경로가 설정될 때까지 기다린다.
+//        return deferredPath.await()
+//    }
+    private suspend fun uploadMapSnapshot(googleMap: GoogleMap): String =
+        withContext(Dispatchers.IO) {
+            val deferredUrl = CompletableDeferred<String>()
+
+            googleMap.snapshot { bitmap ->
+                // 메모리에 존재하는 비트맵을 바이트 배열로 변환
+                ByteArrayOutputStream().use { baos ->
+                    bitmap?.compress(Bitmap.CompressFormat.PNG, 90, baos)
+                    val data = baos.toByteArray()
+
+                    // 스냅샷 이름을 정의 (예: 날짜와 시간을 사용)
+                    val snapshotName = "map_snapshot_${
+                        SimpleDateFormat("yyMMddHHmmss", Locale.KOREA).format(Date())
+                    }.png"
+
+                    // Firebase Storage에 이미지 업로드
+                    val storageRef =
+                        FirebaseStorage.getInstance().reference.child("snapshots/$snapshotName")
+                    storageRef.putBytes(data)
+                        .addOnSuccessListener { taskSnapshot ->
+                            // 업로드 성공 시 다운로드 URL 획득
+                            taskSnapshot.metadata?.reference?.downloadUrl?.addOnSuccessListener { uri ->
+                                deferredUrl.complete(uri.toString())
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            // 업로드 실패 시 에러 핸들링
+                            exception.printStackTrace()
+                            deferredUrl.completeExceptionally(exception)
+                        }
                 }
-                deferredPath.complete(path)
             }
+
+            return@withContext deferredUrl.await() // 업로드 URL 반환
         }
-        // 스냅샷의 파일 경로를 반환
-        // await()를 통해 해당 경로가 설정될 때까지 기다린다.
-        return deferredPath.await()
-    }
 
     private fun delStartEndMarker() {
         startMarker?.remove()
@@ -472,6 +534,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             pauseMarkerList[i] = null
         }
     }
+
     private fun createDialogManager() {
         dialogManager = HomeDialogManager(
             requireContext(),
@@ -487,9 +550,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
             captureMapSnapshot = { googleMap ->
                 // 코루틴 스코프 내에서 비동기 작업 시작
                 CoroutineScope(Dispatchers.Main).launch {
-                    val snapshotPath = saveMapSnapshot(googleMap)
-                    homeViewModel.walkList[homeViewModel.walkList.size - 1].snapshotPath =
-                        snapshotPath
+//                    val snapshotPath = saveMapSnapshot(googleMap)
+//                    homeViewModel.walkList[homeViewModel.walkList.size - 1].snapshotPath =
+//                        snapshotPath
 
                     destroyPolyline()
                     stopLocationService()
@@ -503,7 +566,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback {
                 starttime = time
                 startMarker = marker
             },
-            onWalkEnded = {marker ->
+            onWalkEnded = { marker ->
                 endMarker = marker
             },
             showToast = { message ->

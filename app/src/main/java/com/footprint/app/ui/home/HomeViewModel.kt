@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.footprint.app.Constants.STATUS_NOT_LOADED
 import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.WalkModel
 import com.google.android.gms.maps.model.LatLng
@@ -33,9 +34,10 @@ class HomeViewModel : ViewModel() {
     val walkState: LiveData<String> = _walkState
     private val _time = MutableLiveData<String>().apply { value = "00:00" }
     val time: LiveData<String> = _time
-    val flagList = mutableListOf<FlagModel>()
+    var flagList = mutableListOf<FlagModel>()
     val walkList = mutableListOf<WalkModel>()
 
+    var walkState2:Int = STATUS_NOT_LOADED
     var lineWidthText = "10"
     var colorCode = "000000"
 

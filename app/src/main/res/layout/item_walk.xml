@@ -20,7 +20,25 @@
             app:cardCornerRadius="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+<!--            <ViewSwitcher-->
+<!--                android:id="@+id/vs_map_image"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content">-->
 
+<!--                <ImageView-->
+<!--                    android:id="@+id/iv_placeholder"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/dummy_walkitem_map"-->
+<!--                    android:scaleType="centerCrop" />-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/iv_map_image"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/dummy_walkitem_map"-->
+<!--                    android:scaleType="centerCrop" />-->
+<!--            </ViewSwitcher>-->
             <ImageView
                 android:id="@+id/iv_map_image"
                 android:layout_width="wrap_content"

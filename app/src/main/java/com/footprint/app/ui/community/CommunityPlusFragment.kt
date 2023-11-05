@@ -18,12 +18,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.footprint.app.Constants
 import com.footprint.app.FirebaseDatabaseManager
 import com.footprint.app.R
-import com.footprint.app.api.model.ImageModel
 import com.footprint.app.api.model.PostModel
 import com.footprint.app.databinding.FragmentCommunityPlusBinding
 import com.footprint.app.util.ItemClick
@@ -50,19 +48,38 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
 
     private fun goCommunityPage(){
         binding.btComplete.setOnClickListener {
-            communityViewModel.post.add(PostModel(
-                profileImageUrl = null,    // 프로필 사진 URL
-                nickname = "내새끼",           // 닉네임
-                postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),// 글 작성 일자
-                title = binding.etTitle.text.toString(),            // 글 제목
-                content =  binding.etContent.text.toString(),            // 글 내용
-                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
-                likesCount = 0,            // 좋아요 수
-                commentsCount = 0 ,          // 댓글 수
-            ))
-//            FirebaseDatabaseManager.savePostList(communityViewModel.post.last())
+//            communityViewModel.post.add(PostModel(
+//                profileImageUrl = null,    // 프로필 사진 URL
+//                nickname = "내새끼",           // 닉네임
+//                postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),// 글 작성 일자
+//                title = binding.etTitle.text.toString(),            // 글 제목
+//                content =  binding.etContent.text.toString(),            // 글 내용
+//                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
+//                likesCount = 0,            // 좋아요 수
+//                commentsCount = 0 ,          // 댓글 수
+//            ))
+            FirebaseDatabaseManager.uploadImagesToFirebaseStorage(requireContext(),communityViewModel.images){
+                communityViewModel.post.add(
+                    PostModel(
+                        key = "",
+                        authorId = "작성자ID", // 실제로는 사용자의 고유 ID로 대체해야 합니다.
+                        authorNickname = "내새끼", // 닉네임 예시, 실제 사용자 닉네임으로 대체
+                        authorProfileImageUrl = "", // 프로필 사진 URL이 없는 경우 null, 실제 URL이 있다면 Uri.parse("url")로 대체
+                        postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()), // 글 작성 일자
+                        title = binding.etTitle.text.toString(), // 글 제목
+                        content = binding.etContent.text.toString(), // 글 내용
+                        postImageUrls = it, // 게시글의 사진 URL 리스트
+                        likesCount = 0, // 좋아요 수
+                        commentsCount = 0, // 댓글 수
+                        commentsList = mutableListOf(), // 댓글 리스트
+                        tags = listOf("Hot") // 태그 리스트
+                    )
+                )
+
+                FirebaseDatabaseManager.savePostList(communityViewModel.post.last())
 //            findNavController().navigate(R.id.community)
-            findNavController().popBackStack() // 현재 프래그먼트 백스택에서 프래그먼트를 없앤다.
+                findNavController().popBackStack() // 현재 프래그먼트 백스택에서 프래그먼트를 없앤다.
+            }
         }
 
         communityViewModel.images.clear()
@@ -208,7 +225,9 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == Constants.REQUEST_GALLERY && resultCode == AppCompatActivity.RESULT_OK) {
             val imageUri = data?.data
-            communityViewModel.images.add(ImageModel(imageUri))
+            if (imageUri != null) {
+                communityViewModel.images.add(imageUri)
+            }
             communityAdapter.notifyItemInserted(communityViewModel.images.size - 1)
             binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
         }
