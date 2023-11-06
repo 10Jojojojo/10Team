@@ -1,6 +1,7 @@
 package com.footprint.app.ui.mypage
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -8,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentMypageBinding
+import kotlin.math.log
 
 class MyPageFragment : Fragment(R.layout.fragment_mypage) {
 
@@ -38,12 +40,18 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
     private fun nextPage(){
         binding.mypageRevise.setOnClickListener {
             findNavController().navigate(R.id.mypage_revise)
-
         }
         binding.myDogPlus.setOnClickListener {
             findNavController().navigate(R.id.dog)
         }
-
+        binding.postLinearLayout.setOnClickListener{
+            findNavController().navigate(R.id.Post)
+            Log.d("layout","post")
+        }
+        binding.walkLinearLayout.setOnClickListener {
+            findNavController().navigate(R.id.walk)
+            Log.d("layout","walk")
+        }
     }
 
 

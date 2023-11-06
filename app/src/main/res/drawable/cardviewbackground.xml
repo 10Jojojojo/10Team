@@ -6,4 +6,13 @@
      </stroke>
 
 
+     <solid
+          android:color="#E0F4FF">
+
+     </solid>
+
+     <corners
+          android:radius="10dp">
+
+     </corners>
 </shape>

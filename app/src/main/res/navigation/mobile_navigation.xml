@@ -67,7 +67,14 @@
         android:id="@+id/navigation_mypage"
         android:name="com.footprint.app.ui.mypage.MyPageFragment"
         android:label="@string/title_mypage"
-        tools:layout="@layout/fragment_mypage" />
+        tools:layout="@layout/fragment_mypage" >
+        <action
+            android:id="@+id/walk"
+            app:destination="@id/navigation_myWalk" />
+        <action
+            android:id="@+id/Post"
+            app:destination="@id/navigation_myPost" />
+    </fragment>
     <action
         android:id="@+id/mypage_revise"
         app:destination="@+id/navigation_mypage_revise" />
@@ -109,6 +116,26 @@
 
     </action>
 
+    <fragment
+        android:id="@+id/navigation_myPost"
+        android:name="com.footprint.app.ui.mypage.MyPostFragment"
+        android:label="post"
+        tools:layout="@layout/fragment_my_post">
+        <action
+            android:id="@+id/mypage"
+            app:destination="@id/navigation_mypage" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/navigation_myWalk"
+        android:name="com.footprint.app.ui.mypage.MyWalkFragment"
+        android:label="walk"
+        tools:layout="@layout/fragment_my_walk">
+        <action
+            android:id="@+id/mypage"
+            app:destination="@id/navigation_mypage" />
+    </fragment>
 
 
 </navigation>
