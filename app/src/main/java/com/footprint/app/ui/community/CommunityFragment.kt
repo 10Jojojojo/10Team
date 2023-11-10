@@ -1,22 +1,15 @@
 package com.footprint.app.ui.community
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.footprint.app.Constants.STATUS_LOADED
-import com.footprint.app.Constants.STATUS_NOT_LOADED
-import com.footprint.app.FirebaseDatabaseManager
-import com.footprint.app.FirebaseDatabaseManager.readPostList
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentCommunityBinding
 import com.footprint.app.util.ItemClick
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 
 class CommunityFragment : Fragment(R.layout.fragment_community) {
 
@@ -31,10 +24,17 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
         super.onViewCreated(view, savedInstanceState)
 
         _binding = FragmentCommunityBinding.bind(view)
-        initView()
-        loadData()
+//        init()
+        communityViewModel.postList.observe(viewLifecycleOwner) {
+            if (!communityViewModel.getCommunityObserve()) {
+                initView()
+                communityViewModel.setCommunityObserve(true)
+            }
+        }
     }
-
+//    private fun init(){
+//        communityViewModel.userdata(UserSession.userdata)
+//    }
     private fun initView() {
         binding.rvTag.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -47,17 +47,15 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
             }
         binding.rvPost.layoutManager =
             LinearLayoutManager(requireContext())
-        binding.rvPost.adapter = CommunityAdapter(requireContext(), communityViewModel.post).apply {
+        binding.rvPost.adapter = CommunityAdapter(requireContext(), communityViewModel.postList.value!!).apply {
             itemClick = object : ItemClick {
                 override fun onClick(view: View, position: Int) {
                     if (findNavController().currentDestination?.id == R.id.navigation_community) {
-                        val gson = Gson()
-                        val post = communityViewModel.post[position]
-                        val postJson = gson.toJson(post)
-                        val bundle = Bundle().apply {
-                            putString("post", postJson)
-                        }
-                        findNavController().navigate(R.id.communityPost, bundle)
+                            val bundle = Bundle().apply {
+                                putInt("position", position)
+                            }
+                            findNavController().navigate(R.id.communityPost, bundle)
+
                     }
                 }
             }
@@ -73,18 +71,9 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
         }
     }
 
-    private fun loadData() {
-        if (communityViewModel.postState == STATUS_NOT_LOADED) {
-            readPostList(communityViewModel.post) {
-                // 여기서 UI 갱신
-                communityViewModel.postState = STATUS_LOADED
-                binding.rvPost.adapter?.notifyDataSetChanged()
-            }
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        communityViewModel.setCommunityObserve(false)
         _binding = null
     }
 }

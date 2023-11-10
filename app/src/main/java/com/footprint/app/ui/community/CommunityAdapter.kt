@@ -16,6 +16,8 @@ import com.footprint.app.api.model.TagModel
 import com.footprint.app.databinding.ItemImageBinding
 import com.footprint.app.databinding.ItemPostBinding
 import com.footprint.app.databinding.ItemTagBinding
+import com.footprint.app.formatDateMd
+import com.footprint.app.formatDateYmd
 import com.footprint.app.util.ItemClick
 
 class CommunityAdapter(private val context: Context, private val items: List<*>) :
@@ -32,16 +34,16 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
         RecyclerView.ViewHolder(binding.root) {
         fun bind(postModel: PostModel) {
             Glide.with(context)
-                .load(R.drawable.dummy_petimage)
+                .load(postModel.profileImageUri)
                 .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
                 .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
-                .into(binding.ivPet)
-            binding.tvNickname.text = postModel.authorNickname
-            binding.tvPostdate.text = postModel.postDate
+                .into(binding.ivProfileImage)
+            binding.tvNickname.text = postModel.nickname// postModel.authorNickname
+            binding.tvPostdate.text = formatDateMd(postModel.timestamp)// postModel.postDate
             binding.tvTitle.text = postModel.title
             binding.tvContent.text = postModel.content
-            binding.tvLike.text = postModel.likesCount.toString()
-            binding.tvComment.text = postModel.commentsCount.toString()
+            binding.tvLike.text = postModel.likes.size.toString()// postModel.likesCount.toString()
+            binding.tvComment.text = postModel.comments.size.toString()// postModel.commentsCount.toString()
             binding.root.setOnClickListener {
                 itemClick?.onClick(it, adapterPosition)
             }

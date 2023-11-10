@@ -7,7 +7,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.footprint.app.R
+import com.footprint.app.api.model.PetInfoWalkModel
 import com.footprint.app.databinding.FragmentHomeFavoriteBinding
+import com.footprint.app.ui.mypage.MyPageViewModel
 import com.footprint.app.util.ItemClick
 
 
@@ -22,14 +24,14 @@ class HomeFavoriteFragment : Fragment(R.layout.fragment_home_favorite) {
     }
 
     private fun initView() {
-        if (homeViewModel.walkList.isEmpty()) {
+        if (homeViewModel.walkList.value?.isEmpty()!!) {
             binding.tvEmpty.visibility = View.VISIBLE
             binding.ivEmpty.visibility = View.VISIBLE
         }
         binding.homeFavoriteRecyclerView.layoutManager =
             LinearLayoutManager(requireContext())
         binding.homeFavoriteRecyclerView.adapter =
-            FavoriteAdapter(requireContext(), homeViewModel.walkList).apply {
+            FavoriteAdapter(requireContext(), homeViewModel.walkList.value!!).apply {
                 itemClick = object : ItemClick {
                     override fun onClick(view: View, position: Int) {
                         val bundle = Bundle()

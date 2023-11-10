@@ -7,8 +7,13 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentHomeFavoriteItemBinding
+import com.footprint.app.formatDateYmd
+import com.footprint.app.formatDistance
+import com.footprint.app.formatTimeHourMin
+import com.footprint.app.formatTimeMinSec
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -33,26 +38,32 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
     }
 
     private fun initView() {
+
+        binding.rvPet.layoutManager = LinearLayoutManager(context,
+            LinearLayoutManager.HORIZONTAL,false)
+        binding.rvPet.adapter =
+            PetAdapter(requireContext(), homeViewModel.walkList.value!![index].petList)
+
         binding.tvWalkdistancevalue.text =
-            homeViewModel.walkList[index].distance
+            formatDistance(homeViewModel.walkList.value!![index].distance)
         binding.tvWalktimevalue.text =
-            homeViewModel.walkList[index].walktime
+            formatTimeMinSec(homeViewModel.walkList.value!![index].walktime)
         binding.tvWalkstarttimevalue.text =
-            homeViewModel.walkList[index].starttime
+            formatTimeHourMin(homeViewModel.walkList.value!![index].starttime)
         binding.tvWalkendtimevalue.text =
-            homeViewModel.walkList[index].endtime
+            formatTimeHourMin(homeViewModel.walkList.value!![index].endtime)
         binding.tvWalkdatevalue.text =
-            homeViewModel.walkList[index].date
+            formatDateYmd(homeViewModel.walkList.value!![index].starttime)
     }
 
     private fun initGoogleMap() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
-            val lastWalk = homeViewModel.walkList[index].currentLocation
+            val lastWalk = homeViewModel.walkList.value!![index].currentLocation
             googleMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
-                    homeViewModel.walkList[index].pathpoint[0][0],
+                    homeViewModel.walkList.value!![index].pathpoint[0][0],
                     20f
                 )
             )
@@ -67,15 +78,15 @@ class HomeFavoriteItemFragment : Fragment(R.layout.fragment_home_favorite_item) 
             addMarker(
                 googleMap,
                 R.drawable.ic_placeholder_start,
-                homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.first().first()
+                homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].pathpoint.first().first()
             )
             addMarker(
                 googleMap,
                 R.drawable.ic_placeholder_end,
-                homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.last().last()
+                homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].pathpoint.last().last()
             )
 
-            for (path in homeViewModel.walkList[index].pathpoint) {
+            for (path in homeViewModel.walkList.value!![index].pathpoint) {
                 googleMap.addPolyline(
                     PolylineOptions().addAll(path)
                         .color(Color.parseColor("#${homeViewModel.colorCode}"))

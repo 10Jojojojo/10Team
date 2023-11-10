@@ -32,7 +32,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:id="@+id/iv_pet"
+                    android:id="@+id/iv_profileImage"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/dummy_petimage"

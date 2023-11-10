@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 
-object SharedPref {
+//object SharedPref {
     const val PREF_KEY = "YOUTUBE_PREF"
     fun setString(context: Context?, key: String?, value: String?) {
         context ?: return
@@ -14,12 +14,12 @@ object SharedPref {
         sp.edit().putString(key, value).apply()
     }
 
-    fun getString(context: Context?, key: String?, defaultVal: String): String {
-        context ?: return defaultVal
+    fun Context?.getString( key: String?, defaultVal: String): String {
+        this ?: return defaultVal
 
-        val sp = context.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE)
+        val sp = this.getSharedPreferences(PREF_KEY, Context.MODE_PRIVATE)
         return sp.getString(key, defaultVal) ?: ""
-    }
+//    }
 //    fun saveCategory(context:Context,items :ArrayList<DataModel>) {
 //        val editor =context.getSharedPreferences("spf",Context.MODE_PRIVATE).edit()
 //        val gson = GsonBuilder().create()

@@ -1,25 +1,18 @@
 package com.footprint.app.api.model
 
-import android.net.Uri
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
 
 data class WalkModel(
-    var key:String = "",
-    val distance: String,
-    val walktime: String,
-    val pathpoint: MutableList<MutableList<LatLng>>,
-    val currentLocation: CameraPosition,
-    var snapshotPath: String? = null,  // 스냅샷 파일의 경로 저장
-    var petimage: Uri? = null, // 산책한 반려동물 사진
-    val name: String = "내새끼",
-    var starttime: String = "",
-    var endtime: String = "",
-    val date: String = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),
-    val dateid: String = SimpleDateFormat("yyMMddHHmmss", Locale.KOREA).format(Date())
+    var petList: MutableList<PetInfoWalkModel> = mutableListOf(),
+    var distance: Int = 0,
+    var walktime: Long = 0L,
+    var pathpoint: MutableList<MutableList<LatLng>> = mutableListOf(),
+    var currentLocation: CameraPosition = CameraPosition(LatLng(0.0,0.0),0f,0f,0f),
+    var snapshotPath: String = "",  // 스냅샷 파일의 경로 저장
+    var starttime: Long = 0L,
+    var endtime: Long = 0L,
 )
 
 data class CameraPositionDTO(
@@ -35,72 +28,79 @@ data class LatLngDTO(
 )
 
 data class WalkModelDTO(
-    var key:String? = null,
-    var distance: String = "",
-    var walktime: String = "",
-    var pathpoint: List<List<LatLngDTO>> = listOf(),
-    var currentLocation: CameraPositionDTO = CameraPositionDTO(),
-    var snapshotPath: String? = null,
-    var name: String = "",
-    var starttime: String = "",
-    var endtime: String = "",
-    var date: String = "",
-    var dateid: String = "",
+    var uid:String? = null,
+    var petList: MutableList<PetInfoWalkModel>? = null,
+    var petKey: String? = null,
+    var distance: Int? = null,
+    var walktime: Long? = null,
+    var pathpoint: MutableList<MutableList<LatLngDTO>>? = null,
+    var currentLocation: CameraPositionDTO? = null,
+    var snapshotPath: String? = null,  // 스냅샷 파일의 경로 저장
+    var starttime: Long? = null,
+    var endtime: Long? = null,
 )
 
 fun WalkModel.toDTO(): WalkModelDTO {
+    // 'pathpoint'의 타입을 List<List<LatLngDTO>>로 변환
     val pathpointDTO = pathpoint.map { list ->
         list.map { latLng ->
             LatLngDTO(latLng.latitude, latLng.longitude)
-        }
+        }.toMutableList()
+    }.toMutableList()
+
+    // 'currentLocation'을 CameraPositionDTO로 변환
+    val currentLocationDTO = currentLocation.let {
+        CameraPositionDTO(
+            target = LatLngDTO(
+                latitude = it.target.latitude,
+                longitude = it.target.longitude
+            ),
+            zoom = it.zoom,
+            tilt = it.tilt,
+            bearing = it.bearing
+        )
     }
-    val currentLocationDTO = CameraPositionDTO(
-        target = LatLngDTO(
-            latitude = currentLocation.target.latitude,
-            longitude = currentLocation.target.longitude
-        ),
-        zoom = currentLocation.zoom,
-        tilt = currentLocation.tilt,
-        bearing = currentLocation.bearing
-    )
+
+    // 'WalkModelDTO' 인스턴스 생성
     return WalkModelDTO(
-        key = this.key,
+        uid = FirebaseAuth.getInstance().currentUser?.uid,
+        petList = this.petList,
         distance = this.distance,
         walktime = this.walktime,
         pathpoint = pathpointDTO,
         currentLocation = currentLocationDTO,
         snapshotPath = this.snapshotPath,
-        name = this.name,
         starttime = this.starttime,
-        endtime = this.endtime,
-        date = this.date,
-        dateid = this.dateid
+        endtime = this.endtime
     )
 }
 
 fun WalkModelDTO.toModel(): WalkModel {
-    val pathpointModel = pathpoint.map { list ->
+    val pathpointModel = pathpoint?.map { list ->
         list.map { dto ->
             LatLng(dto.latitude, dto.longitude)
         }.toMutableList()
-    }.toMutableList()
-    val currentLocationModel = CameraPosition.Builder()
-        .target(LatLng(currentLocation.target.latitude, currentLocation.target.longitude))
-        .zoom(currentLocation.zoom)
-        .tilt(currentLocation.tilt)
-        .bearing(currentLocation.bearing)
-        .build()
+    }?.toMutableList() ?: mutableListOf()
+
+    val currentLocationModel = currentLocation?.let {
+        CameraPosition(
+            LatLng(it.target.latitude, it.target.longitude),
+            it.zoom,
+            it.tilt,
+            it.bearing
+        )
+    } ?: CameraPosition(LatLng(0.0,0.0), 0f, 0f, 0f)
+
+    // 'WalkModel' 인스턴스 생성
     return WalkModel(
-        key = this.key ?: "",
-        distance = this.distance,
-        walktime = this.walktime,
+        petList = this.petList ?: mutableListOf(),
+        distance = this.distance ?: 0,
+        walktime = this.walktime ?: 0L,
         pathpoint = pathpointModel,
         currentLocation = currentLocationModel,
-        snapshotPath = this.snapshotPath,
-        name = this.name,
-        starttime = this.starttime,
-        endtime = this.endtime,
-        date = this.date,
-        dateid = this.dateid
+        snapshotPath = this.snapshotPath ?: "",
+        starttime = this.starttime ?: 0L,
+        endtime = this.endtime ?: 0L
+        // 존재하지 않는 필드는 제거합니다.
     )
 }

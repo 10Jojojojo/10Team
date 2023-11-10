@@ -10,7 +10,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.footprint.app.R
 import com.footprint.app.databinding.ActivityLoginBinding
 import com.google.android.gms.common.api.ApiException
 
@@ -48,7 +47,7 @@ LoginActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    showDogProfilePage()
+                            showDogProfilePage()
                 } else {
                     showToast("Firebase 로그인 실패")
                 }

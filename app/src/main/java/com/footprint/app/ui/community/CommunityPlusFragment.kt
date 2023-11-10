@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -21,10 +22,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.footprint.app.Constants
 import com.footprint.app.FirebaseDatabaseManager
+import com.footprint.app.FirebaseDatabaseManager.savePostdata
+import com.footprint.app.FirebaseDatabaseManager.uploadImage
+import com.footprint.app.FirebaseDatabaseManager.uploadImages
 import com.footprint.app.R
 import com.footprint.app.api.model.PostModel
 import com.footprint.app.databinding.FragmentCommunityPlusBinding
+import com.footprint.app.ui.home.HomeViewModel
+import com.footprint.app.ui.mypage.MyPageViewModel
 import com.footprint.app.util.ItemClick
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,8 +42,11 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
     private var _binding: FragmentCommunityPlusBinding? = null
     // 다른 Fragment 에서도 homeViewModel instance 를 참조 하기 위해 수정
     private val communityViewModel by activityViewModels<CommunityViewModel>()
+    private val homeViewModel by activityViewModels<HomeViewModel>()
+    private val myPageViewModel by activityViewModels<MyPageViewModel>()
     private val binding get() = _binding!!
-
+    private val images = mutableListOf<Uri>()
+    private val imageUrls = mutableListOf<String?>()
     // CommunityAdapter 의 instance 를 클래스 레벨 변수로 저장
     private lateinit var communityAdapter: CommunityAdapter
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,35 +58,19 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
 
     private fun goCommunityPage(){
         binding.btComplete.setOnClickListener {
-//            communityViewModel.post.add(PostModel(
-//                profileImageUrl = null,    // 프로필 사진 URL
-//                nickname = "내새끼",           // 닉네임
-//                postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()),// 글 작성 일자
-//                title = binding.etTitle.text.toString(),            // 글 제목
-//                content =  binding.etContent.text.toString(),            // 글 내용
-//                postImageUrl = communityViewModel.images.toMutableList(),   // 값만 할당 하고, 직접 참조를 피하기 위해 .toMutableList()를 붙여주었다.
-//                likesCount = 0,            // 좋아요 수
-//                commentsCount = 0 ,          // 댓글 수
-//            ))
-            FirebaseDatabaseManager.uploadImagesToFirebaseStorage(requireContext(),communityViewModel.images){
-                communityViewModel.post.add(
+
+            requireContext().uploadImages(communityViewModel.images){
+                communityViewModel.updatePost(
                     PostModel(
-                        key = "",
-                        authorId = "작성자ID", // 실제로는 사용자의 고유 ID로 대체해야 합니다.
-                        authorNickname = "내새끼", // 닉네임 예시, 실제 사용자 닉네임으로 대체
-                        authorProfileImageUrl = "", // 프로필 사진 URL이 없는 경우 null, 실제 URL이 있다면 Uri.parse("url")로 대체
-                        postDate = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()), // 글 작성 일자
+                        uid = FirebaseAuth.getInstance().currentUser?.uid,
+                        nickname = homeViewModel.profile.value?.nickName,
+                        profileImageUri = homeViewModel.profile.value?.profileImageUri,
+                        timestamp= System.currentTimeMillis(),
                         title = binding.etTitle.text.toString(), // 글 제목
                         content = binding.etContent.text.toString(), // 글 내용
                         postImageUrls = it, // 게시글의 사진 URL 리스트
-                        likesCount = 0, // 좋아요 수
-                        commentsCount = 0, // 댓글 수
-                        commentsList = mutableListOf(), // 댓글 리스트
-                        tags = listOf("Hot") // 태그 리스트
                     )
                 )
-
-                FirebaseDatabaseManager.savePostList(communityViewModel.post.last())
 //            findNavController().navigate(R.id.community)
                 findNavController().popBackStack() // 현재 프래그먼트 백스택에서 프래그먼트를 없앤다.
             }

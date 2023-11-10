@@ -1,81 +1,112 @@
 package com.footprint.app.api.model
 
-//data class PostModel(
-//    val profileImageUrl: Uri? = null,    // 프로필 사진 URL
-//    val nickname: String = "내새끼",           // 닉네임
-//    val postDate: String = "", // 글 작성 일자
-//    val title: String = "",            // 글 제목
-//    val content: String = "",            // 글 내용
-//    val postImageUrl: MutableList<ImageModel> = mutableListOf(),     // 게시글 의 사진 URL 리스트
-//    val likesCount: Int = 0,            // 좋아요 수
-//    val commentsCount: Int = 0,          // 댓글 수
-//    val commentsList:List<CommentModel> = listOf(),
-//    val tag: List<String> = listOf("Hot")      // 태그(여러개 의 리스트 를 가질 수 있어서 리스트 로 선언)
-//    // Firebase의 Storage 경로를 String으로 저장해주어야함 근데 그거보다는,
-//    // Post를 먼저 올리고, Firebase에 업로드하면, id값이 생길텐데, 이 id값을 이용해서 Storage에 디렉토리를 만들어주는것.
-//    // 그리고 그 디렉토리 안에다가 이미지를 여러장 업로드를 하는것
-//)
+import java.util.Date
 
 data class PostModel(
-    var key:String = "", // 게시글의 고유 식별자
-    val authorId: String = "", // 작성자의 ID
-    val authorNickname: String = "", // 작성자의 닉네임
-    val authorProfileImageUrl: String = "", // 작성자의 프로필 사진 URL
-    val postDate: String = "", // = SimpleDateFormat("yy년 MM월 dd일", Locale.KOREA).format(Date()), // 글 작성 일자
-    val title: String = "", // 글 제목
-    val content: String = "", // 글 내용
-    var postImageUrls: List<String> = mutableListOf(), // 게시글의 사진 URL 리스트
-    val likesCount: Int = 0, // 좋아요 수
-    var commentsCount: Int = 0, // 댓글 수
-    var commentsList: MutableList<CommentModel> = mutableListOf(), // 댓글 리스트
-    val tags: List<String> = listOf("Hot") // 태그 리스트
+    var postKey: String? = null, // 서버에서 데이터를 받을 때 설정
+    val timestamp: Long = System.currentTimeMillis(), // binding할때 format을 해준다. System.currentTimeMillis()와 Date().time은 결국같지만 Date() 쪽이 객체를 생성하기때문에 쪼끔 느림
+    var title: String = "", // 글 제목
+    var content: String = "", // 글 내용
+    var postImageUrls: MutableList<String> = mutableListOf(), // 게시글의 사진 URL 리스트
+    var uid: String? = null, // 해당 게시글의 수정 권한을 주기위해 작성자의 uid를 받아온다.
+    var nickname: String? = null, // uid를 통해 해당 게시글의 작성자 정보를 불러온다.
+    val profileImageUri: String? = null, // uid를 통해 해당 게시글의 프로필 url을 받아온다.
+    var commentCount: Long = 0L, // 댓글의 수는 PostModel에도 저장한다. 바로 화면에 표시하기 위해서
+    var likeCount: Long = 0L, // 좋아요의 수는 PostModel에도 저장한다. 바로 화면에 표시하기 위해서
+    var comments: MutableList<CommentModel> = mutableListOf(), // 게시글의 댓글리스트. 해당 게시글의 postKey로 CommentList를 받아온다.
+    var likes: Map<String,Long> = emptyMap() // 게시글의 좋아요 리스트. id와 timestamp로 이루어져 있다. 해당 게시글의 postKey로 LikeMap을 받아온다.
 )
+
+// DTO 클래스 정의
 data class PostModelDTO(
-    var key: String? = null,
-    var postId: String? = null,
-    var authorId: String? = null,
-    var authorNickname: String? = null,
-    var authorProfileImageUrl: String? = null,
-    var postDate: String? = null,
+    var postKey: String? = null, // 서버에서 데이터를 받을 때 설정
+    var timestamp: Long? = null,
     var title: String? = null,
     var content: String? = null,
-    var postImageUrls: List<String>? = null,
-    var likesCount: Int? = 0,
-    var commentsCount: Int? = 0,
-    var commentsList: List<CommentModelDTO>? = null,
-    var tags: List<String>? = null
+    var postImageUrls: MutableList<String>? = null,
+    var uid: String? = null, // 해당 게시글의 수정 권한을 주기위해 작성자의 uid를 파이어베이스에 업로드한다.
+    var nickname: String? = null, // uid를 통해 해당 게시글의 작성자 정보를 불러온다.
+    var profileImageUri: String? = null, // uid를 통해 해당 게시글의 프로필 url을 받아온다.
+    var commentCount: Long? = null, // 댓글의 수는 PostModel에도 저장한다. 바로 화면에 표시하기 위해서
+    var likeCount: Long? = null, // 좋아요의 수는 PostModel에도 저장한다. 바로 화면에 표시하기 위해서
+//    var comments: MutableList<CommentModel>? = null, // 게시글의 댓글리스트. 서버에는 업로드한다.
+    var comments: Map<String, CommentModel>? = null,
+    var likes: Map<String,Long>? = null// 게시글의 좋아요 리스트. 서버에는 업로드한다.
 )
-fun PostModel.toDTO(): PostModelDTO {
-    return PostModelDTO(
-        key = this.key,
-        authorId = this.authorId,
-        authorNickname = this.authorNickname,
-        authorProfileImageUrl = this.authorProfileImageUrl,
-        postDate = this.postDate,
+
+// 프로필 추가
+fun PostModel.toProfile(profile:ProfileModel): PostModel {
+    return PostModel(
+        postKey = this.postKey,
+        timestamp = this.timestamp,
         title = this.title,
         content = this.content,
         postImageUrls = this.postImageUrls,
-        likesCount = this.likesCount,
-        commentsCount = this.commentsCount,
-        commentsList = this.commentsList.map { it.toDTO() },
-        tags = this.tags
+        nickname = profile.nickName,
+        profileImageUri = profile.profileImageUri,
+        commentCount = this.commentCount,
+        likeCount = this.likeCount,
+        comments = this.comments,
+        likes = this.likes
+    )
+}
+// 모델에서 DTO로 변환
+fun PostModel.toDTO(): PostModelDTO {
+    // List의 각 요소를 Map의 Entry로 변환 (인덱스 또는 키를 자동 생성하거나 관리 필요)
+    val commentsMap = this.comments.associateBy { it.commentKey?: "" } // commentKey는 각 댓글의 고유 ID
+
+    return PostModelDTO(
+        postKey = this.postKey,
+        timestamp = this.timestamp,
+        title = this.title,
+        content = this.content,
+        postImageUrls = this.postImageUrls,
+        nickname = this.nickname,
+        profileImageUri = this.profileImageUri,
+        commentCount = this.commentCount,
+        likeCount = this.likeCount,
+//        comments = this.comments,
+        comments = commentsMap ?: emptyMap(),
+        likes = this.likes
     )
 }
 
+// DTO에서 모델로 변환
 fun PostModelDTO.toModel(): PostModel {
     return PostModel(
-        key = this.key ?: "",
-        authorId = this.authorId ?: "",
-        authorNickname = this.authorNickname ?: "",
-        authorProfileImageUrl = this.authorProfileImageUrl ?: "",
-        postDate = this.postDate ?: "",
+        postKey = this.postKey,
+        timestamp = this.timestamp ?: Date().time,
         title = this.title ?: "",
         content = this.content ?: "",
-        postImageUrls = this.postImageUrls?.toList() ?: listOf(), // 바로 MutableList<String?>로 변환
-        likesCount = this.likesCount ?: 0,
-        commentsCount = this.commentsCount ?: 0,
-//        commentsList = this.commentsList?.toMutableList() { it.toModel() } ?: mutableListOf(),
-        commentsList = this.commentsList?.map { it.toModel() }?.toMutableList() ?: mutableListOf(),
-        tags = this.tags ?: listOf("Hot")
+        postImageUrls = this.postImageUrls ?: mutableListOf(),
+        nickname = this.nickname ?: "",
+        profileImageUri = this.profileImageUri ?: "",
+        commentCount = this.commentCount ?: 0L,
+        likeCount = this.likeCount ?: 0L,
+//        comments = this.comments ?: mutableListOf(),
+        comments = this.comments?.values?.toMutableList() ?: mutableListOf(),
+        likes = this.likes ?: emptyMap()
+
+    )
+}
+
+
+fun PostModelDTO.toModel(profile: ProfileModel?): PostModel {
+    // comments Map을 List로 변환
+    val commentsList = this.comments?.values?.toMutableList() ?: mutableListOf()
+
+    return PostModel(
+        postKey = this.postKey,
+        timestamp = this.timestamp ?: System.currentTimeMillis(),
+        title = this.title.orEmpty(),
+        content = this.content.orEmpty(),
+        postImageUrls = this.postImageUrls ?: mutableListOf(),
+        uid = this.uid,
+        nickname = profile?.nickName,
+        profileImageUri = profile?.profileImageUri,
+        commentCount = this.commentCount ?: 0L,
+        likeCount = this.likeCount ?: 0L,
+        comments = commentsList, // 여기에 변환된 리스트 사용
+        likes = this.likes ?: emptyMap()
     )
 }

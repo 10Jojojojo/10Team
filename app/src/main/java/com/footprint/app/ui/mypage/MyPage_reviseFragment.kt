@@ -8,13 +8,11 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -23,10 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.footprint.app.Constants.REQUEST_GALLERY
 import com.footprint.app.Constants.REQUEST_PERMISSION
-import com.footprint.app.FirebaseDatabaseManager.saveProfile
-import com.footprint.app.FirebaseDatabaseManager.uploadImageToFirebaseStorage
+import com.footprint.app.FirebaseDatabaseManager.uploadImage
 import com.footprint.app.R
-import com.footprint.app.api.model.FlagModel
 import com.footprint.app.api.model.ProfileModel
 import com.footprint.app.databinding.FragmentMyPageReviseBinding
 import com.footprint.app.ui.home.HomeViewModel
@@ -47,49 +43,52 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
             openGallery()
         }
         reUesrInfo()
-        revisepage()
         cance()
         dog()
+        initView()
+    }
+
+    private fun initView() {
+        homeViewModel.profile.value?.let {
+            if (it != ProfileModel()) {
+                Glide.with(requireContext())
+                    .load(
+                        it.profileImageUri ?: R.drawable.ic_mypage_black_24
+                    ) // selectedImageUri에 저장된 이미지 URL
+                    .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
+                    .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
+                    .into(binding.profileImage) // 해당 이미지를 표시할 ImageView
+                binding.mypageReviseName.setText(it.nickName ?: "이름")
+                binding.town.setText(it.address ?: "주소")
+                binding.mypageReviseIntroduction.setText(it.introduction ?: "자기소개")
+            }
+        }
     }
 
     private fun reUesrInfo() {
         binding.save.setOnClickListener {
-            val newName = binding.mypageReviseName.text.toString()
-            val newIntroduction = binding.mypageReviseIntroduction.text.toString()
-            val newTown = binding.town.text.toString()
-
-            viewModel.name = newName
-            viewModel.introduction = newIntroduction
-            viewModel.town = newTown
-
             if (imageUri != null) {
-                uploadImageToFirebaseStorage(requireContext(), imageUri) {
+                uploadImage(imageUri) {
                     val profileModel = ProfileModel(
-                        nickName = newName,
-                        dogName = "",
-                        dogAgeText = "",
-                        dogAge = 2,
-                        dogSex = "",
-                        markerList = homeViewModel.flagList,
-                        selectedImageUri = it,
+                        nickName = binding.mypageReviseName.text.toString(),
+                        profileImageUri = it,
+                        address = binding.town.text.toString(),
+                        introduction = binding.mypageReviseIntroduction.text.toString()
                     )
-                    saveProfile(profileModel)
-                    Glide.with(requireContext())
-                        .load(it) // WalkModel에 저장된 이미지 URL
-                        .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
-                        .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
-                        .into(binding.profileImage) // 해당 이미지를 표시할 ImageView
+                    homeViewModel.updateProfile(profileModel)
+                    findNavController().navigate(R.id.mypage)
                 }
-
+            } else if (homeViewModel.profile.value?.profileImageUri != null) {
+                val profileModel = ProfileModel(
+                    nickName = binding.mypageReviseName.text.toString(),
+                    profileImageUri = homeViewModel.profile.value?.profileImageUri,
+                    address = binding.town.text.toString(),
+                    introduction = binding.mypageReviseIntroduction.text.toString()
+                )
+                homeViewModel.updateProfile(profileModel)
+                findNavController().navigate(R.id.mypage)
             }
-            findNavController().navigate(R.id.mypage)
         }
-    }
-
-    private fun revisepage() {
-        binding.mypageReviseName.setText(viewModel.name)
-        binding.mypageReviseIntroduction.setText(viewModel.introduction)
-        binding.town.setText(viewModel.town)
     }
 
     private fun cance() {
@@ -108,7 +107,7 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         recyclerView.layoutManager = layoutManager
 
-        val adapter = DogAdapter(viewModel.dogList) { position ->
+        val adapter = DogAdapter(homeViewModel.petInfoList) { position ->
             showDeleteDialog(requireContext(), position)
         }
         recyclerView.adapter = adapter
@@ -121,7 +120,7 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
         builder.setMessage("이 항목을 삭제하시겠습니까?")
         builder.setPositiveButton("확인") { _: DialogInterface, _: Int ->
             val adapter = binding.dogCard.adapter as DogAdapter
-            adapter.removeItem(position)
+//            adapter.removeItem(position)
         }
         builder.setNegativeButton("취소") { dialog: DialogInterface, _: Int ->
             dialog.dismiss()

@@ -19,9 +19,29 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/iv_petimage"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
+            <ImageView
+                android:id="@+id/iv_petselect"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_pawprint_off"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
             <TextView
                 android:id="@+id/dogPlusCardName"

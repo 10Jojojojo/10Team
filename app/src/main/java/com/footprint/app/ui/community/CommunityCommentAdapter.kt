@@ -28,8 +28,8 @@ class CommunityCommentAdapter(private val context: Context, private val items: M
                     .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
                     .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
                     .into(ivAuthorImage)
-                tvNickname.text = commentModel.authorNickname
-                tvPostdate.text = commentModel.postDate
+                tvNickname.text = "임시 텍스트(닉네임)"// commentModel.authorNickname
+                tvPostdate.text = "임시 텍스트(게시일자)" // commentModel.postDate
                 tvComment.text = commentModel.content
             }
         }

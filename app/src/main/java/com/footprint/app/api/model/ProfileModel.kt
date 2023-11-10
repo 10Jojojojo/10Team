@@ -2,48 +2,43 @@ package com.footprint.app.api.model
 
 
 data class ProfileModel(
-    var key:String = "",
-    val nickName:String,
-    val dogName:String,
-    val dogAgeText:String,
-    val dogAge:Int,
-    val dogSex:String,
-    val markerList:List<FlagModel>,
-    val selectedImageUri: String
+    val nickName:String? = null,
+    val profileImageUri: String? = null,
+    val address: String? = null,
+    val introduction:String? = null,
+    val petInfoModelList: MutableList<PetInfoModel>? = null
 )
 
 data class ProfileModelDTO(
-    var key:String? = null,
-    var nickName: String = "",
-    var dogName: String = "",
-    var dogAgeText: String = "",
-    var dogAge: Int = 0,
-    var dogSex: String = "",
-    var markerList: List<FlagModelDTO> = listOf(),
-    var selectedImagePath: String = "" // Uri 대신 이미지 경로를 String으로 저장
+    val nickName: String? = null,
+    val profileImageUri: String? = null,
+    val address: String? = null,
+    val introduction: String? = null,
+    val petInfo: Map<String, PetInfoModelDTO>? = null
 )
 
 fun ProfileModel.toDTO(): ProfileModelDTO {
+    // List의 각 요소를 Map의 Entry로 변환
+    val petInfoMap = this.petInfoModelList?.associateBy { it.key ?: "" }
+        ?.mapValues { it.value.toDTO() }
+
     return ProfileModelDTO(
-        key = this.key,
         nickName = this.nickName,
-        dogName = this.dogName,
-        dogAgeText = this.dogAgeText,
-        dogAge = this.dogAge,
-        dogSex = this.dogSex,
-        markerList = this.markerList.map { it.toDTO() },
-        selectedImagePath = this.selectedImageUri
+        profileImageUri = this.profileImageUri,
+        address = this.address,
+        introduction = this.introduction,
+        petInfo = petInfoMap ?: emptyMap()
     )
 }
 fun ProfileModelDTO.toModel(): ProfileModel {
+    // petInfo Map을 List로 변환
+    val petInfoList = this.petInfo?.values?.map { it.toModel() }?.toMutableList()
+
     return ProfileModel(
-        key = this.key ?: "",
         nickName = this.nickName,
-        dogName = this.dogName,
-        dogAgeText = this.dogAgeText,
-        dogAge = this.dogAge,
-        dogSex = this.dogSex,
-        markerList = this.markerList.map { it.toModel() },
-        selectedImageUri = this.selectedImagePath
+        profileImageUri = this.profileImageUri,
+        address = this.address,
+        introduction = this.introduction,
+        petInfoModelList = petInfoList ?: mutableListOf()
     )
 }

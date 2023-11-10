@@ -16,6 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/testpathlogbutton"
         android:layout_width="30dp"
