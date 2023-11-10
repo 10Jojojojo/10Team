@@ -122,5 +122,27 @@
         android:label="커뮤니티포스트">
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_myPost"
+        android:name="com.footprint.app.ui.mypage.MyPostFragment"
+        android:label="post"
+        tools:layout="@layout/fragment_my_post">
+        <action
+            android:id="@+id/mypage"
+            app:destination="@id/navigation_mypage" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/navigation_myWalk"
+        android:name="com.footprint.app.ui.mypage.MyWalkFragment"
+        android:label="walk"
+        tools:layout="@layout/fragment_my_walk">
+        <action
+            android:id="@+id/mypage"
+            app:destination="@id/navigation_mypage" />
+    </fragment>
+
+
 
 </navigation>
