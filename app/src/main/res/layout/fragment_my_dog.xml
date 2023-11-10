@@ -115,7 +115,24 @@
 
         </TextView>
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cv_upload_image"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
+            <ImageView
+                android:id="@+id/iv_upload_image"
+                android:layout_width="36dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_opengallery" />
+
+        </androidx.cardview.widget.CardView>
 
         <RadioGroup
             android:id="@+id/dogSexGroup"

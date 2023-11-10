@@ -86,5 +86,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-database")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.14.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("me.relex:circleindicator:2.1.6")
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
 
 }

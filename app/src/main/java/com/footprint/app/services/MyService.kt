@@ -55,7 +55,7 @@ class MyService : Service() {
             setIntervalMillis(500L)
             setMinUpdateIntervalMillis(250L)
             setPriority(PRIORITY_HIGH_ACCURACY)
-        }.build()
+        }.build() // 나중에는 0.5, 0.25초말고 2~3초로 늘리기 (배터리광탈한다)
         // 위치가 update 될 때마다 호출될 콜백 설정
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {

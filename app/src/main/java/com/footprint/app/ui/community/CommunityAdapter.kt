@@ -1,21 +1,25 @@
 package com.footprint.app.ui.community
 
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.footprint.app.Constants.TYPE_POST
 import com.footprint.app.Constants.TYPE_TAG
 import com.footprint.app.Constants.TYPE_IMAGE
 import com.footprint.app.R
-import com.footprint.app.api.model.ImageModel
 import com.footprint.app.api.model.PostModel
 import com.footprint.app.api.model.TagModel
 import com.footprint.app.databinding.ItemImageBinding
 import com.footprint.app.databinding.ItemPostBinding
 import com.footprint.app.databinding.ItemTagBinding
+import com.footprint.app.formatDateMd
+import com.footprint.app.formatDateYmd
 import com.footprint.app.util.ItemClick
+
 class CommunityAdapter(private val context: Context, private val items: List<*>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     //Any 는 모든 타입을 받을 수 있다.
@@ -30,14 +34,19 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
         RecyclerView.ViewHolder(binding.root) {
         fun bind(postModel: PostModel) {
             Glide.with(context)
-                .load(R.drawable.dummy_petimage)
-                .into(binding.ivPet)
-            binding.tvNickname.text = postModel.nickname
-            binding.tvPostdate.text = postModel.postDate
+                .load(postModel.profileImageUri)
+                .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
+                .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
+                .into(binding.ivProfileImage)
+            binding.tvNickname.text = postModel.nickname// postModel.authorNickname
+            binding.tvPostdate.text = formatDateMd(postModel.timestamp)// postModel.postDate
             binding.tvTitle.text = postModel.title
             binding.tvContent.text = postModel.content
-            binding.tvLike.text = postModel.likesCount.toString()
-            binding.tvComment.text = postModel.commentsCount.toString()
+            binding.tvLike.text = postModel.likes.size.toString()// postModel.likesCount.toString()
+            binding.tvComment.text = postModel.comments.size.toString()// postModel.commentsCount.toString()
+            binding.root.setOnClickListener {
+                itemClick?.onClick(it, adapterPosition)
+            }
         }
     }
 
@@ -51,12 +60,22 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
 
     inner class ImageHolder(private val binding: ItemImageBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(imageModel: ImageModel) {
-            if (imageModel.selectedImageUri != null) {
-                Glide.with(context)
-                    .load(imageModel.selectedImageUri)
-                    .into(binding.ivImage)
+        fun bind(postImageUrl: Uri) {
+            Glide.with(context)
+                .load(postImageUrl)
+                .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
+                .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
+                .into(binding.ivImage)
+            binding.ivImage.setOnClickListener {
+                itemClick?.onClick(it, adapterPosition)
             }
+        }
+        fun bind(postImageUrl: String) {
+            Glide.with(context)
+                .load(postImageUrl)
+                .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
+                .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
+                .into(binding.ivImage)
             binding.ivImage.setOnClickListener {
                 itemClick?.onClick(it, adapterPosition)
             }
@@ -93,10 +112,26 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
                 // 각 포스트 항목들이 뷰페이저를 가지고있음
 //                holder.binding.rvImage.layoutManager = LinearLayoutManager(context)
 //                holder.binding.rvImage.adapter = CommunityAdapter(context, (items[position] as PostModel).postImageUrl)
+
+                // ViewPager2로 변경
+                val postImages = (items[position] as PostModel).postImageUrls
+                holder.binding.vp2PostImage.adapter = CommunityAdapter(context, postImages)
+                holder.binding.vp2PostImage.orientation = ViewPager2.ORIENTATION_HORIZONTAL // 가로 스와이프 설정
+
+                // 페이지 인디케이터 설정 (옵션)
+                // 예를 들어, TabLayoutMediator를 사용하여 TabLayout을 ViewPager2와 연결할 수 있습니다.
+                // 이 부분은 구현에 따라 달라질 수 있습니다.
+//                TabLayoutMediator(holder.binding.tabLayout, holder.binding.viewPager2) { tab, position ->
+//                    // 여기에 페이지 인디케이터 설정
+//                }.attach()
+                // Indicator에 viewPager 설정
+                holder.binding.indicatorVp2PostImage.setViewPager(holder.binding.vp2PostImage)
+
             }
 
             is TagModel -> (holder as TagHolder).bind(items[position] as TagModel)
-            is ImageModel -> (holder as ImageHolder).bind(items[position] as ImageModel)
+            is Uri -> (holder as ImageHolder).bind(items[position] as Uri)
+            is String -> (holder as ImageHolder).bind(items[position] as String)
         }
     }
 
@@ -110,7 +145,8 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
         return when (items[position]) {
             is PostModel -> TYPE_POST
             is TagModel -> TYPE_TAG
-            is ImageModel -> TYPE_IMAGE
+            is Uri -> TYPE_IMAGE
+            is String -> TYPE_IMAGE
             else -> throw IllegalArgumentException("Unknown type at $position")
         }
     }

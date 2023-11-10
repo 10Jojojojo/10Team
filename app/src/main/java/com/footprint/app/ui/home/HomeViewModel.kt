@@ -1,23 +1,31 @@
 package com.footprint.app.ui.home
 
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.footprint.app.api.model.FlagModel
+import com.footprint.app.FirebaseDatabaseManager
+import com.footprint.app.FirebaseDatabaseManager.readMarkerdata
+import com.footprint.app.FirebaseDatabaseManager.readWalkdata
+import com.footprint.app.FirebaseDatabaseManager.saveMarkerdata
+import com.footprint.app.FirebaseDatabaseManager.saveWalkdata
+import com.footprint.app.api.model.MarkerModel
+import com.footprint.app.api.model.PetInfoModel
+import com.footprint.app.api.model.ProfileModel
 import com.footprint.app.api.model.WalkModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 import kotlin.math.pow
 
 class HomeViewModel : ViewModel() {
 
     // 사용자 의 이동 경로 저장
     // 이동 경로는 HomeFragment 가 파괴 되도 다른 Fragment 에서 구글 맵을 불러올 때 이용 해야 하니까, ViewModel 에서 관리
+    // 새로운 MutableList를 할당?해주는식으로 데이터 변화를 만들어도 될듯
+    // add로 하면 Livedata로 감시가안됨
     private val _pathPoints = MutableLiveData<MutableList<MutableList<LatLng>>>().apply {
         value = mutableListOf(mutableListOf())
     }
@@ -26,25 +34,118 @@ class HomeViewModel : ViewModel() {
 //
 //    val placeItems = ArrayList<PlaceModel>()
 
-    private var startTime: Long = 0L // ms로 반환
-    private var endTime: Long = 0L // ms로 반환
+    var startTime: Long = 0L // ms로 반환
+    var endTime: Long = 0L // ms로 반환
     private var walkTime: Long = 0L // ms로 반환
     private val _walkState = MutableLiveData<String>().apply { value = "산책종료" }
     val walkState: LiveData<String> = _walkState
-    private val _time = MutableLiveData<String>().apply { value = "00:00" }
-    val time: LiveData<String> = _time
-    val flagList = mutableListOf<FlagModel>()
-    val walkList = mutableListOf<WalkModel>()
+    private val _time = MutableLiveData<Long>().apply { value = 0L }
+    val time: LiveData<Long> = _time
+
+    private var _walkList =
+        MutableLiveData<MutableList<WalkModel>>().apply { readWalkdata { value = it } }
+    val walkList: LiveData<MutableList<WalkModel>> = _walkList
+    private var _markerList =
+        MutableLiveData<MutableList<MarkerModel>>().apply { readMarkerdata { value = it } }
+    val markerList: LiveData<MutableList<MarkerModel>> = _markerList
+
+    // GoogleMap 준비 상태를 추적하는 LiveData
+    private val _isMapReady = MutableLiveData<Boolean>().apply { value = false }
+    val isMapReady: LiveData<Boolean> = _isMapReady
 
     var lineWidthText = "10"
     var colorCode = "000000"
+
+    var distance: Int = 0
 
     private val _lineWidthTextData = MutableLiveData<Float?>()
     val lineWidthTextData: LiveData<Float?> = _lineWidthTextData
 
     private val _colorCodeData = MutableLiveData<String>()
     val colorCodeData: LiveData<String> = _colorCodeData
-    fun getDistance(): Int {
+
+    private var isHomeObserve = false
+    private var isHomeObserve2 = false
+
+    var petList:MutableList<Long> = mutableListOf()
+    private var _petInfoList = MutableLiveData<MutableList<PetInfoModel>>().apply {
+        FirebaseDatabaseManager.readPetinfodata {
+            value = it
+            Log.d("aaaaaa1", "${petInfoList.value}")
+        }
+    }
+    val petInfoList: LiveData<MutableList<PetInfoModel>> = _petInfoList
+    private var _profile = MutableLiveData<ProfileModel>().apply {
+        FirebaseDatabaseManager.readProfiledata {
+            it?.let {
+                value = it
+            } ?: ProfileModel()
+        }
+    }
+    val profile: LiveData<ProfileModel> = _profile
+
+    fun updateProfile(profile: ProfileModel){
+        FirebaseDatabaseManager.saveProfiledata(profile) {
+            _profile.value = it
+        }
+    }
+    fun updatePetInfo(petInfo:PetInfoModel){
+        FirebaseDatabaseManager.savePetinfodata(petInfo) {
+            val currentList = _petInfoList.value ?: mutableListOf()
+
+            currentList.add(petInfo)
+
+            _petInfoList.value = currentList
+        }
+    }
+
+    fun updateWalk(walk: WalkModel) {
+        // 단순히 _walkList2.value?.add(walk) 로는 value는 바뀌지만, Livedata는 변경되지 않는다.
+        // 따라서 새로운 List를 할당해야 Livedata도 변경되고, 그러기 위해서 var _walkList로 바꿔주었다.
+
+        // 현재 MutableLiveData가 가지고 있는 값을 가져온다.
+        val currentList = _walkList.value ?: mutableListOf()
+
+        // 새로운 walk 객체를 리스트에 추가한다.
+        currentList.add(walk)
+        // 변경된 리스트를 MutableLiveData에 다시 설정한다.
+        _walkList.value = currentList
+        saveWalkdata(walk){}
+    }
+
+    fun updateMarker(marker: MarkerModel) {
+        val currentList = _markerList.value ?: mutableListOf()
+
+        currentList.add(marker)
+
+        _markerList.value = currentList
+        saveMarkerdata(marker){}
+    }
+
+    // GoogleMap이 준비되었을 때 이 메서드를 호출한다.
+    fun setMapReady() {
+        if (isMapReady.value == false) {
+            _isMapReady.value = true
+        }
+    }
+
+    fun setHomeObserve(set:Boolean) {
+        isHomeObserve = set
+    }
+
+    fun getHomeObserve(): Boolean {
+        return isHomeObserve
+    }
+
+    fun setHomeObserve2(set:Boolean) {
+        isHomeObserve2 = set
+    }
+
+    fun getHomeObserve2(): Boolean {
+        return isHomeObserve2
+    }
+
+    fun getDistance() {
         val radius = 6372.8 * 1000
         var c = 0.0
         pathPoints.value?.let { value ->
@@ -66,17 +167,21 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }
-        return (radius * c).toInt()
+        distance = (radius * c).toInt()
     }
 
     private fun getTime() {
-        val dataFormat = SimpleDateFormat("mm : ss", Locale.KOREA)
         _walkState.value = "산책중"
         startTime = System.currentTimeMillis()
+        // 이론적으로는 메모리가 부족하면 뷰가 먼저 파괴되고, 뷰의 라이프사이클이 파괴되면서 뷰모델도 제거가 되기떄문에, 서비스에 옮겨두는게 좋음
+        // 시간되면 해보기(일단 문제없이 돌아가기는 하니까 인지만 하고 후순위로) 서비스에도 코루틴 사용가능 똑같이 그리고 디스패처도 지정해서
+        // 전역변수로 코루틴 스코프 객체를 만들어서 하면 될듯
+        // 구글링으로, 서비스에서 코루틴 사용방법 이런 키워드로 검색해보기
+        // 시간계산의 경우 CPU 연산을 조금 사용해서, 디스패처는 디폴트로 사용하기
         viewModelScope.launch {
             while (walkState.value == "산책중") {
                 endTime = System.currentTimeMillis() - startTime + walkTime
-                _time.value = dataFormat.format(endTime)
+                _time.value = endTime
                 delay(100)
             }
         }
@@ -108,11 +213,13 @@ class HomeViewModel : ViewModel() {
         endTime = 0L
         walkTime = 0L
         _pathPoints.value = mutableListOf(mutableListOf())
-        _time.value = "00:00"
+        _time.value = 0L
     }
+
     fun updateColorCode(newText: String) {
         _colorCodeData.value = newText
     }
+
     fun updateWidth(newNumber: Float?) {
         _lineWidthTextData.value = newNumber
     }

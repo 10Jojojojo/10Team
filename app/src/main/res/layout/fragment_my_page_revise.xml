@@ -56,7 +56,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/mapage_cardView"
                 app:layout_constraintStart_toEndOf="@+id/mapage_cardView" />
 
-            <TextView
+            <EditText
                 android:id="@+id/mypageReviseIntroduction"
                 android:layout_width="350dp"
                 android:layout_height="50dp"
@@ -67,9 +67,8 @@
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/town">
+                app:layout_constraintTop_toBottomOf="@+id/town"/>
 
-            </TextView>
 
             <View
                 android:id="@+id/view"

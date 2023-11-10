@@ -7,8 +7,13 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.footprint.app.R
 import com.footprint.app.databinding.FragmentHomeStopBinding
+import com.footprint.app.formatDateYmd
+import com.footprint.app.formatDistance
+import com.footprint.app.formatTimeHourMin
+import com.footprint.app.formatTimeMinSec
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -30,25 +35,30 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
         initGoogleMap()
     }
     private fun initView() {
+        binding.rvPet.layoutManager = LinearLayoutManager(context,
+            LinearLayoutManager.HORIZONTAL,false)
+        binding.rvPet.adapter =
+            PetAdapter(requireContext(), homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].petList)
+
         binding.tvWalkdistancevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].distance
+            formatDistance(homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].distance)
         binding.tvWalktimevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].walktime
+            formatTimeMinSec(homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].walktime)
         binding.tvWalkstarttimevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].starttime
+            formatTimeHourMin(homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].starttime)
         binding.tvWalkendtimevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].endtime
+                    formatTimeHourMin(homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].endtime)
         binding.tvWalkdatevalue.text =
-            homeViewModel.walkList[homeViewModel.walkList.size - 1].date
+            formatDateYmd(homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].starttime)
     }
     private fun initGoogleMap() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.map_fragmentstop) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
-            val lastWalk = homeViewModel.walkList[homeViewModel.walkList.size - 1].currentLocation
+            val lastWalk = homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].currentLocation
             googleMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
-                    homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint[0][0],
+                    homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].pathpoint[0][0],
                     20f
                 )
             )
@@ -61,9 +71,9 @@ class HomeStopFragment : Fragment(R.layout.fragment_home_stop) {
             // 카메라 를 해당 위치로 이동
             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
 
-            addMarker(googleMap, R.drawable.ic_pawprint_on,homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.first().first() )
-            addMarker(googleMap, R.drawable.ic_pawprint_off, homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint.last().last())
-            for (path in homeViewModel.walkList[homeViewModel.walkList.size - 1].pathpoint) {
+            addMarker(googleMap, R.drawable.ic_placeholder_start,homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].pathpoint.first().first() )
+            addMarker(googleMap, R.drawable.ic_placeholder_end, homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].pathpoint.last().last())
+            for (path in homeViewModel.walkList.value!![homeViewModel.walkList.value!!.size - 1].pathpoint) {
                 googleMap.addPolyline(PolylineOptions().addAll(path).color(Color.parseColor("#${homeViewModel.colorCode}")).width(homeViewModel.lineWidthText.toFloat()))
             }
         }
