@@ -65,14 +65,14 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         binding.myDogPlus.setOnClickListener {
             findNavController().navigate(R.id.dog)
         }
-        binding.postLinearLayout.setOnClickListener{
-            findNavController().navigate(R.id.Post)
-            Log.d("layout","post")
-        }
-        binding.walkLinearLayout.setOnClickListener {
-            findNavController().navigate(R.id.walk)
-            Log.d("layout","walk")
-        }
+//        binding.postLinearLayout.setOnClickListener{
+//            findNavController().navigate(R.id.Post)
+//            Log.d("layout","post")
+//        }
+//        binding.walkLinearLayout.setOnClickListener {
+//            findNavController().navigate(R.id.walk)
+//            Log.d("layout","walk")
+//        }
     }
 
     private fun dog() {
