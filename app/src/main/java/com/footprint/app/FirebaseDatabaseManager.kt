@@ -7,7 +7,6 @@ import com.footprint.app.Constants.CREATE
 import com.footprint.app.Constants.DELETE
 import com.footprint.app.Constants.UPDATE
 import com.footprint.app.api.model.CommentModel
-import com.footprint.app.api.model.LikeModel
 import com.footprint.app.api.model.MarkerModel
 import com.footprint.app.api.model.MarkerModelDTO
 import com.footprint.app.api.model.PetInfoModel
@@ -19,7 +18,7 @@ import com.footprint.app.api.model.WalkModel
 import com.footprint.app.api.model.WalkModelDTO
 import com.footprint.app.api.model.toDTO
 import com.footprint.app.api.model.toModel
-import com.footprint.app.api.model.toProfile
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -47,9 +46,37 @@ object FirebaseDatabaseManager {
     fun savePostdata(postdata: PostModel, onCompleted: (PostModel) -> Unit) {
         val key = database.child("posts").push().key
         if (key != null) {
+            postdata.comments.forEach {
+                it.profileImageUri = null
+                it.nickname = null
+            }
             database.child("posts").child(key).setValue(postdata.toDTO())
+            database.child("user_posts").child(uid).child(key).setValue(postdata.toDTO())
             onCompleted(postdata)
         }
+    }
+    fun readMyPostdata(onCompleted: (MutableList<PostModel>) -> Unit) {
+        val myPostRef = database.child("user_posts").child(uid)
+        // 이 경우 맵형태로 데이터를 받아옴
+
+        myPostRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val postList = mutableListOf<PostModel>()
+                for (postSnapshot in snapshot.children) {
+                    // 각 postSnapshot을 PostdataDTO로 변환
+                    Log.d("aaaaaa111","$postSnapshot")
+                    postSnapshot.getValue(PostModelDTO::class.java)?.let { postdataDTO ->
+                        postList.add(postdataDTO.toModel())
+                    }
+                }
+                // 데이터 변환 완료 후 콜백 함수 호출
+                onCompleted(postList)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        })
     }
 
 //    fun readPostdata(
@@ -109,14 +136,94 @@ object FirebaseDatabaseManager {
 //        })
 //    }
 
+    //    fun readPostdata(
+//        lastPostTimestamp: Long?,
+//        onCompleted: (MutableList<PostModel>, Long?) -> Unit
+//    ) {
+//        // 쿼리 시작점을 설정. 처음에는 lastPostTimestamp가 null이므로 최신 포스트부터 시작한다.
+//        var query = database.child("posts").orderByChild("timestamp")
+//        if (lastPostTimestamp != null) {
+//            // 이미 몇 개의 포스트를 로드했다면, 마지막으로 불러온 포스트의 타임스탬프를 사용하여 그 다음 포스트부터 쿼리
+//            query = query.endBefore(lastPostTimestamp.toDouble()).limitToLast(10)
+//        } else {
+//            query = query.limitToLast(10)
+//        }
+//
+//        query.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                val temporaryPostsList = mutableListOf<PostModel>() // 임시로 데이터를 저장할 리스트
+//                val postsList = mutableListOf<PostModel>()
+//                var newLastTimestamp: Long? = null
+//                val userProfilesMap = mutableMapOf<String, ProfileModel>()
+//
+//                val postSnapshots = dataSnapshot.children.reversed()
+//                for (postSnapshot in postSnapshots) {
+//                    val postDTO = postSnapshot.getValue(PostModelDTO::class.java)
+//                    postDTO?.let {
+//                        // 각 PostModel 객체에 대해 필요한 경우 여기서 초기화를 할 수 있다.
+//                        // 예를 들어, 만약 Firebase에서 빈 배열이 아니라 null로 반환될 경우 여기서 처리한다.
+//                        // 빈 데이터를 Firebase에 업로드한 경우 Firebase에서 데이터를 받아올때, 아무 값을 가지지 않기때문에 여기서 초기화를 진행한다.
+//                        if (it.postImageUrls == null) {
+//                            it.postImageUrls = mutableListOf()
+//                        }
+//                        if (it.commentCount != null) {
+//                            it.commentCount = postSnapshot.child("comments").childrenCount
+//                        } else {
+//                            it.commentCount = 0L
+//                        }
+//                        it.postKey = postSnapshot.key
+//                        if (it.likeCount != null) {
+//
+//                            it.likeCount = postSnapshot.child("likes").childrenCount
+//                        } else {
+//                            it.likeCount = 0L
+//                        }
+//
+//                        temporaryPostsList.add(it.toModel())
+//                        // 새로운 마지막 타임스탬프를 업데이트
+//                        newLastTimestamp = it.timestamp
+//                        if (it.uid != null) {
+//                            userProfilesMap[it.uid!!] = ProfileModel() // 임시 프로필 객체를 생성
+//                        }
+//                    }
+//                }
+//
+//                val userProfileTasks = userProfilesMap.keys.map { uid ->
+//                    database.child("profiles").child(uid).get()
+//                }
+//
+//                Log.d("aaaaaa1","$userProfileTasks")
+//                Tasks.whenAllSuccess<DataSnapshot>(userProfileTasks)
+//                    .addOnSuccessListener { userProfiles ->
+//                        userProfiles.forEach { snapshot ->
+//                            val profile = snapshot.getValue(ProfileModel::class.java)
+//                            profile?.let {
+//                                userProfilesMap[snapshot.key!!] = it // 프로필 맵 업데이트
+//                            }
+//                        }
+//                        temporaryPostsList.forEach { tempPost ->
+//                            val profile = userProfilesMap[tempPost.uid]
+//                            Log.d("aaaaaa1","$profile")
+//                            val post = tempPost.toProfile(profile ?: ProfileModel())
+//                            postsList.add(post)
+//                            newLastTimestamp = tempPost.timestamp
+//                        }
+//                        onCompleted(postsList, newLastTimestamp)
+//                    }
+//            }
+//
+//            override fun onCancelled(databaseError: DatabaseError) {
+//                // Handle the error
+//                databaseError.toException().printStackTrace()
+//            }
+//        })
+//    }
     fun readPostdata(
         lastPostTimestamp: Long?,
         onCompleted: (MutableList<PostModel>, Long?) -> Unit
     ) {
-        // 쿼리 시작점을 설정. 처음에는 lastPostTimestamp가 null이므로 최신 포스트부터 시작한다.
         var query = database.child("posts").orderByChild("timestamp")
         if (lastPostTimestamp != null) {
-            // 이미 몇 개의 포스트를 로드했다면, 마지막으로 불러온 포스트의 타임스탬프를 사용하여 그 다음 포스트부터 쿼리
             query = query.endBefore(lastPostTimestamp.toDouble()).limitToLast(10)
         } else {
             query = query.limitToLast(10)
@@ -124,96 +231,136 @@ object FirebaseDatabaseManager {
 
         query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val temporaryPostsList = mutableListOf<PostModel>() // 임시로 데이터를 저장할 리스트
-                val postsList = mutableListOf<PostModel>()
+                val temporaryPostsList = mutableListOf<PostModel>()
                 var newLastTimestamp: Long? = null
-                val userProfilesMap = mutableMapOf<String, ProfileModel>()
+                val userProfilesMap = mutableMapOf<String, Task<DataSnapshot>>()
 
-                val postSnapshots = dataSnapshot.children.reversed()
-                for (postSnapshot in postSnapshots) {
-                    val postDTO = postSnapshot.getValue(PostModelDTO::class.java)
-                    postDTO?.let {
-                        // 각 PostModel 객체에 대해 필요한 경우 여기서 초기화를 할 수 있다.
-                        // 예를 들어, 만약 Firebase에서 빈 배열이 아니라 null로 반환될 경우 여기서 처리한다.
-                        // 빈 데이터를 Firebase에 업로드한 경우 Firebase에서 데이터를 받아올때, 아무 값을 가지지 않기때문에 여기서 초기화를 진행한다.
-                        if (it.postImageUrls == null) {
-                            it.postImageUrls = mutableListOf()
-                        }
-                        if (it.commentCount != null) {
-                            it.commentCount = postSnapshot.child("comments").childrenCount
-                        } else {
-                            it.commentCount = 0L
-                        }
+                dataSnapshot.children.reversed().forEach { postSnapshot ->
+                    val post = postSnapshot.getValue(PostModelDTO::class.java)
+                    post?.let {
                         it.postKey = postSnapshot.key
-                        if (it.likeCount != null) {
-
-                            it.likeCount = postSnapshot.child("likes").childrenCount
-                        } else {
-                            it.likeCount = 0L
-                        }
-
-                        temporaryPostsList.add(it.toModel())
-                        // 새로운 마지막 타임스탬프를 업데이트
+                        it.commentCount = postSnapshot.child("comments").childrenCount
+                        it.likeCount = postSnapshot.child("likes").childrenCount
                         newLastTimestamp = it.timestamp
-                        if (it.uid != null) {
-                            userProfilesMap[it.uid!!] = ProfileModel() // 임시 프로필 객체를 생성
+                        temporaryPostsList.add(it.toModel())
+                        Log.d("aaaaaa11", "${temporaryPostsList}")
+                        it.uid?.let { uid ->
+                            userProfilesMap[uid] = database.child("profiles").child(uid).get()
                         }
                     }
                 }
-
-                val userProfileTasks = userProfilesMap.keys.map { uid ->
-                    database.child("user_profiles").child(uid).get()
-                }
-
-                Tasks.whenAllSuccess<DataSnapshot>(userProfileTasks)
+                // 모든 프로필 조회 작업이 완료되면 실행
+                Tasks.whenAllSuccess<DataSnapshot>(userProfilesMap.values.toList())
                     .addOnSuccessListener { userProfiles ->
-                        userProfiles.forEach { snapshot ->
-                            val profile = snapshot.getValue(ProfileModel::class.java)
-                            profile?.let {
-                                userProfilesMap[snapshot.key!!] = it // 프로필 맵 업데이트
+                        // 프로필 데이터를 Map 형태로 변환
+                        val profiles = userProfiles.associateBy { it.key }.mapValues { entry ->
+                            entry.value.getValue(ProfileModel::class.java)
+                        }
+                        // 각 포스트에 해당하는 프로필 데이터를 추가
+                        val postsList = temporaryPostsList.map { post ->
+                            post.apply {
+                                val profile = profiles[post.uid]
+                                nickname = profile?.nickName
+                                profileImageUri = profile?.profileImageUri
                             }
                         }
-                        temporaryPostsList.forEach { tempPost ->
-                            val profile = userProfilesMap[tempPost.uid]
-                            val post = tempPost.toProfile(profile ?: ProfileModel())
-                            postsList.add(post)
-                            newLastTimestamp = tempPost.timestamp
-                        }
-                        onCompleted(postsList, newLastTimestamp)
+
+                        Log.d("aaaaaa12", "${postsList}")
+                        // 최종적으로 변환된 포스트 리스트를 콜백을 통해 반환
+                        onCompleted(postsList.toMutableList(), newLastTimestamp)
                     }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                // Handle the error
-                databaseError.toException().printStackTrace()
             }
         })
     }
 
-    fun saveLikedata(postKey: String, uid: String, onCompleted: (Boolean) -> Unit) {
+    //    fun saveLikedata(postKey: String, uid: String, onCompleted: (Boolean) -> Unit) {
+//        val userLike = database.child("user_likes").child(uid).child(postKey)
+//        val postLike = database.child("posts").child(postKey).child("likes").child(uid)
+//
+//        // 좋아요 상태 확인
+//        postLike.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                if (snapshot.exists()) {
+//                    // 좋아요가 이미 있을 경우, 삭제
+//                    postLike.removeValue()
+//                    userLike.removeValue()
+//                    // 콜백함수를 통해 UI 업데이트
+//                    onCompleted(false)
+//                } else {
+//                    // 좋아요가 없을 경우, 추가
+//                    val currentTime = System.currentTimeMillis()
+//                    postLike.setValue(currentTime)
+//                    userLike.setValue(currentTime)
+//                    // 콜백함수를 통해 UI 업데이트
+//                    onCompleted(true)
+//                }
+//            }
+//
+//            override fun onCancelled(databaseError: DatabaseError) {
+//            }
+//        })
+//    }
+    fun saveLikedata(postKey: String, uid: String, onCompleted: (Long) -> Unit) {
         val userLike = database.child("user_likes").child(uid).child(postKey)
+        val postLike = database.child("posts").child(postKey).child("likes").child(uid)
+        val postRef = database.child("posts").child(postKey)
+
+        postLike.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val task = if (snapshot.exists()) {
+                    postLike.removeValue().continueWithTask { userLike.removeValue() }
+                } else {
+                    val currentTime = System.currentTimeMillis()
+                    postLike.setValue(currentTime)
+                        .continueWithTask { userLike.setValue(currentTime) }
+                }
+
+                task.addOnCompleteListener { likeTask ->
+                    if (likeTask.isSuccessful) {
+                        postRef.child("likes")
+                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(likesSnapshot: DataSnapshot) {
+                                    val likeCount = likesSnapshot.childrenCount
+                                    postRef.child("likeCount").setValue(likeCount)
+                                        .addOnCompleteListener {
+                                            onCompleted(likeCount)
+                                        }
+                                }
+
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                }
+                            })
+                    } else {
+                    }
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+            }
+        })
+    }
+
+    fun readLikedata(postKey: String, uid: String, onCompleted: (Boolean) -> Unit) {
         val postLike = database.child("posts").child(postKey).child("likes").child(uid)
 
         // 좋아요 상태 확인
         postLike.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    // 좋아요가 이미 있을 경우, 삭제
-                    postLike.removeValue()
-                    userLike.removeValue()
-                    // 콜백함수를 통해 UI 업데이트
-                    onCompleted(false)
-                } else {
-                    // 좋아요가 없을 경우, 추가
-                    val currentTime = System.currentTimeMillis()
-                    postLike.setValue(currentTime)
-                    userLike.setValue(LikeModel(currentTime))
-                    // 콜백함수를 통해 UI 업데이트
+                    // 좋아요가 이미 있을 경우
                     onCompleted(true)
+                } else {
+                    // 좋아요가 없을 경우
+                    onCompleted(false)
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
+                // 에러 처리
+                onCompleted(false)
             }
         })
     }
@@ -221,12 +368,13 @@ object FirebaseDatabaseManager {
     fun saveCommentData(
         postKey: String,
         uid: String,
-        commentKey: String? = null,
+        commentKey: String?,
         comment: CommentModel?,
         crud: Int,
-        onCompleted: (Boolean) -> Unit
+        onCompleted: (String) -> Unit
     ) {
-        comment?.let{it.uid = uid
+        comment?.let {
+            it.uid = uid
         }
         val postComments = database.child("posts").child(postKey).child("comments")
         val userComments = database.child("user_comments").child(uid).child(postKey)
@@ -236,17 +384,20 @@ object FirebaseDatabaseManager {
                 if (commentKey == null && comment != null) {
                     val key = postComments.push().key
                     key?.let {
+                        comment.commentKey = key // 키 주입해서 파이어베이스에 업로드
+                        comment.profileImageUri = null
+                        comment.nickname = null
+
                         postComments.child(key).setValue(comment).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 userComments.child(key).setValue(System.currentTimeMillis())
-                                    .addOnCompleteListener { userTask ->
-                                        onCompleted(userTask.isSuccessful)
+                                    .addOnCompleteListener {
+                                        onCompleted(key)
                                     }
                             } else {
-                                onCompleted(false)
                             }
                         }
-                    } ?: onCompleted(false)
+                    }
                 }
             }
 
@@ -256,10 +407,9 @@ object FirebaseDatabaseManager {
                         if (task.isSuccessful) {
                             userComments.child(commentKey).removeValue()
                                 .addOnCompleteListener { userTask ->
-                                    onCompleted(userTask.isSuccessful)
+                                    onCompleted("")
                                 }
                         } else {
-                            onCompleted(false)
                         }
                     }
                 }
@@ -271,15 +421,40 @@ object FirebaseDatabaseManager {
                         if (task.isSuccessful) {
                             userComments.child(commentKey).setValue(System.currentTimeMillis())
                                 .addOnCompleteListener { userTask ->
-                                    onCompleted(userTask.isSuccessful)
+                                    onCompleted("")
                                 }
                         } else {
-                            onCompleted(false)
                         }
                     }
                 }
             }
         }
+    }
+
+    fun readCommentdata(postKey: String, onCompleted: (MutableList<CommentModel>) -> Unit) {
+        database.child("posts").child(postKey).child("comments")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val commentList = mutableListOf<CommentModel>()
+
+                    dataSnapshot.children.forEach { commentSnapshot ->
+                        val commentKey = commentSnapshot.key
+                        val comment = commentSnapshot.getValue(CommentModel::class.java)
+                        comment?.let {
+                            it.commentKey = commentKey // Map의 키를 CommentModel의 commentKey 필드에 할당
+                            commentList.add(it)
+                        }
+                    }
+
+                    onCompleted(commentList) // 데이터 로드가 완료된 후 콜백 호출
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // 에러 처리
+                    databaseError.toException().printStackTrace()
+                    onCompleted(mutableListOf()) // 에러 발생 시 빈 리스트를 반환
+                }
+            })
     }
 
 
@@ -304,7 +479,7 @@ object FirebaseDatabaseManager {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val markerList = mutableListOf<MarkerModel>()
                     for (markerSnapshot in dataSnapshot.children) {
-                        val markerDTO = markerSnapshot.getValue(MarkerModelDTO::class.java)?.apply{
+                        val markerDTO = markerSnapshot.getValue(MarkerModelDTO::class.java)?.apply {
                             markerKey = markerSnapshot.key // 마커의 키 저장
                         }
                         markerDTO?.let {
@@ -323,6 +498,7 @@ object FirebaseDatabaseManager {
                 }
             })
     }
+
     fun deleteMarkerdata(key: String, onCompleted: (Boolean) -> Unit) {
         val markerRef = database.child("markers").child(key)
         markerRef.removeValue().addOnCompleteListener { task ->
@@ -438,8 +614,8 @@ object FirebaseDatabaseManager {
         profile: ProfileModel,
         onCompleted: (ProfileModel?) -> Unit
     ) {
-            database.child("profiles").child(uid).setValue(profile)
-            onCompleted(profile)
+        database.child("profiles").child(uid).setValue(profile)
+        onCompleted(profile)
 
     }
 

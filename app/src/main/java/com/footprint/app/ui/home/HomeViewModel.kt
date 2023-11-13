@@ -13,6 +13,7 @@ import com.footprint.app.FirebaseDatabaseManager.saveMarkerdata
 import com.footprint.app.FirebaseDatabaseManager.saveWalkdata
 import com.footprint.app.api.model.MarkerModel
 import com.footprint.app.api.model.PetInfoModel
+import com.footprint.app.api.model.PostModel
 import com.footprint.app.api.model.ProfileModel
 import com.footprint.app.api.model.WalkModel
 import com.google.android.gms.maps.model.LatLng
@@ -83,7 +84,11 @@ class HomeViewModel : ViewModel() {
         }
     }
     val profile: LiveData<ProfileModel> = _profile
-
+    private var _myPostList = MutableLiveData<MutableList<PostModel>>().apply {
+        FirebaseDatabaseManager.readMyPostdata() { value = it
+        }
+    }
+    val myPostList: LiveData<MutableList<PostModel>> = _myPostList
     fun updateProfile(profile: ProfileModel){
         FirebaseDatabaseManager.saveProfiledata(profile) {
             _profile.value = it

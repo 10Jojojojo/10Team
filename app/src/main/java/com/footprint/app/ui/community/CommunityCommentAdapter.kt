@@ -10,12 +10,15 @@ import com.footprint.app.R
 import com.footprint.app.api.model.CommentModel
 import com.footprint.app.api.model.PostModel
 import com.footprint.app.databinding.ItemCommentBinding
+import com.footprint.app.formatDateMd
+import com.footprint.app.formatDateMdhm
 import com.footprint.app.util.ItemClick
 
 class CommunityCommentAdapter(private val context: Context, private val items: MutableList<CommentModel>) :
     RecyclerView.Adapter<CommunityCommentAdapter.CommentHolder>() {
 
-    var itemClick: ItemClick? = null
+    var itemClickUpdate: ItemClick? = null
+    var itemClickDelete: ItemClick? = null
 
 
     // 생성자 의 parameter 에 val 을 사용 하여 멤버 변수로 선언
@@ -24,13 +27,19 @@ class CommunityCommentAdapter(private val context: Context, private val items: M
         fun bind(commentModel: CommentModel) {
             binding.apply {
                 Glide.with(context)
-                    .load(R.drawable.dummy_petimage)
+                    .load(commentModel.profileImageUri)
                     .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
                     .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
                     .into(ivAuthorImage)
-                tvNickname.text = "임시 텍스트(닉네임)"// commentModel.authorNickname
-                tvPostdate.text = "임시 텍스트(게시일자)" // commentModel.postDate
+                tvNickname.text = commentModel.nickname
+                tvPostdate.text = formatDateMdhm(commentModel.timestamp)
                 tvComment.text = commentModel.content
+                tvUpdate.setOnClickListener {
+                    itemClickUpdate?.onClick(it, adapterPosition)
+                }
+                tvDelete.setOnClickListener {
+                    itemClickDelete?.onClick(it, adapterPosition)
+                }
             }
         }
     }

@@ -38,8 +38,7 @@
         android:id="@+id/navigation_homefavoriteitem"
         android:name="com.footprint.app.ui.home.HomeFavoriteItemFragment"
         android:label="즐겨찾기상세"
-        tools:layout="@layout/fragment_home_favorite_item">
-    </fragment>
+        tools:layout="@layout/fragment_home_favorite_item"></fragment>
 
     <fragment
         android:id="@+id/navigation_community"
@@ -54,7 +53,7 @@
         <action
             android:id="@+id/communityPost"
             app:destination="@+id/navigation_communityPost"
-            app:launchSingleTop="true" >
+            app:launchSingleTop="true">
 
         </action>
     </fragment>
@@ -62,28 +61,32 @@
     <fragment
         android:id="@+id/navigation_communityPlus"
         android:name="com.footprint.app.ui.community.CommunityPlusFragment"
-        tools:layout="@layout/fragment_community_plus"
-        android:label="커뮤니티플러스">
+        android:label="커뮤니티플러스"
+        tools:layout="@layout/fragment_community_plus">
 
 
     </fragment>
-
 
 
     <fragment
         android:id="@+id/navigation_mypage"
         android:name="com.footprint.app.ui.mypage.MyPageFragment"
         android:label="@string/title_mypage"
-        tools:layout="@layout/fragment_mypage" />
-    <action
-        android:id="@+id/mypage_revise"
-        app:destination="@+id/navigation_mypage_revise" />
-    <action
-        android:id="@+id/dog"
-        app:destination="@+id/navigation_mydog">
+        tools:layout="@layout/fragment_mypage">
+        <action
+            android:id="@+id/mypage_revise"
+            app:destination="@+id/navigation_mypage_revise" />
+        <action
+            android:id="@+id/dog"
+            app:destination="@+id/navigation_mydog" />
+        <action
+            android:id="@+id/mypageWalk"
+            app:destination="@id/navigation_myWalk" />
+        <action
+            android:id="@+id/mypagePost"
+            app:destination="@id/navigation_myPost" />
 
-    </action>
-
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_mypage_revise"
@@ -118,9 +121,8 @@
     <fragment
         android:id="@+id/navigation_communityPost"
         android:name="com.footprint.app.ui.community.CommunityPostFragment"
-        tools:layout="@layout/fragment_community_post"
-        android:label="커뮤니티포스트">
-    </fragment>
+        android:label="커뮤니티포스트"
+        tools:layout="@layout/fragment_community_post"></fragment>
 
     <fragment
         android:id="@+id/navigation_myPost"
@@ -141,8 +143,19 @@
         <action
             android:id="@+id/mypage"
             app:destination="@id/navigation_mypage" />
+
+        <action
+            android:id="@+id/mypageFavoriteItem"
+            app:destination="@id/navigation_myWalkFavoriteItem" />
     </fragment>
-
-
+    <fragment
+        android:id="@+id/navigation_myWalkFavoriteItem"
+        android:name="com.footprint.app.ui.mypage.MyWalkFavoriteItemFragment"
+        android:label="walk"
+        tools:layout="@layout/fragment_my_walk">
+        <action
+            android:id="@+id/myWalk"
+            app:destination="@id/navigation_myWalk" />
+    </fragment>
 
 </navigation>

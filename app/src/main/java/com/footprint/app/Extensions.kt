@@ -159,6 +159,10 @@ fun formatDateMd(timeInMillis: Long): String {
     val dateFormat = SimpleDateFormat("MM월 dd일", Locale.KOREA)
     return dateFormat.format(Date(timeInMillis))
 }
+fun formatDateMdhm(timeInMillis: Long): String {
+    val dateFormat = SimpleDateFormat("MM월 dd일 hh : mm", Locale.KOREA)
+    return dateFormat.format(Date(timeInMillis))
+}
 
 //    // 스냅샷을 찍고 PNG 파일을 반환하는 함수
 //    fun captureMapSnapshot(googleMap: GoogleMap, context: Context, onSnapshotReady: (Uri?) -> Unit) {

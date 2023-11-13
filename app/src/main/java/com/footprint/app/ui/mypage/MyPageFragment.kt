@@ -24,6 +24,7 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
     private lateinit var dogAdapter: DogAdapter
 
     private val homeViewModel by activityViewModels<HomeViewModel>()
+    private val myPageViewModel by activityViewModels<MyPageViewModel>()
 
     private var _binding: FragmentMypageBinding? = null
     private val binding get() = _binding!!
@@ -65,14 +66,14 @@ class MyPageFragment : Fragment(R.layout.fragment_mypage) {
         binding.myDogPlus.setOnClickListener {
             findNavController().navigate(R.id.dog)
         }
-//        binding.postLinearLayout.setOnClickListener{
-//            findNavController().navigate(R.id.Post)
-//            Log.d("layout","post")
-//        }
-//        binding.walkLinearLayout.setOnClickListener {
-//            findNavController().navigate(R.id.walk)
-//            Log.d("layout","walk")
-//        }
+        binding.postLinearLayout.setOnClickListener{
+            findNavController().navigate(R.id.mypagePost)
+            Log.d("layout","post")
+        }
+        binding.walkLinearLayout.setOnClickListener {
+            findNavController().navigate(R.id.mypageWalk)
+            Log.d("layout","walk")
+        }
     }
 
     private fun dog() {

@@ -79,7 +79,7 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
         communityViewModel.images.clear()
     }
     private fun initView() {
-        spinnerView()
+//        spinnerView()
         goCommunityPage()
         recyclerView()
         binding.cvUploadImage.setOnClickListener {
@@ -111,68 +111,68 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
         // Indicator에 viewPager 설정
 //        binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
     }
-    private fun spinnerView() {
-        // 스피너 에 들어갈 데이터 (첫 번째 옵션 으로 안내 메시지 포함)
-        val spinnerItems = arrayListOf("카테고리를 선택해주세요.")
-        spinnerItems.addAll(communityViewModel.dummyTag.map { it.tag })
-
-        // 어댑터 설정
-        val spinnerAdapter = object : ArrayAdapter<String>(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            spinnerItems
-        ) {
-            override fun isEnabled(position: Int): Boolean {
-                // 첫 번째 아이템 은 선택 불가능 하게 설정
-                return position != 0
-            }
-
-            override fun getDropDownView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                val view: TextView =
-                    super.getDropDownView(position, convertView, parent) as TextView
-                // 첫 번째 아이템 은 회색 으로 표시 하여 선택 불가능 하게 보이게 설정
-                if (position == 0) {
-                    view.setTextColor(Color.GRAY)
-                } else {
-                    view.setTextColor(Color.BLACK)
-                }
-                return view
-            }
-        }
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        // 스피너 에 어댑터 적용
-        binding.spinner.adapter = spinnerAdapter
-
-        // 스피너 선택 이벤트 리스너 설정
-        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?, // NullPointerException 예외 때문에 view를 nullable 타입으로 변경
-                position: Int,
-                id: Long
-            ) {
-                // 첫 번째 아이템은 처리하지 않음
-                if (position > 0) {
-                    // view가 null이 아닐 때만 처리
-                    view?.let {
-                        // 선택된 항목 처리
-                        val item = parent.getItemAtPosition(position).toString()
-                    }
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                // 아무것 도 선택 되지 않았을 때 기본 값으로 설정
-                binding.spinner.setSelection(0)
-            }
-        }
-        // 앱 시작시 초기 선택 설정
-        binding.spinner.setSelection(0)
-    }
+//    private fun spinnerView() {
+//        // 스피너 에 들어갈 데이터 (첫 번째 옵션 으로 안내 메시지 포함)
+//        val spinnerItems = arrayListOf("카테고리를 선택해주세요.")
+//        spinnerItems.addAll(communityViewModel.dummyTag.map { it.tag })
+//
+//        // 어댑터 설정
+//        val spinnerAdapter = object : ArrayAdapter<String>(
+//            requireContext(),
+//            android.R.layout.simple_spinner_item,
+//            spinnerItems
+//        ) {
+//            override fun isEnabled(position: Int): Boolean {
+//                // 첫 번째 아이템 은 선택 불가능 하게 설정
+//                return position != 0
+//            }
+//
+//            override fun getDropDownView(
+//                position: Int,
+//                convertView: View?,
+//                parent: ViewGroup
+//            ): View {
+//                val view: TextView =
+//                    super.getDropDownView(position, convertView, parent) as TextView
+//                // 첫 번째 아이템 은 회색 으로 표시 하여 선택 불가능 하게 보이게 설정
+//                if (position == 0) {
+//                    view.setTextColor(Color.GRAY)
+//                } else {
+//                    view.setTextColor(Color.BLACK)
+//                }
+//                return view
+//            }
+//        }
+//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//
+//        // 스피너 에 어댑터 적용
+//        binding.spinner.adapter = spinnerAdapter
+//
+//        // 스피너 선택 이벤트 리스너 설정
+//        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//            override fun onItemSelected(
+//                parent: AdapterView<*>,
+//                view: View?, // NullPointerException 예외 때문에 view를 nullable 타입으로 변경
+//                position: Int,
+//                id: Long
+//            ) {
+//                // 첫 번째 아이템은 처리하지 않음
+//                if (position > 0) {
+//                    // view가 null이 아닐 때만 처리
+//                    view?.let {
+//                        // 선택된 항목 처리
+//                        val item = parent.getItemAtPosition(position).toString()
+//                    }
+//                }
+//            }
+//            override fun onNothingSelected(parent: AdapterView<*>) {
+//                // 아무것 도 선택 되지 않았을 때 기본 값으로 설정
+//                binding.spinner.setSelection(0)
+//            }
+//        }
+//        // 앱 시작시 초기 선택 설정
+//        binding.spinner.setSelection(0)
+//    }
     private fun openGallery() { // 갤러리를 여는 함수.
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
