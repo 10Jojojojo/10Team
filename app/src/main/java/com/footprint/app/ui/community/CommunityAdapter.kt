@@ -43,7 +43,7 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
             binding.tvPostdate.text = formatDateMdhm(postModel.timestamp)
             binding.tvTitle.text = postModel.title
             binding.tvContent.text = postModel.content
-            binding.tvLike.text = postModel.likes.size.toString()
+            binding.tvLike.text = postModel.likeCount.toString()
             binding.tvComment.text = postModel.comments.size.toString()
             binding.root.setOnClickListener {
                 itemClick?.onClick(it, adapterPosition)

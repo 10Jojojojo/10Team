@@ -46,9 +46,37 @@ object FirebaseDatabaseManager {
     fun savePostdata(postdata: PostModel, onCompleted: (PostModel) -> Unit) {
         val key = database.child("posts").push().key
         if (key != null) {
+            postdata.comments.forEach {
+                it.profileImageUri = null
+                it.nickname = null
+            }
             database.child("posts").child(key).setValue(postdata.toDTO())
+            database.child("user_posts").child(uid).child(key).setValue(postdata.toDTO())
             onCompleted(postdata)
         }
+    }
+    fun readMyPostdata(onCompleted: (MutableList<PostModel>) -> Unit) {
+        val myPostRef = database.child("user_posts").child(uid)
+        // 이 경우 맵형태로 데이터를 받아옴
+
+        myPostRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val postList = mutableListOf<PostModel>()
+                for (postSnapshot in snapshot.children) {
+                    // 각 postSnapshot을 PostdataDTO로 변환
+                    Log.d("aaaaaa111","$postSnapshot")
+                    postSnapshot.getValue(PostModelDTO::class.java)?.let { postdataDTO ->
+                        postList.add(postdataDTO.toModel())
+                    }
+                }
+                // 데이터 변환 완료 후 콜백 함수 호출
+                onCompleted(postList)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+
+            }
+        })
     }
 
 //    fun readPostdata(
@@ -215,7 +243,7 @@ object FirebaseDatabaseManager {
                         it.likeCount = postSnapshot.child("likes").childrenCount
                         newLastTimestamp = it.timestamp
                         temporaryPostsList.add(it.toModel())
-                        Log.d("aaaaaa11","${temporaryPostsList}")
+                        Log.d("aaaaaa11", "${temporaryPostsList}")
                         it.uid?.let { uid ->
                             userProfilesMap[uid] = database.child("profiles").child(uid).get()
                         }
@@ -237,7 +265,7 @@ object FirebaseDatabaseManager {
                             }
                         }
 
-                        Log.d("aaaaaa12","${postsList}")
+                        Log.d("aaaaaa12", "${postsList}")
                         // 최종적으로 변환된 포스트 리스트를 콜백을 통해 반환
                         onCompleted(postsList.toMutableList(), newLastTimestamp)
                     }
@@ -248,26 +276,65 @@ object FirebaseDatabaseManager {
         })
     }
 
-    fun saveLikedata(postKey: String, uid: String, onCompleted: (Boolean) -> Unit) {
+    //    fun saveLikedata(postKey: String, uid: String, onCompleted: (Boolean) -> Unit) {
+//        val userLike = database.child("user_likes").child(uid).child(postKey)
+//        val postLike = database.child("posts").child(postKey).child("likes").child(uid)
+//
+//        // 좋아요 상태 확인
+//        postLike.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                if (snapshot.exists()) {
+//                    // 좋아요가 이미 있을 경우, 삭제
+//                    postLike.removeValue()
+//                    userLike.removeValue()
+//                    // 콜백함수를 통해 UI 업데이트
+//                    onCompleted(false)
+//                } else {
+//                    // 좋아요가 없을 경우, 추가
+//                    val currentTime = System.currentTimeMillis()
+//                    postLike.setValue(currentTime)
+//                    userLike.setValue(currentTime)
+//                    // 콜백함수를 통해 UI 업데이트
+//                    onCompleted(true)
+//                }
+//            }
+//
+//            override fun onCancelled(databaseError: DatabaseError) {
+//            }
+//        })
+//    }
+    fun saveLikedata(postKey: String, uid: String, onCompleted: (Long) -> Unit) {
         val userLike = database.child("user_likes").child(uid).child(postKey)
         val postLike = database.child("posts").child(postKey).child("likes").child(uid)
+        val postRef = database.child("posts").child(postKey)
 
-        // 좋아요 상태 확인
         postLike.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    // 좋아요가 이미 있을 경우, 삭제
-                    postLike.removeValue()
-                    userLike.removeValue()
-                    // 콜백함수를 통해 UI 업데이트
-                    onCompleted(false)
+                val task = if (snapshot.exists()) {
+                    postLike.removeValue().continueWithTask { userLike.removeValue() }
                 } else {
-                    // 좋아요가 없을 경우, 추가
                     val currentTime = System.currentTimeMillis()
                     postLike.setValue(currentTime)
-                    userLike.setValue(currentTime)
-                    // 콜백함수를 통해 UI 업데이트
-                    onCompleted(true)
+                        .continueWithTask { userLike.setValue(currentTime) }
+                }
+
+                task.addOnCompleteListener { likeTask ->
+                    if (likeTask.isSuccessful) {
+                        postRef.child("likes")
+                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(likesSnapshot: DataSnapshot) {
+                                    val likeCount = likesSnapshot.childrenCount
+                                    postRef.child("likeCount").setValue(likeCount)
+                                        .addOnCompleteListener {
+                                            onCompleted(likeCount)
+                                        }
+                                }
+
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                }
+                            })
+                    } else {
+                    }
                 }
             }
 
@@ -275,6 +342,7 @@ object FirebaseDatabaseManager {
             }
         })
     }
+
     fun readLikedata(postKey: String, uid: String, onCompleted: (Boolean) -> Unit) {
         val postLike = database.child("posts").child(postKey).child("likes").child(uid)
 
@@ -296,6 +364,7 @@ object FirebaseDatabaseManager {
             }
         })
     }
+
     fun saveCommentData(
         postKey: String,
         uid: String,
@@ -316,6 +385,9 @@ object FirebaseDatabaseManager {
                     val key = postComments.push().key
                     key?.let {
                         comment.commentKey = key // 키 주입해서 파이어베이스에 업로드
+                        comment.profileImageUri = null
+                        comment.nickname = null
+
                         postComments.child(key).setValue(comment).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 userComments.child(key).setValue(System.currentTimeMillis())
@@ -335,6 +407,7 @@ object FirebaseDatabaseManager {
                         if (task.isSuccessful) {
                             userComments.child(commentKey).removeValue()
                                 .addOnCompleteListener { userTask ->
+                                    onCompleted("")
                                 }
                         } else {
                         }
@@ -348,6 +421,7 @@ object FirebaseDatabaseManager {
                         if (task.isSuccessful) {
                             userComments.child(commentKey).setValue(System.currentTimeMillis())
                                 .addOnCompleteListener { userTask ->
+                                    onCompleted("")
                                 }
                         } else {
                         }
@@ -356,6 +430,7 @@ object FirebaseDatabaseManager {
             }
         }
     }
+
     fun readCommentdata(postKey: String, onCompleted: (MutableList<CommentModel>) -> Unit) {
         database.child("posts").child(postKey).child("comments")
             .addListenerForSingleValueEvent(object : ValueEventListener {

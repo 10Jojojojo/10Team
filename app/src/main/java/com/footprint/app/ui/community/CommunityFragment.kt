@@ -36,15 +36,15 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
 //        communityViewModel.userdata(UserSession.userdata)
 //    }
     private fun initView() {
-        binding.rvTag.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvTag.adapter =
-            CommunityAdapter(requireContext(), communityViewModel.dummyTag).apply {
-                itemClick = object : ItemClick {
-                    override fun onClick(view: View, position: Int) {
-                    }
-                }
-            }
+//        binding.rvTag.layoutManager =
+//            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+//        binding.rvTag.adapter =
+//            CommunityAdapter(requireContext(), communityViewModel.dummyTag).apply {
+//                itemClick = object : ItemClick {
+//                    override fun onClick(view: View, position: Int) {
+//                    }
+//                }
+//            }
         binding.rvPost.layoutManager =
             LinearLayoutManager(requireContext())
         binding.rvPost.adapter = CommunityAdapter(requireContext(), communityViewModel.postList.value!!).apply {
@@ -52,6 +52,7 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
                 override fun onClick(view: View, position: Int) {
                     if (findNavController().currentDestination?.id == R.id.navigation_community) {
                             val bundle = Bundle().apply {
+                                communityViewModel.currentPostposition = position
                                 putInt("position", position)
                                 putString("postKey,", communityViewModel.postList.value!![position].postKey)
                             }

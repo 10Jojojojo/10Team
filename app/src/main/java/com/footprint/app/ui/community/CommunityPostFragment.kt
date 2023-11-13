@@ -2,6 +2,7 @@ package com.footprint.app.ui.community
 
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
@@ -46,6 +47,7 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
                 readProfiledata(comment.uid) { profileModel ->
                     comment.nickname = profileModel?.nickName
                     comment.profileImageUri = profileModel?.profileImageUri
+                    communityViewModel.updateCommentUI() // 비동기적으로 닉네임과 프로필Url이 받아와져서, 이후 옵저브 메서드를 동작시키기 위한 메서드
                 }
             }
         }
@@ -63,7 +65,8 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
                             communityViewModel.updateComment(postKey = communityViewModel.postList.value?.get(getposition)?.postKey!!,
                                 comment = communityViewModel.postList.value?.get(getposition)?.comments!![position],
                                 crud = UPDATE,
-                                updateComment = binding.etAddComment.text.toString()){}
+                                updateComment = binding.etAddComment.text.toString()){
+                            }
                         } else {
                             showToast("수정할 권한이 없습니다.")
                         }
@@ -72,10 +75,15 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
                 itemClickDelete = object : ItemClick {
                     override fun onClick(view: View, position: Int) {
                         if (communityViewModel.postList.value?.get(getposition)?.comments!![position].uid == FirebaseAuth.getInstance().currentUser?.uid) {
+
                             communityViewModel.updateComment(
                                 postKey = communityViewModel.postList.value?.get(getposition)?.postKey!!,
                                 comment = communityViewModel.postList.value?.get(getposition)?.comments!![position],
-                                crud = DELETE){}
+                                crud = DELETE){
+                                communityViewModel.postList.value?.get(getposition)?.commentCount =
+                                    communityViewModel.commentList.value?.size?.toLong()!!
+                                communityViewModel.updateCommentUI()
+                            }
                         } else {
                             showToast("삭제할 권한이 없습니다.")
                         }
@@ -120,12 +128,18 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
                 communityViewModel.updateComment(
                     communityViewModel.postList.value?.get(getposition)?.postKey!!,
                     newComment,CREATE
-                ){}
+                ){
+                    communityViewModel.postList.value?.get(getposition)?.commentCount =
+                        communityViewModel.commentList.value?.size?.toLong()!!
+                }
                 etAddComment.setText("")
             }
             binding.ivFavorite.setOnClickListener {
-                communityViewModel.updateLike(communityViewModel.postList.value?.get(getposition)?.postKey!!)
-
+                communityViewModel.let {
+                    it.updateLike(it.postList.value?.get(getposition)?.postKey!!) {count ->
+                                it.postList.value!![getposition].likeCount = count
+                    }
+                }
             }
         }
         communityViewModel.commentList.observe(viewLifecycleOwner) {
@@ -136,16 +150,8 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
             communityCommentAdapter.notifyDataSetChanged()
         }
         communityViewModel.likeState.observe(viewLifecycleOwner) {
-            if(it)
-            binding.tvLike.text = (communityViewModel.postList.value?.get(getposition)?.likeCount?.plus(
-                1
-            )).toString()
-                else if(!it){
-                binding.tvLike.text = (communityViewModel.postList.value?.get(getposition)?.likeCount?.plus(
-                    -1
-                )).toString()
-                }
-
+                binding.tvLike.text =
+                    communityViewModel.postList.value?.get(getposition)?.likeCount.toString()
         }
         recyclerView()
 //        FirebaseDatabaseManager.readCommentdata(postkey!!){}

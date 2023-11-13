@@ -39,6 +39,8 @@ class CommunityViewModel : ViewModel() {
         return lastPostTimestamp
     }
     private var isCommunityObserve = false
+
+    var currentPostposition = 0
     fun setCommunityObserve(state:Boolean) {
         isCommunityObserve = state
     }
@@ -75,8 +77,6 @@ class CommunityViewModel : ViewModel() {
 
                 currentList.add(comment)
 
-                _commentList.value = currentList
-
                 saveCommentData(
                     postKey = postKey,
                     uid = comment.uid,
@@ -85,14 +85,14 @@ class CommunityViewModel : ViewModel() {
                     crud = CREATE
                 ) {
                     comment.commentKey = it
+                    _commentList.value = currentList
+                    onCompleted()
                 }
             }
             DELETE -> {
                 val currentList = _commentList.value ?: mutableListOf()
 
                 currentList.remove(comment)
-
-                _commentList.value = currentList
 
                 saveCommentData(
                     postKey = postKey,
@@ -101,24 +101,20 @@ class CommunityViewModel : ViewModel() {
                     comment = comment,
                     crud = DELETE
                 ) {
+                    _commentList.value = currentList
+                    onCompleted()
                 }
             }
             UPDATE-> {
                 // 기존 리스트 복사
                 // 기존 객체를 참조하는것이 아닌, 새로운 리스트를 만들어야 데이터 수정이 가능한 듯 함
                 val currentList = _commentList.value?.toMutableList()
-                Log.d("aaaaaa1231","${commentList}")
 
                 // 특정 댓글을 찾아 수정
                 val index = currentList?.indexOfFirst { it.commentKey == comment.commentKey }
-                Log.d("aaaaaa1232","${index}")
                 if (index != null) {
                     currentList[index].content = updateComment ?: ""
-                    Log.d("aaaaaa1233","${currentList[index]}")
                 }
-
-                _commentList.value = currentList
-                Log.d("aaaaaa1234","${ _commentList.value}")
 
                 saveCommentData(
                     postKey = postKey,
@@ -128,19 +124,25 @@ class CommunityViewModel : ViewModel() {
                     crud = UPDATE
                 ) {
                     comment.commentKey = it
+                    _commentList.value = currentList
+                    onCompleted()
                 }
             }
         }
     }
 
-    fun updateLike(postKey:String) {
+    fun updateLike(postKey:String,onCompleted: (Long) -> Unit) {
         // 내 좋아요 상태를 알려주는 상태변수만 정의 라이크모델 이런거까지 필요없음.
-        var likeState = _likeState.value
 
-        likeState = !likeState!!
+        saveLikedata(postKey,FirebaseAuth.getInstance().currentUser?.uid!!){
 
-        _likeState.value = likeState
-        saveLikedata(postKey,FirebaseAuth.getInstance().currentUser?.uid!!){}
+            onCompleted(it)
+            var likeState = _likeState.value
+
+            likeState = !likeState!!
+
+            _likeState.value = likeState
+        }
     }
     fun loadLike(likeState:Boolean) {
         _likeState.value = likeState
@@ -151,12 +153,16 @@ class CommunityViewModel : ViewModel() {
         _postList.value = postList
     }
 
+    fun updateCommentUI(){
+        val currentComments = commentList.value ?: mutableListOf()
+        _commentList.value = currentComments
+    }
     fun loadComment(
         commentList: MutableList<CommentModel>,
         onCompleted: (MutableList<CommentModel>) -> Unit
     ) {
-        _commentList.value = commentList
         onCompleted(commentList)
+        _commentList.value = commentList
     }
 //
 //    fun loadLike(likeList: MutableList<LikeModel>) {
