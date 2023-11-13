@@ -17,6 +17,7 @@ import com.footprint.app.databinding.ItemImageBinding
 import com.footprint.app.databinding.ItemPostBinding
 import com.footprint.app.databinding.ItemTagBinding
 import com.footprint.app.formatDateMd
+import com.footprint.app.formatDateMdhm
 import com.footprint.app.formatDateYmd
 import com.footprint.app.util.ItemClick
 
@@ -38,12 +39,12 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
                 .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
                 .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
                 .into(binding.ivProfileImage)
-            binding.tvNickname.text = postModel.nickname// postModel.authorNickname
-            binding.tvPostdate.text = formatDateMd(postModel.timestamp)// postModel.postDate
+            binding.tvNickname.text = postModel.nickname
+            binding.tvPostdate.text = formatDateMdhm(postModel.timestamp)
             binding.tvTitle.text = postModel.title
             binding.tvContent.text = postModel.content
-            binding.tvLike.text = postModel.likes.size.toString()// postModel.likesCount.toString()
-            binding.tvComment.text = postModel.comments.size.toString()// postModel.commentsCount.toString()
+            binding.tvLike.text = postModel.likes.size.toString()
+            binding.tvComment.text = postModel.comments.size.toString()
             binding.root.setOnClickListener {
                 itemClick?.onClick(it, adapterPosition)
             }

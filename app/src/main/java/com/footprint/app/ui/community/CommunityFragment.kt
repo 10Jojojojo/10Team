@@ -53,6 +53,7 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
                     if (findNavController().currentDestination?.id == R.id.navigation_community) {
                             val bundle = Bundle().apply {
                                 putInt("position", position)
+                                putString("postKey,", communityViewModel.postList.value!![position].postKey)
                             }
                             findNavController().navigate(R.id.communityPost, bundle)
 

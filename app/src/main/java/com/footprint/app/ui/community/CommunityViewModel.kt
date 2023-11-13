@@ -6,12 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.footprint.app.Constants.CREATE
+import com.footprint.app.Constants.DELETE
+import com.footprint.app.Constants.UPDATE
 import com.footprint.app.FirebaseDatabaseManager.readPostdata
 import com.footprint.app.FirebaseDatabaseManager.saveCommentData
 import com.footprint.app.FirebaseDatabaseManager.saveLikedata
 import com.footprint.app.FirebaseDatabaseManager.savePostdata
 import com.footprint.app.api.model.CommentModel
-import com.footprint.app.api.model.LikeModel
 import com.footprint.app.api.model.PostModel
 import com.footprint.app.api.model.TagModel
 import com.google.firebase.auth.FirebaseAuth
@@ -21,14 +22,13 @@ class CommunityViewModel : ViewModel() {
     private var _postList = MutableLiveData<MutableList<PostModel>>().apply {
         readPostdata(null) { it, stamp ->
             value = it
-            Log.d("aaaaaa1","현재 Postdata는 ${value}")
             lastPostTimestamp = stamp
         }
     }
     val postList: LiveData<MutableList<PostModel>> = _postList
-    private var _likeList =
-        MutableLiveData<MutableList<LikeModel>>().apply { value = mutableListOf() }
-    val likeList: LiveData<MutableList<LikeModel>> = _likeList
+    private var _likeState =
+        MutableLiveData<Boolean>().apply { value = false }
+    val likeState: LiveData<Boolean> = _likeState
     private var _commentList =
         MutableLiveData<MutableList<CommentModel>>().apply { value = mutableListOf() }
 
@@ -68,38 +68,96 @@ class CommunityViewModel : ViewModel() {
         }
     }
 
-    fun updateComment(postKey:String,comment: CommentModel) {
-        val currentList = _commentList.value ?: mutableListOf()
+    fun updateComment(postKey: String, comment: CommentModel, crud: Int,updateComment:String? = null,onCompleted: () -> Unit) {
+        when (crud) {
+            CREATE -> {
+                val currentList = _commentList.value ?: mutableListOf()
 
-        currentList.add(comment)
+                currentList.add(comment)
 
-        _commentList.value = currentList
+                _commentList.value = currentList
 
-        Log.d("aaaaaa1", FirebaseAuth.getInstance().currentUser?.uid ?: "")
-        saveCommentData(postKey,FirebaseAuth.getInstance().currentUser?.uid ?: "", comment = comment,crud = CREATE){}
+                saveCommentData(
+                    postKey = postKey,
+                    uid = comment.uid,
+                    commentKey = comment.commentKey,
+                    comment = comment,
+                    crud = CREATE
+                ) {
+                    comment.commentKey = it
+                }
+            }
+            DELETE -> {
+                val currentList = _commentList.value ?: mutableListOf()
+
+                currentList.remove(comment)
+
+                _commentList.value = currentList
+
+                saveCommentData(
+                    postKey = postKey,
+                    uid = comment.uid,
+                    commentKey = comment.commentKey,
+                    comment = comment,
+                    crud = DELETE
+                ) {
+                }
+            }
+            UPDATE-> {
+                // 기존 리스트 복사
+                // 기존 객체를 참조하는것이 아닌, 새로운 리스트를 만들어야 데이터 수정이 가능한 듯 함
+                val currentList = _commentList.value?.toMutableList()
+                Log.d("aaaaaa1231","${commentList}")
+
+                // 특정 댓글을 찾아 수정
+                val index = currentList?.indexOfFirst { it.commentKey == comment.commentKey }
+                Log.d("aaaaaa1232","${index}")
+                if (index != null) {
+                    currentList[index].content = updateComment ?: ""
+                    Log.d("aaaaaa1233","${currentList[index]}")
+                }
+
+                _commentList.value = currentList
+                Log.d("aaaaaa1234","${ _commentList.value}")
+
+                saveCommentData(
+                    postKey = postKey,
+                    uid = comment.uid,
+                    commentKey = comment.commentKey,
+                    comment = comment,
+                    crud = UPDATE
+                ) {
+                    comment.commentKey = it
+                }
+            }
+        }
     }
 
-    fun updateLike(postKey:String,like: LikeModel) {
-        val currentList = _likeList.value ?: mutableListOf()
+    fun updateLike(postKey:String) {
+        // 내 좋아요 상태를 알려주는 상태변수만 정의 라이크모델 이런거까지 필요없음.
+        var likeState = _likeState.value
 
-        currentList.add(like)
+        likeState = !likeState!!
 
-        _likeList.value = currentList
+        _likeState.value = likeState
         saveLikedata(postKey,FirebaseAuth.getInstance().currentUser?.uid!!){}
     }
-
+    fun loadLike(likeState:Boolean) {
+        _likeState.value = likeState
+    }
 
 
     fun loadPost(postList: MutableList<PostModel>) {
         _postList.value = postList
     }
 
-//    fun loadComment(
-//        commentList: MutableList<CommentModel>,
-//        onCompleted: (MutableList<CommentModel>) -> Unit
-//    ) {
-//        _commentList.value = commentList
-//    }
+    fun loadComment(
+        commentList: MutableList<CommentModel>,
+        onCompleted: (MutableList<CommentModel>) -> Unit
+    ) {
+        _commentList.value = commentList
+        onCompleted(commentList)
+    }
 //
 //    fun loadLike(likeList: MutableList<LikeModel>) {
 //        _likeList.value = likeList

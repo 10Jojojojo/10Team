@@ -10,7 +10,7 @@ data class PostModel(
     var postImageUrls: MutableList<String> = mutableListOf(), // 게시글의 사진 URL 리스트
     var uid: String? = null, // 해당 게시글의 수정 권한을 주기위해 작성자의 uid를 받아온다.
     var nickname: String? = null, // uid를 통해 해당 게시글의 작성자 정보를 불러온다.
-    val profileImageUri: String? = null, // uid를 통해 해당 게시글의 프로필 url을 받아온다.
+    var profileImageUri: String? = null, // uid를 통해 해당 게시글의 프로필 url을 받아온다.
     var commentCount: Long = 0L, // 댓글의 수는 PostModel에도 저장한다. 바로 화면에 표시하기 위해서
     var likeCount: Long = 0L, // 좋아요의 수는 PostModel에도 저장한다. 바로 화면에 표시하기 위해서
     var comments: MutableList<CommentModel> = mutableListOf(), // 게시글의 댓글리스트. 해당 게시글의 postKey로 CommentList를 받아온다.
@@ -60,6 +60,7 @@ fun PostModel.toDTO(): PostModelDTO {
         timestamp = this.timestamp,
         title = this.title,
         content = this.content,
+        uid = this.uid,
         postImageUrls = this.postImageUrls,
         nickname = this.nickname,
         profileImageUri = this.profileImageUri,
@@ -79,6 +80,7 @@ fun PostModelDTO.toModel(): PostModel {
         title = this.title ?: "",
         content = this.content ?: "",
         postImageUrls = this.postImageUrls ?: mutableListOf(),
+        uid = this.uid ?: "",
         nickname = this.nickname ?: "",
         profileImageUri = this.profileImageUri ?: "",
         commentCount = this.commentCount ?: 0L,
