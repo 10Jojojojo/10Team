@@ -54,6 +54,10 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
 
         _binding = FragmentCommunityPlusBinding.bind(view)
         initView()
+
+        binding.back.setOnClickListener {
+            findNavController().navigate(R.id.navigation_community)
+        }
     }
 
     private fun goCommunityPage(){

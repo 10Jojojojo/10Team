@@ -159,6 +159,10 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
         {
             communityViewModel.loadLike(it)
         }
+
+        binding.back.setOnClickListener {
+            findNavController().navigate(R.id.navigation_community)
+        }
     }
 
     private fun recyclerView() {
