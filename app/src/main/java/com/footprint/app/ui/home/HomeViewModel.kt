@@ -10,6 +10,7 @@ import com.footprint.app.FirebaseDatabaseManager
 import com.footprint.app.FirebaseDatabaseManager.readMarkerdata
 import com.footprint.app.FirebaseDatabaseManager.readWalkdata
 import com.footprint.app.FirebaseDatabaseManager.saveMarkerdata
+import com.footprint.app.FirebaseDatabaseManager.saveProfiledata
 import com.footprint.app.FirebaseDatabaseManager.saveWalkdata
 import com.footprint.app.api.model.MarkerModel
 import com.footprint.app.api.model.PetInfoModel
@@ -90,7 +91,7 @@ class HomeViewModel : ViewModel() {
     }
     val myPostList: LiveData<MutableList<PostModel>> = _myPostList
     fun updateProfile(profile: ProfileModel){
-        FirebaseDatabaseManager.saveProfiledata(profile) {
+        saveProfiledata(profile) {
             _profile.value = it
         }
     }

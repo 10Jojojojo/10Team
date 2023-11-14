@@ -29,6 +29,8 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
 
     var itemClick: ItemClick? = null
 
+    var itemClickUpdate: ItemClick? = null
+    var itemClickDelete: ItemClick? = null
 
     // 생성자 의 parameter 에 val 을 사용 하여 멤버 변수로 선언
     inner class PostHolder(val binding: ItemPostBinding) :
@@ -39,14 +41,16 @@ class CommunityAdapter(private val context: Context, private val items: List<*>)
                 .placeholder(R.drawable.gif_loading) // 로딩 중에 보여줄 이미지
                 .error(R.drawable.ic_error) // 로딩 실패 시 보여줄 이미지
                 .into(binding.ivProfileImage)
-            binding.tvNickname.text = postModel.nickname
-            binding.tvPostdate.text = formatDateMdhm(postModel.timestamp)
-            binding.tvTitle.text = postModel.title
-            binding.tvContent.text = postModel.content
-            binding.tvLike.text = postModel.likeCount.toString()
-            binding.tvComment.text = postModel.comments.size.toString()
-            binding.root.setOnClickListener {
-                itemClick?.onClick(it, adapterPosition)
+            binding.apply {
+                tvNickname.text = postModel.nickname
+                tvPostdate.text = formatDateMdhm(postModel.timestamp)
+                tvTitle.text = postModel.title
+                tvContent.text = postModel.content
+                tvLike.text = postModel.likeCount.toString()
+                tvComment.text = postModel.comments.size.toString()
+                root.setOnClickListener {
+                    itemClick?.onClick(it, adapterPosition)
+                }
             }
         }
     }

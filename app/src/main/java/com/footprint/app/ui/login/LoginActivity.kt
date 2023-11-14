@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.footprint.app.FirebaseDatabaseManager
 import com.footprint.app.MainActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -11,6 +12,7 @@ import com.google.android.gms.common.SignInButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.footprint.app.databinding.ActivityLoginBinding
+import com.footprint.app.membershipActivity
 import com.google.android.gms.common.api.ApiException
 
 class
@@ -54,8 +56,14 @@ LoginActivity : AppCompatActivity() {
             }
     }
     private fun showDogProfilePage() {
-        val intent = Intent(this, MainActivity::class.java) // 강아지프로필 페이지로 수정필요
-        startActivity(intent)
+        FirebaseDatabaseManager.readProfiledata { if(it==null){
+            val intent = Intent(this, membershipActivity::class.java)
+            startActivity(intent)
+        }else{
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+        }
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

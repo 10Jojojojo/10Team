@@ -34,6 +34,7 @@ class CommunityViewModel : ViewModel() {
 
     val commentList: LiveData<MutableList<CommentModel>> = _commentList
 
+    var postState:Boolean = false
     private var lastPostTimestamp: Long? = null
     fun getLastPostTimestamp(): Long? {
         return lastPostTimestamp
@@ -61,15 +62,48 @@ class CommunityViewModel : ViewModel() {
 //        _profileList.value = currentList
 //    }
 
-    fun updatePost(post: PostModel) {
-        val currentList = _postList.value ?: mutableListOf()
-        _postList.value = currentList
-        savePostdata(post){
-            currentList.add(it)
-            _postList.value = currentList
+//    fun updatePost(post: PostModel) {
+//        val currentList = _postList.value ?: mutableListOf()
+//        _postList.value = currentList
+//        savePostdata(post){
+//            currentList.add(it)
+//            _postList.value = currentList
+//        }
+//    }
+fun updatePost(post: PostModel, crud: Int, onCompleted: () -> Unit) {
+    val currentList = _postList.value ?: mutableListOf()
+
+    when (crud) {
+        CREATE -> {
+            savePostdata(post, crud) {
+                currentList.add(post)
+                _postList.value = currentList
+                onCompleted()
+            }
+        }
+
+        DELETE -> {
+            savePostdata(post, crud) {
+                currentList.remove(post)
+                _postList.value = currentList
+                onCompleted()
+            }
+        }
+
+        UPDATE -> {
+            // 특정 게시물을 찾아 수정
+            val index = currentList.indexOfFirst { it.postKey == post.postKey }
+            if (index != -1) {
+                currentList[index] = post
+            }
+
+            savePostdata(post, crud) {
+                _postList.value = currentList
+                onCompleted()
+            }
         }
     }
-
+}
     fun updateComment(postKey: String, comment: CommentModel, crud: Int,updateComment:String? = null,onCompleted: () -> Unit) {
         when (crud) {
             CREATE -> {

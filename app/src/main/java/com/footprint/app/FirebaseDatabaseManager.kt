@@ -43,18 +43,58 @@ object FirebaseDatabaseManager {
     // 로그인 시 얻은 uid값을 사용한다. uid값을 사용할 때 값을 초기화한다.
     private val uid by lazy { FirebaseAuth.getInstance().currentUser?.uid ?: "" }
 
-    fun savePostdata(postdata: PostModel, onCompleted: (PostModel) -> Unit) {
-        val key = database.child("posts").push().key
-        if (key != null) {
+//    fun savePostdata(postdata: PostModel,crud:Int, onCompleted: (PostModel) -> Unit) {
+//        val key = database.child("posts").push().key
+//        if (key != null) {
+//            postdata.comments.forEach {
+//                it.profileImageUri = null
+//                it.nickname = null
+//            }
+//            postdata.postKey = key
+//            database.child("posts").child(key).setValue(postdata.toDTO())
+//            database.child("user_posts").child(uid).child(key).setValue(postdata.toDTO())
+//            onCompleted(postdata)
+//        }
+//    }
+fun savePostdata(postdata: PostModel, crud: Int, onCompleted: (String?) -> Unit) {
+    val postRef = database.child("posts")
+    val userPostRef = database.child("user_posts").child(uid)
+
+    when (crud) {
+        CREATE -> {
+            val key = postRef.push().key ?: return
+            postdata.postKey = key // 새로운 키 주입
             postdata.comments.forEach {
                 it.profileImageUri = null
                 it.nickname = null
             }
-            database.child("posts").child(key).setValue(postdata.toDTO())
-            database.child("user_posts").child(uid).child(key).setValue(postdata.toDTO())
-            onCompleted(postdata)
+            val task1 = postRef.child(postdata.postKey!!).setValue(postdata.toDTO())
+            val task2 = userPostRef.child(postdata.postKey!!).setValue(postdata.toDTO())
+
+            Tasks.whenAll(task1, task2).addOnCompleteListener {
+                onCompleted(if (it.isSuccessful) key else null)
+            }
+        }
+
+        DELETE -> {
+            val task1 = postRef.child(postdata.postKey!!).removeValue()
+            val task2 = userPostRef.child(postdata.postKey!!).removeValue()
+
+            Tasks.whenAll(task1, task2).addOnCompleteListener {
+                onCompleted(if (it.isSuccessful) postdata.postKey else null)
+            }
+        }
+
+        UPDATE -> {
+            val task1 = postRef.child(postdata.postKey!!).setValue(postdata.toDTO())
+            val task2 = userPostRef.child(postdata.postKey!!).setValue(postdata.toDTO())
+
+            Tasks.whenAll(task1, task2).addOnCompleteListener {
+                onCompleted(if (it.isSuccessful) postdata.postKey else null)
+            }
         }
     }
+}
     fun readMyPostdata(onCompleted: (MutableList<PostModel>) -> Unit) {
         val myPostRef = database.child("user_posts").child(uid)
         // 이 경우 맵형태로 데이터를 받아옴
@@ -64,7 +104,7 @@ object FirebaseDatabaseManager {
                 val postList = mutableListOf<PostModel>()
                 for (postSnapshot in snapshot.children) {
                     // 각 postSnapshot을 PostdataDTO로 변환
-                    Log.d("aaaaaa111","$postSnapshot")
+                    Log.d("aaaaaa111", "$postSnapshot")
                     postSnapshot.getValue(PostModelDTO::class.java)?.let { postdataDTO ->
                         postList.add(postdataDTO.toModel())
                     }
@@ -303,37 +343,89 @@ object FirebaseDatabaseManager {
 //            }
 //        })
 //    }
+//    fun saveLikedata(postKey: String, uid: String, onCompleted: (Long) -> Unit) {
+//        val userLike = database.child("user_likes").child(uid).child(postKey)
+//        val postLike = database.child("posts").child(postKey).child("likes").child(uid)
+//        val postRef = database.child("posts").child(postKey)
+//        val userpostLike = database.child("user_posts").child(uid).child(postKey).child("likes").child(uid)
+//
+//        postLike.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                val task = if (snapshot.exists()) {
+//                    postLike.removeValue().continueWithTask { userLike.removeValue() }
+//                } else {
+//                    val currentTime = System.currentTimeMillis()
+//                    postLike.setValue(currentTime)
+//                        .continueWithTask { userLike.setValue(currentTime) }
+//                }
+//
+//                task.addOnCompleteListener { likeTask ->
+//                    if (likeTask.isSuccessful) {
+//                        postRef.child("likes")
+//                            .addListenerForSingleValueEvent(object : ValueEventListener {
+//                                override fun onDataChange(likesSnapshot: DataSnapshot) {
+//                                    val likeCount = likesSnapshot.childrenCount
+//                                    postRef.child("likeCount").setValue(likeCount)
+//                                        .addOnCompleteListener {
+//                                            onCompleted(likeCount)
+//                                        }
+//                                }
+//
+//                                override fun onCancelled(databaseError: DatabaseError) {
+//                                }
+//                            })
+//                    } else {
+//                    }
+//                }
+//            }
+//
+//            override fun onCancelled(databaseError: DatabaseError) {
+//            }
+//        })
+//    }
+
     fun saveLikedata(postKey: String, uid: String, onCompleted: (Long) -> Unit) {
         val userLike = database.child("user_likes").child(uid).child(postKey)
         val postLike = database.child("posts").child(postKey).child("likes").child(uid)
+        val userpostLike =
+            database.child("user_posts").child(uid).child(postKey).child("likes").child(uid)
         val postRef = database.child("posts").child(postKey)
-
+        val userpostRef = database.child("user_posts").child(uid).child(postKey)
+        var likeCount = 0L
+        var userlikeCount = 0L
         postLike.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val task = if (snapshot.exists()) {
-                    postLike.removeValue().continueWithTask { userLike.removeValue() }
-                } else {
-                    val currentTime = System.currentTimeMillis()
-                    postLike.setValue(currentTime)
-                        .continueWithTask { userLike.setValue(currentTime) }
-                }
+                val currentTime = System.currentTimeMillis()
+                val task1 =
+                    if (snapshot.exists()) postLike.removeValue() else postLike.setValue(currentTime)
+                val task2 =
+                    if (snapshot.exists()) userLike.removeValue() else userLike.setValue(currentTime)
+                val task3 =
+                    if (snapshot.exists()) userpostLike.removeValue() else userpostLike.setValue(
+                        currentTime
+                    )
+//                Tasks.whenAll(task1, task2, task3).addOnCompleteListener {
+//                    val task4 = postRef.get().continueWithTask { task ->
+//                        likeCount = if (task.isSuccessful) task.result.childrenCount else 0L
+//                        database.child("posts").child(postKey).setValue(likeCount)
+//                    }
+//                    val task5 = userpostRef.get().continueWithTask { task ->
+//                        userlikeCount = if (task.isSuccessful) task.result.childrenCount else 0L
+//                        database.child("user_posts").child(uid).child(postKey).setValue(userlikeCount)
+//                    }
+                Tasks.whenAll(task1, task2, task3).addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        postRef.child("likes").get().addOnSuccessListener { dataSnapshot ->
+                            val likeCount = dataSnapshot.childrenCount
+                            postRef.updateChildren(mapOf("likeCount" to likeCount))
+                        }
 
-                task.addOnCompleteListener { likeTask ->
-                    if (likeTask.isSuccessful) {
-                        postRef.child("likes")
-                            .addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(likesSnapshot: DataSnapshot) {
-                                    val likeCount = likesSnapshot.childrenCount
-                                    postRef.child("likeCount").setValue(likeCount)
-                                        .addOnCompleteListener {
-                                            onCompleted(likeCount)
-                                        }
-                                }
+                        userpostRef.child("likes").get().addOnSuccessListener { dataSnapshot ->
+                            val userlikeCount = dataSnapshot.childrenCount
+                            userpostRef.updateChildren(mapOf("likeCount" to userlikeCount))
+                        }
 
-                                override fun onCancelled(databaseError: DatabaseError) {
-                                }
-                            })
-                    } else {
+                        onCompleted(likeCount)
                     }
                 }
             }
@@ -378,7 +470,8 @@ object FirebaseDatabaseManager {
         }
         val postComments = database.child("posts").child(postKey).child("comments")
         val userComments = database.child("user_comments").child(uid).child(postKey)
-//        database.child("posts").child(postKey).child("commentCount").setValue()
+        val userpostComments =
+            database.child("user_posts").child(uid).child(postKey).child("comments")
         when (crud) {
             CREATE -> {
                 if (commentKey == null && comment != null) {
@@ -388,43 +481,41 @@ object FirebaseDatabaseManager {
                         comment.profileImageUri = null
                         comment.nickname = null
 
-                        postComments.child(key).setValue(comment).addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                userComments.child(key).setValue(System.currentTimeMillis())
-                                    .addOnCompleteListener {
-                                        onCompleted(key)
-                                    }
-                            } else {
-                            }
+                        val task1 = postComments.child(key).setValue(comment)
+                        val task2 = userComments.child(key).setValue(comment)
+                        val task3 = userpostComments.child(key).setValue(comment)
+
+                        // 모든 작업이 성공했는지 확인
+                        Tasks.whenAll(task1, task2, task3).addOnCompleteListener {
+                            onCompleted(key)
                         }
-                    }
+                    } ?: onCompleted("")
                 }
             }
 
             DELETE -> {
                 if (commentKey != null) {
-                    postComments.child(commentKey).removeValue().addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            userComments.child(commentKey).removeValue()
-                                .addOnCompleteListener { userTask ->
-                                    onCompleted("")
-                                }
-                        } else {
-                        }
+                    val task1 = postComments.child(commentKey).removeValue()
+                    val task2 = userComments.child(commentKey).removeValue()
+                    val task3 = userpostComments.child(commentKey).removeValue()
+
+                    // 모든 작업이 성공했는지 확인
+                    Tasks.whenAll(task1, task2, task3).addOnCompleteListener {
+                        onCompleted(commentKey)
                     }
                 }
             }
 
             UPDATE -> {
                 if (commentKey != null && comment != null) {
-                    postComments.child(commentKey).setValue(comment).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            userComments.child(commentKey).setValue(System.currentTimeMillis())
-                                .addOnCompleteListener { userTask ->
-                                    onCompleted("")
-                                }
-                        } else {
-                        }
+                    val task1 = postComments.child(commentKey).setValue(comment)
+                    val task2 = userComments.child(commentKey).setValue(comment)
+                    val task3 =
+                        userpostComments.child(commentKey).setValue(comment)
+
+                    // 모든 작업이 성공했는지 확인
+                    Tasks.whenAll(task1, task2, task3).addOnCompleteListener {
+                        onCompleted(commentKey)
                     }
                 }
             }
@@ -651,7 +742,7 @@ object FirebaseDatabaseManager {
             })
     }
 
-    fun uploadImage(image: Uri?, onComplete: (String) -> Unit) {
+    fun uploadImage(image: Uri?, onComplete: (String?) -> Unit) {
         image?.let {
             // Firebase Storage 경로 설정
             val storageRef = FirebaseStorage.getInstance().reference
@@ -674,7 +765,7 @@ object FirebaseDatabaseManager {
                 .addOnFailureListener {
                     // 업로드 실패
                 }
-        }
+        } ?: onComplete(null)
     }
 
     fun uploadImage(image: ByteArray, onComplete: (String) -> Unit) {

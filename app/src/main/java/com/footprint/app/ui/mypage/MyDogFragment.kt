@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -108,13 +109,21 @@ class MyDogFragment : Fragment(R.layout.fragment_my_dog) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
     private fun openGallery() { // 갤러리를 여는 함수.
+
+        // API 레벨에 따른 권한과 요청 코드 설정
+        val permission: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // API 33부터는 READ_MEDIA_IMAGES 사용
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else { // 그 이하 버전에서는 READ_EXTERNAL_STORAGE 사용
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
-                Manifest.permission.READ_MEDIA_IMAGES // READ_EXTERNAL_STORAGE 권한이 있는지 확인. 앱이 사용자의 저장소에서 파일을 읽을수 있도록 허용하는 권한. android.Manifest를 import 해와야한다.
+                permission // READ_EXTERNAL_STORAGE 권한이 있는지 확인. 앱이 사용자의 저장소에서 파일을 읽을수 있도록 허용하는 권한. android.Manifest를 import 해와야한다.
             ) != PackageManager.PERMISSION_GRANTED // PackageManager.PERMISSION_GRANTED는 권한 승인상태. 승인상태가 아니라면, 아래의 실행문을 실행하게 된다.
         ) {
             Log.d("FootprintApp","openGallery1")
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(permission),
                 Constants.REQUEST_PERMISSION
             )
             // requestPermissions 메서드를 이용해 사용자에게 해당 권한을 요청함.

@@ -175,15 +175,15 @@
             app:layout_constraintEnd_toStartOf="@id/iv_pawprint"
             app:layout_constraintStart_toEndOf="@id/iv_pause" />
 
-        <View
-            android:id="@+id/v_exampleline"
-            android:layout_width="0dp"
-            android:layout_height="10dp"
-            android:background="@color/black"
-            app:layout_constraintBottom_toTopOf="@id/iv_pawprint"
-            app:layout_constraintEnd_toEndOf="@id/iv_pawprint"
-            app:layout_constraintStart_toStartOf="@id/iv_pawprint"
-            app:layout_constraintTop_toTopOf="parent" />
+<!--        <View-->
+<!--            android:id="@+id/v_exampleline"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="10dp"-->
+<!--            android:background="@color/black"-->
+<!--            app:layout_constraintBottom_toTopOf="@id/iv_pawprint"-->
+<!--            app:layout_constraintEnd_toEndOf="@id/iv_pawprint"-->
+<!--            app:layout_constraintStart_toStartOf="@id/iv_pawprint"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
 
         <ImageView
             android:id="@+id/iv_pawprint"

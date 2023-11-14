@@ -64,7 +64,11 @@ class CommunityFragment : Fragment(R.layout.fragment_community) {
         }
         binding.ivPen.setOnClickListener {
             if (findNavController().currentDestination?.id == R.id.navigation_community) {
-                findNavController().navigate(R.id.communityPlus)
+                val bundle = Bundle().apply {
+                    putInt("position", -1)
+                }
+                communityViewModel.postState = true
+                findNavController().navigate(R.id.communityPlus,bundle)
             } // 네비게이션 컴포넌트의 오류
             // 그 이유는 화살표로 어디로 가는지 다 정해놧는데, 컴터 입장에서 그걸 수행하기까지 시간이 걸림?
             // 예를들어 커뮤니티에서 커뮤니티 플러스로 가야하는데, 그 전에 내가 홈으로 가버리면 홈에서 커뮤니티 플러스를 가는게 되버려서 에러가 남

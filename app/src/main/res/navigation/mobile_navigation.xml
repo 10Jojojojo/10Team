@@ -122,7 +122,13 @@
         android:id="@+id/navigation_communityPost"
         android:name="com.footprint.app.ui.community.CommunityPostFragment"
         android:label="커뮤니티포스트"
-        tools:layout="@layout/fragment_community_post"></fragment>
+        tools:layout="@layout/fragment_community_post">
+        <action
+            android:id="@+id/communityPlus"
+            app:destination="@+id/navigation_communityPlus"
+            app:launchSingleTop="true" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_myPost"
