@@ -29,7 +29,7 @@ LoginActivity : AppCompatActivity() {
         btnGoogleSignIn = binding.btngoogle
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("796616173651-tuijqr0er165et5ln12lgud85gc39d8h.apps.googleusercontent.com")
+            .requestIdToken("AIzaSyCm5x95U8m1ayqqEtztoG5HVnYOSFiXkj8")
             .requestEmail()
             .build()
         val mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -75,9 +75,10 @@ LoginActivity : AppCompatActivity() {
                 // Google 로그인성공시 Firebase에 인증
                 firebaseAuthWithGoogle(account?.idToken!!)
             } catch (e: ApiException) {
-                showToast("Google 로그인 실패")
-
+                e.printStackTrace()
+                showToast("Google 로그인 실패: "+e.statusCode)
             }
+
         }
     }
     companion object {

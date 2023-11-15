@@ -64,6 +64,9 @@
         android:label="커뮤니티플러스"
         tools:layout="@layout/fragment_community_plus">
 
+        <action
+            android:id="@+id/navigation_community"
+            app:destination="@id/navigation_community" />
 
     </fragment>
 
@@ -123,13 +126,12 @@
         android:name="com.footprint.app.ui.community.CommunityPostFragment"
         android:label="커뮤니티포스트"
         tools:layout="@layout/fragment_community_post">
-        <action
-            android:id="@+id/communityPlus"
-            app:destination="@+id/navigation_communityPlus"
-            app:launchSingleTop="true" />
+    <action
+        android:id="@+id/communityPlus"
+        app:destination="@+id/navigation_communityPlus"
+        app:launchSingleTop="true" />
 
-    </fragment>
-
+</fragment>
     <fragment
         android:id="@+id/navigation_myPost"
         android:name="com.footprint.app.ui.mypage.MyPostFragment"
