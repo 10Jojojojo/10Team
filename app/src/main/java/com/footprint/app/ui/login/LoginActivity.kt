@@ -67,9 +67,10 @@ LoginActivity : AppCompatActivity() {
                 // Google 로그인성공시 Firebase에 인증
                 firebaseAuthWithGoogle(account?.idToken!!)
             } catch (e: ApiException) {
-                showToast("Google 로그인 실패")
-
+                e.printStackTrace()
+                showToast("Google 로그인 실패: "+e.statusCode)
             }
+
         }
     }
     companion object {
