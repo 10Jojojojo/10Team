@@ -1,6 +1,7 @@
 package com.footprint.app.ui.community
 
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -134,10 +135,37 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
                 }
                 etAddComment.setText("")
             }
-            binding.ivFavorite.setOnClickListener {
+            ivFavorite.setOnClickListener {
                 communityViewModel.let {
-                    it.updateLike(it.postList.value?.get(getposition)?.postKey!!) {count ->
-                                it.postList.value!![getposition].likeCount = count
+                    it.updateLike(it.postList.value?.get(getposition)?.postKey!!) {
+                            count -> it.postList.value!![getposition].likeCount = count
+                        Log.d("aaaaaa123124","${communityViewModel.likeState.value}")
+                    }
+                }
+            }
+            tvUpdate.setOnClickListener {
+                if (communityViewModel.postList.value?.get(getposition)?.uid == FirebaseAuth.getInstance().currentUser?.uid) {
+                    //수정 코드 구현
+                    val bundle = Bundle().apply {
+                        putInt("position", getposition)
+                    }
+                    communityViewModel.postList.value?.get(getposition)?.postImageUrls?.let {
+                        for (i in it) {
+                            communityViewModel.images.add(Uri.parse(i))
+                        }
+                    }
+                    communityViewModel.postState = false
+                    findNavController().navigate(R.id.communityPlus, bundle)
+                }
+            }
+            tvDelete.setOnClickListener {
+                if (communityViewModel.postList.value?.get(getposition)?.uid == FirebaseAuth.getInstance().currentUser?.uid) {
+                    //삭제 코드 구현
+                    communityViewModel.updatePost(
+                        communityViewModel.postList.value?.get(getposition)!!,
+                        DELETE
+                    ) {
+                        findNavController().popBackStack()
                     }
                 }
             }
@@ -152,6 +180,9 @@ class CommunityPostFragment : Fragment(R.layout.fragment_community_post) {
         communityViewModel.likeState.observe(viewLifecycleOwner) {
                 binding.tvLike.text =
                     communityViewModel.postList.value?.get(getposition)?.likeCount.toString()
+            Log.d("aaaaaa123122",
+                communityViewModel.postList.value?.get(getposition)?.likeCount.toString()
+            )
         }
         recyclerView()
 //        FirebaseDatabaseManager.readCommentdata(postkey!!){}

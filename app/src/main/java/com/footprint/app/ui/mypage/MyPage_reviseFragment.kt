@@ -8,17 +8,20 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.footprint.app.Constants
 import com.footprint.app.Constants.REQUEST_GALLERY
 import com.footprint.app.Constants.REQUEST_PERMISSION
 import com.footprint.app.FirebaseDatabaseManager.uploadImage
@@ -67,21 +70,19 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
 
     private fun reUesrInfo() {
         binding.save.setOnClickListener {
-            if (imageUri != null) {
-                uploadImage(imageUri) {
-                    val profileModel = ProfileModel(
-                        nickName = binding.mypageReviseName.text.toString(),
-                        profileImageUri = it,
-                        address = binding.town.text.toString(),
-                        introduction = binding.mypageReviseIntroduction.text.toString()
-                    )
-                    homeViewModel.updateProfile(profileModel)
-                    findNavController().navigate(R.id.mypage)
-                }
-            } else if (homeViewModel.profile.value?.profileImageUri != null) {
+            if (homeViewModel.profile.value?.profileImageUri != null) {
                 val profileModel = ProfileModel(
                     nickName = binding.mypageReviseName.text.toString(),
                     profileImageUri = homeViewModel.profile.value?.profileImageUri,
+                    address = binding.town.text.toString(),
+                    introduction = binding.mypageReviseIntroduction.text.toString()
+                )
+                homeViewModel.updateProfile(profileModel)
+                findNavController().navigate(R.id.mypage)
+            } else uploadImage(imageUri) {
+                val profileModel = ProfileModel(
+                    nickName = binding.mypageReviseName.text.toString(),
+                    profileImageUri = it,
                     address = binding.town.text.toString(),
                     introduction = binding.mypageReviseIntroduction.text.toString()
                 )
@@ -138,20 +139,29 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
     }
 
     private fun openGallery() { // 갤러리를 여는 함수.
+
+        // API 레벨에 따른 권한과 요청 코드 설정
+        val permission: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // API 33부터는 READ_MEDIA_IMAGES 사용
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else { // 그 이하 버전에서는 READ_EXTERNAL_STORAGE 사용
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
-                Manifest.permission.READ_MEDIA_IMAGES // READ_EXTERNAL_STORAGE 권한이 있는지 확인. 앱이 사용자의 저장소에서 파일을 읽을수 있도록 허용하는 권한. android.Manifest를 import 해와야한다.
+                permission // READ_EXTERNAL_STORAGE 권한이 있는지 확인. 앱이 사용자의 저장소에서 파일을 읽을수 있도록 허용하는 권한. android.Manifest를 import 해와야한다.
             ) != PackageManager.PERMISSION_GRANTED // PackageManager.PERMISSION_GRANTED는 권한 승인상태. 승인상태가 아니라면, 아래의 실행문을 실행하게 된다.
         ) {
-            Log.d("FootprintApp", "openGallery1")
-            requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES), REQUEST_PERMISSION)
+            Log.d("FootprintApp","openGallery1")
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(permission),
+                Constants.REQUEST_PERMISSION
+            )
             // requestPermissions 메서드를 이용해 사용자에게 해당 권한을 요청함.
         } else { // 권한이 없는상태가 아니라면(= 권한이 있는 상태라면)
-            Log.d("FootprintApp", "openGallery2")
-            val intent =
-                Intent(Intent.ACTION_PICK) // 이미지를 선택할 수 있는 액션을 가진 인텐트 객체를 생성, 선택을 하면 intent에 데이터가 담김
+            Log.d("FootprintApp","openGallery2")
+            val intent = Intent(Intent.ACTION_PICK) // 이미지를 선택할 수 있는 액션을 가진 인텐트 객체를 생성, 선택을 하면 intent에 데이터가 담김
             intent.type = "image/*" // 갤러리에서 이미지 파일만 표시하도록 지정
-            startActivityForResult(intent, REQUEST_GALLERY)
+            startActivityForResult(intent, Constants.REQUEST_GALLERY)
             // REQUEST_GALLERY = 1이면, 갤러리 액티비티를 시작하면서 이 액티비티에서 결과를 반환받을 것임을 알린다.
         } // 이 함수의 결과로 데이터를 선택하면 intent에 이미지 데이터(자료형은 Uri)가 담김
     }

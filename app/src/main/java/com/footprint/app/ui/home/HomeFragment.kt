@@ -225,7 +225,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, View.
         binding.ivFlag.setOnClickListener(this)
         binding.ivFavorite.setOnClickListener(this)
         binding.ivFlaginfoanddel.setOnClickListener(this)
-        binding.vExampleline.setOnClickListener(this)
+//        binding.vExampleline.setOnClickListener(this)
     }
 
 // 지도 프래그먼트를 가져와서 OnMapReadyCallback을 등록
@@ -590,7 +590,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, View.
             }
             homeViewModel.colorCode = colorCode
             homeViewModel.lineWidthText = lineWidth.toString()
-            binding.vExampleline.setBackgroundColor(Color.parseColor("#${homeViewModel.colorCode}"))
+//            binding.vExampleline.setBackgroundColor(Color.parseColor("#${homeViewModel.colorCode}"))
 //            bindingDialog.vExampleline.layoutParams.width = lineWidth
             dialog.dismiss()
         }
@@ -785,9 +785,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnMapReadyCallback, View.
                     }
                 }
 
-                binding.vExampleline -> {
-                    showDialogPolyline()
-                }
+//                binding.vExampleline -> {
+//                    showDialogPolyline()
+//                }
 
                 else -> {}
             }

@@ -3,7 +3,7 @@ package com.footprint.app.api.model
 data class PetInfoModel(
     var key:String? = null,
     val timestamp: Long = 0L,
-    var petImageUrl:String = "",
+    var petImageUrl:String? = null,
     var petName:String = "",
     var petAge:String = "",
     var petSex:String = "",
@@ -12,7 +12,7 @@ data class PetInfoModel(
 data class PetInfoModelDTO(
     var key:String? = null,
     val timestamp: Long = 0L,
-    val petImageUrl: String = "",
+    val petImageUrl: String? = null,
     val petName: String = "",
     val petAge: String = "",
     val petSex: String = "",
@@ -42,5 +42,5 @@ fun PetInfoModelDTO.toModel(): PetInfoModel {
 }
 data class PetInfoWalkModel(
     var petName:String = "",
-    var petImageUrl:String = "",
+    var petImageUrl:String? = null,
 )
