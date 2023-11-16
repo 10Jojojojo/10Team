@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AppCompatDelegate
 import com.footprint.app.databinding.ActivitySplashBinding
 import com.footprint.app.ui.login.LoginActivity
 
@@ -15,7 +16,7 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         // ViewBinding을 초기화하고 뷰를 설정
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
