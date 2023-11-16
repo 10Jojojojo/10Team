@@ -27,8 +27,8 @@ class CommunityViewModel : ViewModel() {
     }
     val postList: LiveData<MutableList<PostModel>> = _postList
     private var _likeState =
-        MutableLiveData<Boolean>().apply { value = false }
-    val likeState: LiveData<Boolean> = _likeState
+        MutableLiveData<Boolean?>().apply { value = null }
+    val likeState: LiveData<Boolean?> = _likeState
     private var _commentList =
         MutableLiveData<MutableList<CommentModel>>().apply { value = mutableListOf() }
 
@@ -168,14 +168,11 @@ fun updatePost(post: PostModel, crud: Int, onCompleted: () -> Unit) {
     fun updateLike(postKey:String,onCompleted: (Long) -> Unit) {
         // 내 좋아요 상태를 알려주는 상태변수만 정의 라이크모델 이런거까지 필요없음.
 
-        saveLikedata(postKey,FirebaseAuth.getInstance().currentUser?.uid!!){
+        saveLikedata(postKey,FirebaseAuth.getInstance().currentUser?.uid!!){it,state ->
 
             onCompleted(it)
-            var likeState = _likeState.value
 
-            likeState = !likeState!!
-
-            _likeState.value = likeState
+            _likeState.value = state
         }
     }
     fun loadLike(likeState:Boolean) {

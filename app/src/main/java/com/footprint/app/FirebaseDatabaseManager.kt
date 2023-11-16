@@ -384,26 +384,27 @@ fun savePostdata(postdata: PostModel, crud: Int, onCompleted: (String?) -> Unit)
 //        })
 //    }
 
-    fun saveLikedata(postKey: String, uid: String, onCompleted: (Long) -> Unit) {
+    fun saveLikedata(postKey: String, uid: String, onCompleted: (Long,Boolean) -> Unit) {
         val userLike = database.child("user_likes").child(uid).child(postKey)
         val postLike = database.child("posts").child(postKey).child("likes").child(uid)
         val userpostLike =
             database.child("user_posts").child(uid).child(postKey).child("likes").child(uid)
         val postRef = database.child("posts").child(postKey)
         val userpostRef = database.child("user_posts").child(uid).child(postKey)
-        var likeCount = 0L
-        var userlikeCount = 0L
+        var likeState:Boolean = true
         postLike.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val currentTime = System.currentTimeMillis()
                 val task1 =
-                    if (snapshot.exists()) postLike.removeValue() else postLike.setValue(currentTime)
+                    if (snapshot.exists()) postLike.removeValue() else {
+                        postLike.setValue(currentTime) }
                 val task2 =
                     if (snapshot.exists()) userLike.removeValue() else userLike.setValue(currentTime)
                 val task3 =
                     if (snapshot.exists()) userpostLike.removeValue() else userpostLike.setValue(
                         currentTime
                     )
+                if(snapshot.exists()) likeState = false
 //                Tasks.whenAll(task1, task2, task3).addOnCompleteListener {
 //                    val task4 = postRef.get().continueWithTask { task ->
 //                        likeCount = if (task.isSuccessful) task.result.childrenCount else 0L
@@ -418,6 +419,7 @@ fun savePostdata(postdata: PostModel, crud: Int, onCompleted: (String?) -> Unit)
                         postRef.child("likes").get().addOnSuccessListener { dataSnapshot ->
                             val likeCount = dataSnapshot.childrenCount
                             postRef.updateChildren(mapOf("likeCount" to likeCount))
+                            onCompleted(likeCount,likeState)
                         }
 
                         userpostRef.child("likes").get().addOnSuccessListener { dataSnapshot ->
@@ -425,7 +427,6 @@ fun savePostdata(postdata: PostModel, crud: Int, onCompleted: (String?) -> Unit)
                             userpostRef.updateChildren(mapOf("likeCount" to userlikeCount))
                         }
 
-                        onCompleted(likeCount)
                     }
                 }
             }

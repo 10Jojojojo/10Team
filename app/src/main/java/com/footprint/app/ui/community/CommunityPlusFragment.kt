@@ -55,7 +55,7 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
     private lateinit var communityAdapter: CommunityAdapter
     private var getposition = 0
     private lateinit var images: MutableList<*>
-
+    private lateinit var temporaryImageUris: MutableList<Uri>
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -88,9 +88,8 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
 //            findNavController().navigate(R.id.community)
                 }
             } else {
-                Log.d("aaaaaa12311", "${communityViewModel.images}")
+                temporaryImageUris = communityViewModel.images
                 requireContext().uploadImages(communityViewModel.images) {
-                    Log.d("aaaaaa123112", "${it}")
                     communityViewModel.updatePost(
                         PostModel(
                             postKey = communityViewModel.postList.value?.get(getposition)?.postKey,
@@ -98,7 +97,7 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
                                 ?: 0L,
                             title = binding.etTitle.text.toString(), // 글 제목
                             content = binding.etContent.text.toString(), // 글 내용
-                            postImageUrls = it, // 게시글의 사진 URL 리스트
+                            postImageUrls = ((communityViewModel.postList.value?.get(getposition)?.postImageUrls?: mutableListOf()) + it).toMutableList(), // 게시글의 사진 URL 리스트
                             uid = communityViewModel.postList.value?.get(getposition)?.uid,
                             nickname = communityViewModel.postList.value?.get(getposition)?.nickname,
                             profileImageUri = communityViewModel.postList.value?.get(getposition)?.profileImageUri,
@@ -159,7 +158,7 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
 //                    // 여기에 페이지 인디케이터 설정
 //                }.attach()
         // Indicator에 viewPager 설정
-//        binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
+        binding.indicatorVp2PostImage.setViewPager(binding.vp2PostImage)
     }
 
     //    private fun spinnerView() {
@@ -265,13 +264,10 @@ class CommunityPlusFragment : Fragment(R.layout.fragment_community_plus) {
         when (requestCode) {
             Constants.REQUEST_PERMISSION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("FootprintApp", "onRequestPermissionsResult1")
                     openGallery()
                 } else {
                     // 권한 거부 처리
                     Toast.makeText(requireContext(), "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-                    Log.d("FootprintApp", "onRequestPermissionsResult2")
-
                 }
             }
         }

@@ -70,21 +70,19 @@ class MyPage_reviseFragment : Fragment(R.layout.fragment_my_page_revise) {
 
     private fun reUesrInfo() {
         binding.save.setOnClickListener {
-            if (imageUri != null) {
-                uploadImage(imageUri) {
-                    val profileModel = ProfileModel(
-                        nickName = binding.mypageReviseName.text.toString(),
-                        profileImageUri = it,
-                        address = binding.town.text.toString(),
-                        introduction = binding.mypageReviseIntroduction.text.toString()
-                    )
-                    homeViewModel.updateProfile(profileModel)
-                    findNavController().navigate(R.id.mypage)
-                }
-            } else if (homeViewModel.profile.value?.profileImageUri != null) {
+            if (homeViewModel.profile.value?.profileImageUri != null) {
                 val profileModel = ProfileModel(
                     nickName = binding.mypageReviseName.text.toString(),
                     profileImageUri = homeViewModel.profile.value?.profileImageUri,
+                    address = binding.town.text.toString(),
+                    introduction = binding.mypageReviseIntroduction.text.toString()
+                )
+                homeViewModel.updateProfile(profileModel)
+                findNavController().navigate(R.id.mypage)
+            } else uploadImage(imageUri) {
+                val profileModel = ProfileModel(
+                    nickName = binding.mypageReviseName.text.toString(),
+                    profileImageUri = it,
                     address = binding.town.text.toString(),
                     introduction = binding.mypageReviseIntroduction.text.toString()
                 )

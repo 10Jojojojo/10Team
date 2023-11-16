@@ -45,7 +45,7 @@ class membershipActivity : AppCompatActivity() {
 //            openGallery()
 //        }
         binding.complete.setOnClickListener {
-            val nickName = binding.nickName.text.toString()
+            val nickName = binding.nickNameword.text.toString()
             val dogName = binding.dogNameword.text.toString()
             val dogAgeText = binding.dogAge.text.toString()
             val dogAge = dogAgeText.toIntOrNull() ?: 0
